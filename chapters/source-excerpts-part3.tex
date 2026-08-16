@@ -1,0 +1,476 @@
+% Extended lesson notes for the final group of problems.
+
+\expandafter\def\csname sourceexcerpt@50\endcsname{%
+altogether and so the data structure algorithm we're going to use is called the prefix
+and suffix product arrays technique so prefix and suffix product arrays technique and
+some may Wonder initially and I thought of this myself what about two pointer I've
+heard of this thing called two pointer but isn't that the same as a prefix and suffix
+product arrays technique well no it's not you see the differences between two pointers
+is that we're focusing on really just the whole array all of itself and we're going to
+be focusing on the left and right side of the array not particularly two points in the
+array we are going to be scanning and creating two different arrays to be able to keep
+track of what we have already done so to answer what are we going to do with the data
+we will we are going to first create two arrays which will then be vectors in C++ to
+store all the elements to store all the elements visited create one array in fact I'm
+just going to put this inside of the technique so that way we know exactly what to do
+right over here so we would first create two arrays to store all the elements visited
+create one array for the left side visited and then create one array for the right
+side visited and then finally what are we going to do with the data we will loop
+through our given array create both the left and the right side arrays by creating a
+formula to take the index of each element and store them in their respective arrays
+then multiply both the right and left side arrays we created for the output.
+}
+
+\expandafter\def\csname sourceexcerpt@51\endcsname{%
+us to do just run the problem is that we are given a head of a linked list and the it
+looks like here okay and wants us to remove the nth node from the end of the length
+list okay so from the end of the linked list so we have the second note accordingly and
+we remove that and therefore we have one 2 three and five same thing for well if we
+have one in particular and we remove the first index since we are removing from the
+end of the list that's tricky to start we're then going to have one accordingly so
+that's why in particular we have this input and the output so from the end of the link
+list the output is a new linked list with the output or hang on with the nth node
+removed. The technique that helps solve this problem is two pointers. We have
+two elements of data we will put at the head of the linked list as well as a as well
+as a second pointer after the first pointer and this will help us scan throughout the
+rest of our linked list given the fact that we were just given the head so we can remove
+our nth node okay and the following steps in order to break down the following problem
+are as followed so for step one we're going to initialize our two pointers at the head
+of the list then we will move the first pointer n nodes ahead from the end and we'll
+use a for Loop to iterate through and.
+}
+
+\expandafter\def\csname sourceexcerpt@52\endcsname{%
+in the list nodes only nodes themselves can be changed okay so we need to focus on the
+nodes position so we need to change the nodes position based on their desired order
+and we need to return a modified linked list all right so the technique for us to be
+able to solve the following problem that we would need in order to rearrange the order
+is that we are going to be using a fast and slow pointer method it's the tortois and
+her algorithm where we have a fast and slow pointer and we focus on dividing the
+linked lists based on their halves reverse one of the halves then merge them together
+so this steps for us to be able to solve the following problem or as follows step one
+Hang on we're going to have the edge case where we have a null pointer step two we're
+going to initialize two pointers at the head of the list to find the middle in step
+three we're going to move the first pointer to two steps at a time and the second
+pointer one step at a time then the next part we're going to reverse the second half
+of the list the fifth step we're going to merge the two halves taking one node from
+each half alternatively then we're going to initialize our two halves and expand upon
+the relationship between the first and second nodes and finally we're going to set the
+second node as the next node so to give the following what we're going to do our
+following steps I'm just going to move all this up here so have step one step two step
+three step four step five is.
+}
+
+\expandafter\def\csname sourceexcerpt@53\endcsname{%
+we are given putting up our questions here our answers down here skop input so right
+here we are given a linked list with a head node hence right here and then the data
+structure that we would need or Technique we have to use we would use an iterator
+approach with three pointers to reverse the linked list want to do with the data we will
+modify pointers of each node to reverse the direction of the links and then for output
+we will return the new head of the reversed linked list and so now this is just at the
+point of myself showing you how to do it so we will then just go over the steps over
+what we need to do which will break it down into five steps so putting this in our
+section one we need to initialize three pointers which will be the previous where we
+will initialize as null because everything is connected current as head and next as
+null because we haven't seen anything yet all right and we're going to Loop through
+the linked list until current becomes null since we're moving up we're treating this
+like an array third we each iteration we will assign next as the next node of current
+so technically we have four pointers to start change the next pointer of current to
+previous and reversing the link move pre to current and current to next finally after
+the loop we will assign the head as the new head which is now the last node of the
+original linked list so just rundown linked list is pretty easy to understand it's like an
+array but instead it's connected that's just the best way of.
+}
+
+\expandafter\def\csname sourceexcerpt@54\endcsname{%
+the main technique is bit manipulation and I'll also have some signs with some
+operators as well that we use for bit manipulation in order to solve a following
+problem but what we will be doing is that if we have a 32 bit unsigned integer that we
+have we just need to reverse that and finally have our numerical output at the same
+time so as indicated over here and this requires the use of binary operators to be
+able to manipulate our far our following binary input so what we need to do so we need
+to return the Reversed bits there's some notes on here about Java but we're focusing
+on C++ what to do with the data reverse the bits and then input we are given a 32 bits
+unsigned integer and there is a key difference between signed and unsigned integers
+in particular I also have another visual to also further explain that will be up here
+and without further Ado let's be able to write out the solution for this because it's
+going to be pretty straightforward over exactly we what we need to do this will be
+taken in three steps so step one what we need to do is that we need to in initialize
+the result and second step we need to do is initialize a variable to keep track of the
+number of bits to be processed in step three we need to reverse the bits of the given
+integer using a while loop and for the first part of three inside the while loop we're
+going to shift the result to the left by one and then we are going to shift the given
+integer to the.
+}
+
+\expandafter\def\csname sourceexcerpt@55\endcsname{%
+in the parameters to be able to see exactly what's going to be input it is represented
+an image rotate the image by 90° okay clockwise you have to rotate the image in place
+which means you can modify the input 2D Matrix directly do not allocate another 2D
+Matrix and do the rotation okay so that means we need to modify and that means we're
+not going to be necessarily storing per se okay we won't be storing anything since
+right here if we are rotating an image in place we just need to modify the 2D Matrix
+directly and that means we're not going to make another Matrix to store every single
+element that we are visiting this part can be tricky at first but if you understand
+more about data structures and algorithms data structures can be used in particular to
+keep track of every single element that we have visited in order for our output which
+would be our answer however we are not going to be using a data structure in this case
+instead we are just going to be doing this technique called an inplace Matrix rotation
+and what is that really well an in place Matrix rotation is really just two for Loops
+where we swap both of the first element we scan and the second element we also scan as
+well so for instance if we were to have a matrix of 1 2 3 4 5 6 789 what we need to do
+really in terms of rotating it you notice the n the numbers one two and three they're
+all going to be rotated 90 degrees so 1 2 and three accordingly and then also the same
+thing 456 which.
+}
+
+\expandafter\def\csname sourceexcerpt@56\endcsname{%
+checking to see if they are the same or not and then we will be returning true if the
+same so the technique we will be doing is depth-first search namely to be able to make a
+comparison between the two where depth-first search pretty works and is really extensive
+given its space and time complexity that we would use and keep everything within the
+constant space and so what we will be doing is that we're going to be checking on the
+different values between all of our n u all between our pointers between if one or one
+of P or Q is null or the values are not equal to each other we're going to be having
+one condition where it's going to be false and then we're going to see in particular
+if prq are going to be matching up so use this technique to check their pointers first
+and then we also do a recursive call to check to see the left and right sub trees of p
+and Q just from the roots for def search is known for recursion so to be able to break
+down the steps or what we are going to do step one we are going to we're going to be
+checking if p and Q are null return true and then for the second part if one of P or Q
+is null or their values are not equal return false and then we're going to be
+recursively calling the function for the left sub trees of p and Q and then we will be
+doing the same thing but for the left sub trees so the four boundaries so we're doing this for
+left and the right.
+}
+
+\expandafter\def\csname sourceexcerpt@57\endcsname{%
+string and this string can be deserialized to the original tree structure. Serialization also
+the input SL output format is the same as how LeetCode displays a binary tree you do not
+necessarily need to follow this format so please be creative and come with a different
+approach yourself okay so for what we will be doing for our following steps is that
+for one we are given the root of a binary tree as our input so I'm just going to label
+out the rest of our following questions over what we need to do so we know exactly
+what input is the root of binary tree what data structure algorithm technique to use
+what to do with the data and finally what our output is going to be so we're given the
+root of binary tree it looks like from our input to Output or output for serialization
+we need a string that encodes the structure of the tree for deserialization the root
+node of the reconstructed tree so then the technique that we're going to be doing for
+this since we're focusing connectivity of a given trees that we're going to do depth
+first search using recursion for both serialization and d serialization and so the
+steps for us to be able to go about for each one are going to be The Following over
+here for two functions I'm going to put these notes in the comments as well is that
+Force heroization we will overall we will Traverse the tree in preorder traversal and
+build a string representation using essential value for null noes for D serialization
+we use preorder string representation to reconstruct the tree creating new nodes for
+each value and null for.
+}
+
+\expandafter\def\csname sourceexcerpt@58\endcsname{%
+that row and column to zero then we are going to iterate again if the first cell of a
+row or column is zero we set the entire row or column to zero accordingly so that
+means we're going to be looping throughout the rest of our given throughout the rest
+of our given Matrix that we will have right here let's put the notes down here zero
+right here okay and given empo that we have we have a Matrix and we are supposed to
+return a matrix with corresponding zeros so what we will be doing is that for a
+following way we are going to first 2D Matrix so the steps we are going to be doing to
+be able to get through all of this is that for the first step if a zero is found at
+cell let's just say for example cell I and cell I of J as our initial one we're going
+to set the Matrix accordly this one and Matrix Z J to Zer accordingly step two we're
+going to iterate over the Matrix again to indicate we have a modification in place if
+Matrix the four boundaries I of zero or Matrix whenever we have a row or column is zero we're
+going to set Matrix I n j to zero then step three we're going to be outputting the
+modified Matrix and so I'm going to be expanding upon the pseudo code to be able to
+help break down over what we need to do so what we will be doing in this case is that
+for each cell in The Matrix for step one if the cell value is zero we're going to set
+the first cell of the corresponding.
+}
+
+\expandafter\def\csname sourceexcerpt@59\endcsname{%
+elements are returned in spiral order. The solution uses an iterative approach with
+four boundaries: top, bottom, left, and right. These boundaries control each direction
+of the scan
+so this may be a little bit confusing at first but I'm going to be explaining more
+within the steps that we have and so we will have in order for us to be able to
+replicate this entire behavior of the iterative approach what we need to do is that
+first we need to Define our four pointers top bottom left and right we also initialize
+list which will be Vector since naturally arrays and list can be treated as vectors
+and such and so the next step that we will do is that we are going to run a while loop
+from Loop until the top of the Matrix is less than or equal to the bottom and the left
+of the Matrix is going to be less than or equal to the right and what we're going to
+do is that we're going to print the top row from left to right and then increment the
+top pointer and then we will print the right column from top to bottom decrementing
+the pointer right pointer and then we will be reaching to this point if the top is
+less than or equal to the bottom we're going to print the bottom row from right to
+left and then decrement the bottom pointer and then if the left pointer is less than.
+}
+
+\expandafter\def\csname sourceexcerpt@60\endcsname{%
+so if we have the root of one binary tree and then the root of a sub of a sub tree
+accordingly of sub root and then a root we're checking to see if these values are
+matching so that's all we are doing the values from the sub root are matching any of
+the sub trees from the root of the binary tree it's pretty self-explanatory and then
+we return true or false just seeing if these nodes accordingly within the root of our
+B inary tree have the same values as the following right over here so just to be able
+to break down even further the technique that we will be able to use to be able to
+solve this problem is that we're going to be doing a recursive approach to check if
+one tree is a sub tree of another and what we will be doing with our data aside from
+checking we will Traverse the trees recursively comparing the nodes and their sub
+trees so then what we will be doing next I'm just going to be going over the steps
+over how we will be solving this problem and let's just double check for case of that
+yep it's pretty self-explanatory between examples one and two check and see if these
+sub trees have accordingly the same type of numbers already between sub tree as well
+as the binary tree now this example may have the sub root values but then we have this
+zero at the end that will also expand upon two so if we were to break down how a
+binary tree works for the most part it typically will start with the root then you go
+left then you.
+}
+
+\expandafter\def\csname sourceexcerpt@61\endcsname{%
+then we initiated for instance A + B and then return sum this is not what they're
+going to look for watch this never mind this works strangely enough we can do that
+just kidding I wish just a little humor to help you guys out during the whole time but
+anyway I'm just going to give you guys the steps over exactly what to do on this whole
+thing so steps to be able to go through on this so step one what we need to do is that
+we need to initialize our two integers then we also need to initialize an unassigned
+integer we're going to call this one carry then the third step of what we're going to
+do is that we are going to perform bit one operations to calculate the sum step four
+is that while one of the numbers can be a or b that we initialized doesn't equal zero
+we calculate the sum by using the carry zor binary operator then what we will do is
+that we're going to calculate the carry by using and operator with left shifting next
+part we're going to set the first integer to be the sum then we will set the second
+integer to be the carry and finally we will return the first integer so to be able to
+go over the steps what to do so step one step two step three step four step five on
+what to do step one we're going to ini size everything along with step two at the same
+time so int num of one is going to be equal to a just for clarity int num of two is
+going to be equ Al to B.
+}
+
+\expandafter\def\csname sourceexcerpt@62\endcsname{%
+what we're working with so we have a given array of nums and the K most frequent
+elements it looks like it's just asking us to return the two most frequent elements so
+we have 1 two three ones we have three ones accordingly then we have it looks like two
+twos and just 1 three so there are three ones and two twos the two most frequent
+elements are yes one and two and it looks like that we need to return this in an array
+as they are expected and it looks like this Edge case if it's just one and the one
+most frequent element it will just be one also some more constraints as well okaye the
+range one the number of unique elements inray so it starts at one and follow up your
+algorithms time Collex must run better than o n log n where n is the arrays size okay
+so that's also another thing to take into consideration and then the data structure
+and technique that we use is really just going to be a hash
+map with a priority queue and to explain the data structures between the two over exactly
+how we're using them is that a hash map is much like in the case of a series of
+lockers that one would have if one has a key that needs to connect to a specific
+Locker the value you have a key value pair to be able to open your locker and that is
+how the hash map is typically designed and then the priority Cube for the most part is
+that cues in general are much like in the case of grocery store lines where.
+}
+
+\expandafter\def\csname sourceexcerpt@63\endcsname{%
+minus1 nus one the robot can only move either down or right at any point in time given
+the two integers M and N return the number of possible unique paths that the robot can
+take to reach the bottom right corner okay so we need to return all the possible pass
+input we are given two integers which represent a grid as well okay so the technique
+that we're going to be doing is going to be dynamic programming where we're just going
+to expand upon the variables and their relationships and so we need to ask ourselves
+what to do with the data so the first step we need to do is that we are going to initi
+we are going to initialize a 2d grid which will be a vector inside of another Vector
+of integers called DP and the Second Step we're going to do is set the value of the
+first row and First Column cells to one since there is one cell and this is how we set
+everything up in the third we're going to Loop over the grid starting from the second
+row and second column then for each cell going to set its value equal to the sum of
+the cell above it and the cell to the left of it and we are just going to finally
+return the number of unique paths which would be represented as our red that we have
+created M minus one n minus one as the exact values okay so first things first going
+do step one which will be Vector here Vector int DP m Vector int then n we're going to
+do step two initialize our Rows 4 into I is going.
+}
+
+\expandafter\def\csname sourceexcerpt@64\endcsname{%
+letters exactly once so in our first example we have the input of s is equal to n a g
+and T is equal to n a gr whenever we rearrange the words all together will be the same
+and so we are we already found that these are the same word and so it's considered
+true are second example has the input of rat and car though we have the same number of
+characters these are totally different words in particular because they're not the
+same characters and so we also have our constraints S\&T consists of lowercase English
+letters that's good and so to be able to give a breakdown from our problem we already
+know that we have two strings SNT and the following data structure algorithm technique
+we're going to use we're going to use one map to keep track of the frequency of
+characters for both s andt and what do we do with the data it's going to be the
+following steps overall we will keep track of each character in our maps to determine
+if they both have the same number of characters and the same type so the steps that we
+need to do is that first we need to initialize our map to keep track of the frequency
+of similar characters between variables s and t then second step we are going to Loop
+through the S string and increment the frequency of characters for S then next part we
+will Loop through each character in string T and doing so we will decrement each
+character and the frequency map and overall finally if there is a nonzero number we
+will return false if the frequency map didn't turn to zero.
+}
+
+\expandafter\def\csname sourceexcerpt@65\endcsname{%
+I'll break it down and it looks like we will return a true or false condition and
+Bings are set to True default false otherwise well if we set a condition turn all
+right so A Man A Plan A Canal Panama true such as like okay so it's like damn it I'm
+mad spell backwards say racecar there you go yay racecar spell
+backwards is damn it I mad oh damn that's a p drone for the most part okay so that's
+the same thing we got to check to see if it is a palad Drome or if it's not a palad
+Drome because all the letters okay race a car and this is not a power drone because it
+needs to be the same type of word forward and backwards all right that's the four boundaries same
+space that is also a pal androme just like a number example three as well all right
+and so the technique we're going to be using this time is going to be two pointers in
+this case where it's not for two pointers you have one point at the end you have your
+left and your right and it's like binary search but it's not binary search because two
+pointers is not Divine and Conquer and you don't have a middle type of variable
+whatsoever you have just have two pointers where it's just going to be your left and
+your right of your string it looks like what we're going to be doing for steps is that
+we're going to initialize our two pointers left and right then what we're going to do
+is Loop until we're going to be expanding upon the relation ship.
+}
+
+\expandafter\def\csname sourceexcerpt@66\endcsname{%
+we have a following input right here that would be if it's a parenthesis we're going
+to return true and then if in example two all the parentheses are closed and they're
+all corresponding so it's also true but in this case in the third one it's not they're
+not the same brackets so it's going to be false accordingly so it looks like all
+together we are given a string and we need to return true if valid parenthesis false
+otherwise s consists of parenthesis only dot and we also need to false otherwise and
+we also need to check for edge cases if there is no string as well no characters and
+the string as well yeah Okie doie right here so now the technique I will be using is
+we'll be calling upon a stack will and if you are curious and wondering what a stack
+is it's a type of data structure that much like in a stack of plates that have various
+methods of push pop and then such as push and pop on a stack namely one is able to
+have organize their data accordingly depending on exactly how they want to keep track
+of what has been scanned so we would use a stack to keep track of all the characters
+visited and what are we going to do with the data well first things we're going to do
+is that we're going to initialize our stack Second Step we're going to do is Loop
+through the string for every character and then for all of the beginning parentheses
+we will store the characters in the stack and then for the closing parenthesis we're
+going to check to see if the top of.
+}
+
+\expandafter\def\csname sourceexcerpt@67\endcsname{%
+so just by nature of binary search trees nodes that are going to be less than the noes
+key or the noes value that we have with the current one it's going to be on the left
+and then greater is on the right that's just based on principle when your search trees
+by principal left is less right is more that's just what they mean and we just need to
+replicate this entire behavior and nature of the binary search tree just to determine
+if it's true and it looks like we are just given the root of a binary tree and then
+our output is that return true or false if we have a binary a valid binary search tree
+or not so the technique that we will be doing for the following case is going to be
+recursion we will create a helper function to determine the current node the minimum
+allowed value and the maximum allowed value and to go over the steps of how we will
+replicate this one we're going to we're going to call upon a helper function we will
+create and then call upon throughout the rest of our solution is valid binary search
+tree with the root node and the minimum and maximum allowed values those are going to
+be some we're going to create and then step two we're going to create our helper
+function helper cursive function that takes the current node the minimum and Max
+values then we're going to have a base case if the current node is null we're going to
+going to return true and the reason being and even in even in the case of an empty
+subtree it is also considered true then.
+}
+
+\expandafter\def\csname sourceexcerpt@68\endcsname{%
+we have LeetCode being true just for this example and the reason being because return
+true because LeetCode can be segmented as LeetCode but in this case apple and apple
+and word Apple pen Apple ah okay so we have apple pen and apple pen it's like the one
+example and then we return true and then return true because Apple pen Apple can
+be segmented as Apple pen Apple note that you are allowed to reuse a dictionary word
+okay and then we have cats and dog with a word dick of cats dog sand and Cat it's
+false namely because hey we have cats right here and then we are just with left with
+OG the it looks like all the words accordingly still need to be intact we can reuse
+them but all the words need to be stay intact so just give wrak down our input we are
+given a word s and a dictionary of strings called word deck and it looks like our
+output is either true or if we can find the word in our word dictionary AR or false
+otherwise all right and so the technique to be able to solve this following problem is
+that we're going to use dynamic programming where dynamic programming best way of
+describing it is what we will be doing is that we will be going forward and backward
+Within A Word Dictionary to be able to find every single character that we find to be
+able to make up our following string that we were given for Apple pen Apple we're
+going to have to go forward then we also have to go backward to be able to find
+exactly each word that will.
+}
+
+\expandafter\def\csname sourceexcerpt@69\endcsname{%
+the words with the given Board of characters to find which words are in the board
+where the characters are adjacent to each other and so the steps for us to be able to
+accomplish this for the following test are going to be the following step one we will
+initialize a tri data structure and insert all the words into it orang into it with
+each character step two we will create a list to store the found words from our
+character board step three we will Loop over each cell in the board using def for
+search for both the row and the column step four you will return the list of found
+words so just going over all the steps that we need to do I'm also going to further
+expand this at the same time so step one what we will do ultimately is that to
+initialize a tried data structure we will need to do the following create a separate
+structure to initialize the trode children and word so if I'm going step one step two
+step three step four step one is going to look like the following we're going to move
+this out here so that way we can call upon a public struck that we have where it's
+going to represent trodde and then we're going to have a vector or trodes for children
+and then we're going to have a string called word then we're going to have a TR node
+structur with children ranging from the English letters in the alphabet with a null
+pointer and then word this is just how we initialize our following don't forget the
+comments as well and this is just how we set up.
+}
+
+\expandafter\def\csname sourceexcerpt@70\endcsname{%
+example two we have a given Matrix over here and then we have the word c is it all
+connected well according to this one yes it's true now if we have this one a b c b as
+this word within the board is it really connected all together well in this case it's
+not so what we need to do is we need to replicate this Behavior to be able to have our
+input or output exist accordingly so we would need to return true if the word is in
+The Matrix accordingly and the technique we will be using for this is going to be
+depth first search with recursion to check for each Matrix that has been checked
+already and so I'm going to break down for search in the following stuff that we have
+for what we are going to do with the following data so to be able to break down I'm
+going to first expand in three different steps so one what we need to do is that for
+our given solution we need to Loop over each cell in the board from top to bottom and
+right to left accordingly using a nested for Loop and then for step two what we're
+going to do we're going to perform depth-first search by creating a function which takes
+in the parameters of the board index of I index of J with our word and our current
+index therefore be returning true if the word is in The Matrix three otherwise return
+false in this case and I'm going to be expanding a little bit more on part two namely
+to be able to break down our following def first search function so.
+}
+
+\expandafter\def\csname sourceexcerpt@71\endcsname{%
+need to write this algorithm in O login time complexity and overall just from looking
+from the example we have nums equal to 45 67012 with the target of zero and our output
+is four what we need to do is that we need to reflect the relationship of the
+following examples example 1 2 and 3 to have our input reflect our output so if we
+have a target of zero already started it's located right here so a Rays start at zero
+by principle so 0 1 2 3 and 4 Target is zero right over here and it's located right
+over here so it's at index 4 which we output four and if the target is not located in
+the array we're going to have to return negative 1 somewhere in the case of right here
+and over here and here so we're so we will use a technique
+called binary search where in it's more of a divide and conquer method where we have
+three variables of the middle low and high end and the way how we are going to figure
+out between the two is that with binary search the principles the principle is say for
+example you have a row of cards that's the best way of describing it and you are
+supposed to find your given Target you have a value you need to find of one now you
+don't know where one is already located because it's already been shuffled in the
+amount of cards but what you can do is that if you have your following numbers already
+taken into consideration for the array you can find where the middle is going to be
+located and.
+}
+
+\expandafter\def\csname sourceexcerpt@72\endcsname{%
+the length of longest strictly increasing sub sequence okay so we will return the
+length of the longest strict the increasing subsequence we're given an array nums
+right here so we need to figure out the streak of how many numbers it's pretty simple
+all right to figure out the longest streak of numbers which are increasing it's pretty
+self-explanatory we have here the longest increasing subsequence is over here four so
+I'll just need to clarify for four ah okay so longest form of increasing subsequence
+we have 01 and then 2 three 0 1 2 3 for the entire thing that would explain four we
+have four elements over here so that makes sense just trying to clarify on that part
+okay and but the tag we're going to be focusing on this problem, we will use
+dynamic programming because we will be moving forward and backwards in our array to
+understand the pattern and get our desired output most like going to have two Loops to
+start with so going over the first St U we need to initialize an array called DP of
+nums size we will for clarity decare and N is equal to num.
+
+size three we will Loop over the array starting from the second number since we need a
+sequence we will iterate also every number four the second number to have our sequence
+e we will declare our second number to be greater than our first number yeah this will
+be statement if our second number is greater than our first number we will set our
+current index to get the max of number and DP and last member stored in our Ray of the
+previous number + one.
+}

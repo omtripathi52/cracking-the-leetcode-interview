@@ -1,0 +1,1058 @@
+% Additional lessons: trees, graphs, and dynamic programming.
+
+\patternintoc{Tree Traversal and Recursion}
+\problemstart{Binary Tree Level Order Traversal}{102}{Medium}{Breadth-first search}{Queue}
+
+\subsection{The Problem}
+Given the root of a binary tree, return its values one level at a time from
+top to bottom. Nodes on the same depth belong to the same output row.
+
+\begin{conceptbox}{Example}
+For the tree with root \(3\), children \(9\) and \(20\), and children
+\(15\) and \(7\) under \(20\), return
+\texttt{[[3],[9,20],[15,7]]}. An empty tree returns an empty vector.
+\end{conceptbox}
+
+\subsection{From the Direct Idea to BFS}
+A depth-first traversal can record each node's depth, but it needs extra logic
+to place values into the correct row. The cleaner approach processes the tree in
+the same order as the required output: breadth first. A queue stores the next
+nodes to visit.
+
+At the beginning of each outer-loop iteration, the queue contains exactly one
+complete level. Save the current queue size before adding any children. That
+size tells us how many nodes belong to the current row.
+
+\begin{visualbox}{The queue handles one tree level at a time}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,level distance=12mm]
+  \node[trienode,visited] (r) {3};
+  \node[trienode,below left=12mm and 18mm of r] (a) {9};
+  \node[trienode,below right=12mm and 18mm of r] (b) {20};
+  \node[trienode,below left=12mm and 8mm of b] (c) {15};
+  \node[trienode,below right=12mm and 8mm of b] (d) {7};
+  \draw[flowarrow] (r)--(a); \draw[flowarrow] (r)--(b);
+  \draw[flowarrow] (b)--(c); \draw[flowarrow] (b)--(d);
+  \node[draw=teal,dashed,fit=(r),inner sep=3mm,label=right:{\scriptsize level 0}] {};
+  \node[draw=orange,dashed,fit=(a)(b),inner sep=3mm,label=right:{\scriptsize level 1}] {};
+  \node[draw=teal,dashed,fit=(c)(d),inner sep=3mm,label=right:{\scriptsize level 2}] {};
+\end{tikzpicture}
+
+\smallskip
+Queue after each level: \texttt{[3]} $\rightarrow$ \texttt{[9,20]}
+$\rightarrow$ \texttt{[15,7]}.
+\end{visualbox}
+
+\subsection{Algorithm and Key Idea}
+Start by pushing the root. While the queue is not empty, save
+\texttt{levelSize}, remove exactly that many nodes, append their values to one
+row, and push each non-null child. The key rule is that every queued node is
+unprocessed and the first \texttt{levelSize} nodes share the same depth.
+
+\begin{invariantbox}{one saved queue prefix equals one tree level}
+Immediately before an outer-loop round, the queue contains all unprocessed
+nodes in breadth-first order. The saved size identifies exactly the current
+depth; children appended during the round belong to the next depth and are
+so not consumed until the following round.
+\end{invariantbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+levelOrder(root):
+    if root is null: return []
+    queue = [root]
+    result = []
+    while queue is not empty:
+        levelSize = queue.size()
+        level = []
+        repeat levelSize times:
+            node = pop front
+            append node.value to level
+            push non-null children
+        append level to result
+    return result
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Binary Tree Level Order Traversal}]
+#include <queue>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        if (root == nullptr) return {};
+
+        vector<vector<int>> result;
+        queue<TreeNode*> pending;
+        pending.push(root);
+
+        while (!pending.empty()) {
+            const int levelSize = static_cast<int>(pending.size());
+            vector<int> level;
+            level.reserve(levelSize);
+
+            for (int i = 0; i < levelSize; ++i) {
+                TreeNode* node = pending.front();
+                pending.pop();
+                level.push_back(node->val);
+                if (node->left != nullptr) pending.push(node->left);
+                if (node->right != nullptr) pending.push(node->right);
+            }
+            result.push_back(move(level));
+        }
+        return result;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time, Space, and Common Mistakes}
+Every node enters and leaves the queue once, so time is \(O(n)\). The queue
+uses \(O(w)\) space, where \(w\) is the maximum tree width; the returned rows
+use \(O(n)\) output space. Save the level size before pushing children, and
+handle a null root before accessing it.
+
+\begin{revisionbox}{How to explain it in an interview}
+I use BFS because the output is grouped by depth. The queue contains the next
+level. I snapshot its size, process exactly those nodes, and enqueue their
+children for the following level. Each node is processed once: \(O(n)\) time
+and \(O(w)\) extra queue space.
+\end{revisionbox}
+
+\subsection{Detailed Visual Dry Run}
+For the worked example, the queue changes by complete levels. Children are
+added only after the current node is removed.
+
+\begin{dryrunbox}{Queue trace for \texttt{[3,9,20,null,null,15,7]}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c X c@{}}
+\toprule
+Round & Saved size & Nodes processed and children appended & Output \\
+\midrule
+1 & 1 & Remove 3; append 9 and 20 & \texttt{[[3]]} \\
+2 & 2 & Remove 9; remove 20 and append 15 and 7 & \texttt{[[3],[9,20]]} \\
+3 & 2 & Remove 15 and 7; neither has children & \texttt{[[3],[9,20],[15,7]]} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{dryrunbox}
+
+\begin{visualbox}{What the queue holds after each level}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[text=teal,font=\bfseries] at (0.2,2.05) {front on the left};
+  \node[text=orange,font=\bfseries] at (4.3,2.05) {back on the right};
+
+  \node[text=navy,font=\bfseries,anchor=east] at (-0.8,1.3) {start};
+  \node[arraycell,minimum width=13mm] (q0) at (0,1.3) {3};
+  \node[right=12mm of q0,text=navy,font=\scriptsize] {nodes in this level \(=1\)};
+
+  \node[text=navy,font=\bfseries,anchor=east] at (-0.8,0) {after level 0};
+  \node[arraycell,minimum width=13mm] (q1) at (0,0) {9};
+  \node[arraycell,minimum width=13mm,right=0mm of q1] (q2) {20};
+  \node[right=12mm of q2,text=navy,font=\scriptsize] {nodes in this level \(=2\)};
+
+  \node[text=navy,font=\bfseries,anchor=east] at (-0.8,-1.3) {after level 1};
+  \node[arraycell,minimum width=13mm] (q3) at (0,-1.3) {15};
+  \node[arraycell,minimum width=13mm,right=0mm of q3] (q4) {7};
+  \node[right=12mm of q4,text=navy,font=\scriptsize] {nodes in this level \(=2\)};
+\end{tikzpicture}
+\end{visualbox}
+
+The saved size is essential. If the loop instead continued until the queue
+became empty, the children would be consumed in the same row as their parents
+and the level grouping would be lost.
+
+\subsection{Code Walkthrough}
+\begin{enumerate}
+  \item Reject a null root and return an empty result.
+  \item Push the root into \texttt{pending}. The queue now represents the
+  first unprocessed level.
+  \item Copy \texttt{pending.size()} into \texttt{levelSize}. This value does
+  not change when children are pushed later in the round.
+  \item Pop exactly \texttt{levelSize} nodes, record their values, and enqueue
+  their non-null children from left to right.
+  \item Move the completed row into the result and repeat for the next depth.
+\end{enumerate}
+
+Although the code contains a loop inside another loop, it is still linear.
+The inner loops across all rounds process each node exactly once; they do not
+restart a full scan for every level.
+
+\subsection{Edge Cases, Follow-ups, and Practice}
+Test an empty tree, one node, a completely skewed tree, and a wide final
+level. A common mistake is to enqueue null children and then dereference them.
+Useful follow-ups include zigzag level order, returning only the rightmost
+node at each depth, and computing the average value of every level.
+
+\begin{revisionbox}{Practice checkpoint}
+Without looking at the code, explain what the queue contains immediately
+before each outer-loop iteration. Then modify the algorithm so alternating
+rows are reversed while the traversal remains breadth first.
+\end{revisionbox}
+\chaptercheckpoint
+  {The requested output is grouped by tree depth.}
+  {A FIFO queue and the size of the current level.}
+  {Processing newly enqueued children in the current output row.}
+  {$O(n)$ time and $O(w)$ extra queue space.}
+\judgeclassnote
+
+
+\problemstart{Binary Tree Maximum Path Sum}{124}{Hard}{Postorder DFS}{Binary tree}
+
+\subsection{The Problem}
+A path may start and end at any nodes, but it cannot reuse a node. Return the
+largest sum of any non-empty path. The path does not have to pass through the
+root.
+
+\begin{conceptbox}{Example}
+For \texttt{[-10,9,20,null,null,15,7]}, the best path is
+\(15\rightarrow20\rightarrow7\), so the answer is \(42\).
+\end{conceptbox}
+
+\subsection{Building the Recursive State}
+A brute-force search could start a path at every node and explore many of the
+same subtrees repeatedly. Postorder DFS removes that repetition. A parent can
+continue through at most one child, so each recursive call returns the best
+one-sided gain beginning at its node.
+
+For a node with value \(x\): \(L=\max(0,\text{left gain}),\qquad R=\max(0,\text{right gain}).\)
+The complete path turning at this node is \(L+x+R\). The value returned to the
+parent is \(x+\max(L,R)\).
+
+\begin{invariantbox}{a returned gain is always a single extendable chain}
+After \texttt{gain(node)} finishes, its return value is the maximum sum of a
+path that starts at \texttt{node} and travels downward through at most one
+child. The global answer separately stores the best complete path seen so far,
+which may use both children at exactly one turning node.
+\end{invariantbox}
+
+\begin{visualbox}{A path can join both children at one middle node}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[trienode,active] (r) {20};
+  \node[trienode,visited,below left=14mm and 16mm of r] (l) {15};
+  \node[trienode,visited,below right=14mm and 16mm of r] (q) {7};
+  \draw[-,very thick,orange] (l)--(r)--(q);
+  \node[below=9mm of l,text=teal] {best left path: 15};
+  \node[below=9mm of q,text=teal] {best right path: 7};
+  \node[above=7mm of r,draw=orange,fill=softorange,rounded corners]
+    {full path: \(15+20+7=42\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\begin{visualbox}{A node sends only one branch up to its parent}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (r) {20};
+  \node[trienode,visited,below left=13mm and 16mm of r] (l) {15};
+  \node[trienode,visited,below right=13mm and 16mm of r] (q) {7};
+  \draw[-,thick,navy] (r)--(l) (r)--(q);
+  \node[left=7mm of l,align=right,text=teal] {sends up\\15};
+  \node[right=7mm of q,align=left,text=teal] {sends up\\7};
+  \node[dsnode,right=35mm of r,fill=softorange] (full)
+    {best full path\\\(15+20+7=42\)};
+  \node[dsnode,below=9mm of full,fill=softteal] (up)
+    {send up to parent\\\(20+\max(15,7)=35\)};
+  \draw[flowarrow,orange] (r.east) -- (full.west);
+  \draw[flowarrow,teal] (full) -- (up);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dfs(node):
+    if node is null: return 0
+    leftGain = max(0, dfs(node.left))
+    rightGain = max(0, dfs(node.right))
+    answer = max(answer, leftGain + node.value + rightGain)
+    return node.value + max(leftGain, rightGain)
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Binary Tree Maximum Path Sum}]
+#include <algorithm>
+#include <limits>
+
+using namespace std;
+
+class Solution {
+    int bestPath = numeric_limits<int>::min();
+
+    int gain(TreeNode* node) {
+        if (node == nullptr) return 0;
+        const int left = max(0, gain(node->left));
+        const int right = max(0, gain(node->right));
+        bestPath = max(bestPath, node->val + left + right);
+        return node->val + max(left, right);
+    }
+
+public:
+    int maxPathSum(TreeNode* root) {
+        bestPath = numeric_limits<int>::min();
+        gain(root);
+        return bestPath;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works and Complexity}
+Postorder traversal makes both child gains available before processing the
+parent. Every possible path has a highest turning node; the algorithm tests
+that path when it processes that node. Negative gains are discarded because
+they can only reduce the sum. Time is \(O(n)\), and recursion uses \(O(h)\)
+stack space for tree height \(h\).
+
+\begin{revisionbox}{Common mistakes}
+Do not start the answer to zero because all node values may be negative.
+Do not return the two-child path to the parent; that would branch and stop
+being a valid path. Return only the better one-sided gain.
+\end{revisionbox}
+
+\begin{conceptbox}{All-negative tree}
+For a tree such as \texttt{[-3,-2,-5]}, every child gain is clipped to zero,
+but each node still tests its own value as a non-empty path. Initializing the
+global answer to negative infinity returns \(-2\), while
+initializing it to zero would incorrectly allow an empty path.
+\end{conceptbox}
+
+\subsection{From Brute Force to One Postorder Traversal}
+A direct method could treat every node as a possible path start and explore
+every possible continuation. Long chains and overlapping subtrees would then
+be traversed repeatedly, leading to \(O(n^2)\) work on a skewed tree. The
+optimized method asks each subtree one reusable question: ``What is the best
+one-sided gain that can be extended through your parent?''
+
+This returned value and the global answer are deliberately different:
+\begin{itemize}
+  \item the value returned upward may use at most one child;
+  \item the complete choice recorded locally may join both child gains.
+\end{itemize}
+
+\subsection{Detailed Visual Dry Run}
+\begin{dryrunbox}{Postorder values for \texttt{[-10,9,20,null,null,15,7]}}
+\begin{center}
+\begin{tabular}{@{}c c c c c@{}}
+\toprule
+Node & Left gain & Right gain & Complete choice & Gain returned \\
+\midrule
+9 & 0 & 0 & 9 & 9 \\
+15 & 0 & 0 & 15 & 15 \\
+7 & 0 & 0 & 7 & 7 \\
+20 & 15 & 7 & 42 & 35 \\
+-10 & 9 & 35 & 34 & 25 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The best complete path is recorded at node 20. The value 42 is not returned to
+node \(-10\), because returning both branches would create an invalid fork.
+\end{dryrunbox}
+
+\subsection{Code Walkthrough}
+The helper first recurses left and right, so it is a postorder traversal.
+\texttt{max(0, gain)} discards a negative branch. The expression
+\texttt{node->val + left + right} tests the path whose highest turning point
+is the current node. The helper then returns the current value plus only the
+larger child gain. Resetting \texttt{bestPath} inside the public method makes
+the same \texttt{Solution} object safe for another call.
+
+\subsection{Edge Cases and Interview Follow-ups}
+The tree may contain one negative node, all negative nodes, or a best path
+that never touches the root. Recursion uses \(O(h)\) call-stack space and can
+reach \(O(n)\) for a skewed tree. A useful follow-up is to return the actual
+nodes in the maximum path; that requires storing or reconstructing the chosen
+child direction as well as the sum.
+
+\begin{revisionbox}{How to explain it simply}
+Each recursive call returns the best downward path the parent can extend. At
+each node I also test the complete path that joins the best non-negative left
+and right gains. Every path has exactly one highest turning node, so one of
+these local choices represents the global optimum.
+\end{revisionbox}
+\chaptercheckpoint
+  {A path may begin and end anywhere, and a parent needs child results.}
+  {One-sided postorder gains plus a global complete-path maximum.}
+  {Returning the two-child choice upward or allowing an empty path.}
+  {$O(n)$ time and $O(h)$ recursion space.}
+\judgeclassnote
+
+
+\patternintoc{Graph Traversal}
+\problemstart{Clone Graph}{133}{Medium}{DFS with memoization}{Graph and hash map}
+
+\subsection{The Problem}
+Given one node in a connected undirected graph, return a deep copy. Every
+original node must correspond to one new node, and neighbor relationships must
+be keepd without sharing original pointers.
+
+\subsection{Why a Hash Map Is Needed}
+A plain recursive copy loops forever on cycles and may clone the same node more
+than once. Store \(\text{original pointer}\rightarrow\text{clone pointer}\)
+before recursing into neighbors. Seeing an existing key means the clone
+is already available.
+
+\begin{invariantbox}{every discovered original has exactly one registered clone}
+Before DFS follows an outgoing edge, the current original node already has a
+map entry. As a result, a back edge, self-loop, or shared neighbor always
+returns the same clone pointer instead of allocating another object.
+\end{invariantbox}
+
+\begin{visualbox}{Copy every node and every connection}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[trienode] (a) {1}; \node[trienode,right=16mm of a] (b) {2};
+  \node[trienode,below=14mm of b] (c) {3}; \node[trienode,below=14mm of a] (d) {4};
+  \draw[-,navy,thick] (a)--(b)--(c)--(d)--(a);
+  \node[above=7mm of a,text=navy,font=\bfseries] {original};
+  \node[right=18mm of b,font=\Large,text=teal] (arrow) {$\Longrightarrow$};
+  \node[trienode,visited,right=18mm of arrow] (aa) {1'};
+  \node[trienode,visited,right=16mm of aa] (bb) {2'};
+  \node[trienode,visited,below=14mm of bb] (cc) {3'};
+  \node[trienode,visited,below=14mm of aa] (dd) {4'};
+  \draw[-,teal,thick] (aa)--(bb)--(cc)--(dd)--(aa);
+  \node[above=7mm of aa,text=teal,font=\bfseries] {copy};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+clone(node):
+    if node is null: return null
+    if node is in cloneMap: return cloneMap[node]
+    copy = new Node(node.value)
+    cloneMap[node] = copy
+    for neighbor in node.neighbors:
+        copy.neighbors.push_back(clone(neighbor))
+    return copy
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Clone Graph}]
+#include <unordered_map>
+
+using namespace std;
+
+class Solution {
+    unordered_map<Node*, Node*> clones;
+
+    Node* clone(Node* node) {
+        if (node == nullptr) return nullptr;
+        const auto found = clones.find(node);
+        if (found != clones.end()) return found->second;
+
+        Node* copy = new Node(node->val);
+        clones[node] = copy;
+        for (Node* neighbor : node->neighbors) {
+            copy->neighbors.push_back(clone(neighbor));
+        }
+        return copy;
+    }
+
+public:
+    Node* cloneGraph(Node* node) {
+        clones.clear();
+        return clone(node);
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works, Time, and Space}
+The map creates exactly one clone for every reachable original node. Each edge
+is copied when its adjacency entry is visited. Time is \(O(V+E)\), map and
+recursion space are \(O(V)\). Insert the clone into the map before visiting
+neighbors; doing it afterward fails on cycles and self-loops.
+
+\begin{revisionbox}{How to explain it in an interview}
+I run DFS and memoize original-to-copy pointers. If a node was cloned already,
+I reuse it. Otherwise I create and register the clone first, then recursively
+copy every neighbor. This handles cycles and keeps shared neighbors.
+\end{revisionbox}
+
+\subsection{Why a Plain Recursive Copy Fails}
+On a tree, recursively copying children eventually reaches null. A graph may
+return to a node already on the active recursion path. Without the map, the
+copy of node 1 asks for node 2, node 2 asks for node 1 again, and recursion
+never ends. The map is both a cycle guard and the record that
+keeps one-to-one node identity.
+
+\subsection{Detailed Map and DFS Trace}
+\begin{dryrunbox}{Cloning the four-node cycle}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c X X@{}}
+\toprule
+Visit & Map before the recursive calls & Action \\
+\midrule
+1 & empty & create \(1'\), store \(1\to1'\), then visit its neighbors \\
+2 & \(1\to1'\) & create \(2'\), store it, then visit neighbor 1 \\
+1 again & \(1\to1',2\to2'\) & reuse \(1'\); do not recurse again \\
+3 and 4 & earlier clones remain stored & create each once and copy every edge \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{dryrunbox}
+
+\begin{visualbox}{Each original node points to its one copy}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,fill=softblue] (o1) {old node 1};
+  \node[dsnode,below=7mm of o1,fill=softblue] (o2) {old node 2};
+  \node[dsnode,below=7mm of o2,fill=softblue] (o3) {old node 3};
+  \node[dsnode,right=38mm of o1,fill=softteal] (c1) {copy \(1'\)};
+  \node[dsnode,below=7mm of c1,fill=softteal] (c2) {copy \(2'\)};
+  \node[dsnode,below=7mm of c2,fill=softteal] (c3) {copy \(3'\)};
+  \draw[flowarrow,teal] (o1)--node[edgelabel,above,font=\scriptsize]{saved pair} (c1);
+  \draw[flowarrow,teal] (o2)--(c2);
+  \draw[flowarrow,teal] (o3)--(c3);
+  \node[draw=navy,dashed,fit=(o1)(o2)(o3)(c1)(c2)(c3),inner sep=5mm,
+    label=above:{\small\textbf{saved old-to-copy pairs}}] {};
+\end{tikzpicture}
+
+\smallskip
+If an old node appears again, the saved pair returns the same copy. This keeps
+all shared connections and cycles correct.
+\end{visualbox}
+
+\begin{visualbox}{If a node was copied already, stop going deeper}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[draw=navy,fill=softblue,minimum width=43mm,minimum height=8mm] (g0)
+    {copy node 1};
+  \node[draw=navy,fill=softblue,minimum width=43mm,minimum height=8mm,
+    above=0mm of g0] (g1) {copy node 2};
+  \node[draw=orange,fill=softorange,minimum width=43mm,minimum height=8mm,
+    above=0mm of g1] (g2) {see node 1 again};
+  \node[left=12mm of g2,text=orange,font=\bfseries,align=right] (top) {working\\now};
+  \draw[flowarrow,orange] (top)--(g2);
+  \node[dsnode,right=25mm of g1,fill=softteal] (hit)
+    {node 1 already has copy \(1'\)\\use that copy};
+  \draw[flowarrow,teal] (g2.east)--(hit.north west);
+\end{tikzpicture}
+
+\smallskip
+The repeated node creates nothing new. Use its saved copy and finish this
+function call.
+\end{visualbox}
+
+\subsection{Code Walkthrough}
+\begin{enumerate}
+  \item A null input represents an empty graph and returns null.
+  \item Search \texttt{clones} before allocating. An existing entry means the
+  node and all references to its identity already have a copy.
+  \item Allocate a new node and immediately place it in the map.
+  \item Recursively clone every neighbor and append the returned pointer to
+  the copy's adjacency vector in the same order.
+\end{enumerate}
+
+The immediate insertion in step 3 is the key rule-preserving step. It makes
+the partial clone visible before an edge can lead back to it.
+
+\subsection{Edge Cases, Alternative, and Practice}
+Test a single isolated node, a self-loop, two nodes connected to each other,
+and several nodes sharing the same neighbor. Verify that cloned pointers are
+different from all original pointers. An iterative BFS alternative uses a
+queue plus the same original-to-clone map and has the same \(O(V+E)\) cost.
+
+\begin{revisionbox}{Practice checkpoint}
+Draw a graph containing a self-loop and explain exactly why registering the
+copy after cloning its neighbors would recurse forever.
+\end{revisionbox}
+\chaptercheckpoint
+  {A pointer-based graph must be copied without sharing original objects.}
+  {An original-pointer-to-clone-pointer hash map and DFS stack.}
+  {Registering a clone only after recursively visiting its neighbors.}
+  {$O(V+E)$ time and $O(V)$ map plus traversal space.}
+\judgeclassnote
+
+
+\patternintoc{Dynamic Programming}
+\problemstart{Coin Change}{322}{Medium}{Bottom-up dynamic programming}{One-dimensional DP}
+
+\subsection{The Problem}
+Given coin denominations and a target amount, return the fewest coins needed
+to form that amount. Coins may be reused. Return \(-1\) when the amount is
+unreachable.
+
+\begin{conceptbox}{Example}
+With \texttt{coins=[1,2,5]} and \texttt{amount=11}, the best construction is
+\(5+5+1\), so the answer is \(3\).
+\end{conceptbox}
+
+\subsection{How We Get to the Solution}
+Trying every sequence of coins creates an exponential recursion tree. The same
+remaining amounts occur repeatedly. Let \(dp[x]\) be the minimum number of
+coins needed to form \(x\). Start \(dp[0]=0\) and every other entry to an
+unreachable sentinel \(\texttt{amount}+1\).
+
+For each amount \(x\) and each coin \(c\le x\): \(dp[x]=\min(dp[x],1+dp[x-c]).\)
+
+\begin{invariantbox}{every smaller amount is already best}
+When the outer loop reaches amount \(x\), each referenced state \(dp[x-c]\)
+has already been finalized. Trying every possible final coin tests
+every construction of \(x\), and the minimum choice becomes best.
+\end{invariantbox}
+
+\begin{visualbox}{To make 11, add coin 5 to the best answer for 6}
+\centering
+\begin{tikzpicture}[font=\small]
+  \foreach \x/\v in {0/0,1/1,2/1,3/2,4/2,5/1,6/2,7/2,8/3,9/3,10/2,11/3} {
+    \node[arraycell] (d\x) at (0.8*\x,0) {\v};
+    \node[below=1mm of d\x,font=\tiny] {\x};
+  }
+  \draw[flowarrow,orange] (d6.north) to[bend left=28]
+    node[edgelabel,above,font=\scriptsize]{add coin 5} (d11.north);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dp = array(amount + 1, amount + 1)
+dp[0] = 0
+for current from 1 through amount:
+    for coin in coins:
+        if coin <= current:
+            dp[current] = min(dp[current], 1 + dp[current - coin])
+return -1 if dp[amount] is unreachable, otherwise dp[amount]
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Coin Change}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        vector<int> dp(amount + 1, amount + 1);
+        dp[0] = 0;
+
+        for (int current = 1; current <= amount; ++current) {
+            for (const int coin : coins) {
+                if (coin <= current) {
+                    dp[current] = min(dp[current], 1 + dp[current - coin]);
+                }
+            }
+        }
+        return dp[amount] == amount + 1 ? -1 : dp[amount];
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+For \(A=\texttt{amount}\) and \(m\) coin types, time is \(O(A m)\) and space
+is \(O(A)\). The key rule is that before computing \(dp[x]\), every smaller
+amount is already best. Avoid using zero as the default for unreachable
+amounts; it would look like a free solution.
+
+\begin{revisionbox}{Pattern clue}
+When a target can be built from reusable choices and the question asks for a
+minimum, maximum, or count, define the answer for every smaller target and
+extend those solved states.
+\end{revisionbox}
+
+\subsection{Brute Force and Repeated Work}
+A recursive brute-force solution tries every coin, subtracts it from the
+remaining amount, and repeats. For amount 11, branches such as
+\(11\to10\to8\) and \(11\to9\to8\) both solve the same remaining amount 8.
+Without memoization, the recursion tree grows exponentially. The DP table
+stores the answer to each remaining amount once.
+
+\subsection{Detailed Table Walkthrough}
+\begin{dryrunbox}{Building \(dp\) for coins \texttt{[1,2,5]}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c X@{}}
+\toprule
+Amount & Best count & Reason \\
+\midrule
+0 & 0 & base case: no coins are needed \\
+1 & 1 & \(1+dp[0]\) using coin 1 \\
+2 & 1 & coin 2 is better than two coin-1 choices \\
+5 & 1 & one coin of value 5 \\
+6 & 2 & coin 1 plus the best answer for 5 \\
+10 & 2 & \(5+5\) \\
+11 & 3 & \(1+dp[10]\), producing \(1+5+5\) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{dryrunbox}
+
+The sentinel \texttt{amount + 1} is safe because no valid answer can require
+more than \texttt{amount} positive-valued coins when coin 1 exists. More
+generally, it simply represents a value worse than every possible valid
+answer under the problem rules.
+
+\subsection{Code Walkthrough}
+The outer loop grows the solved prefix from 1 through \texttt{amount}. For
+each coin not larger than the current amount, the code considers taking that
+coin last. The remaining state \texttt{current - coin} is smaller and has
+already been solved. After all coins are tested, \texttt{dp[current]} is the
+minimum among every possible final coin.
+
+\subsection{Edge Cases, Alternatives, and Interview Notes}
+Amount zero returns zero. An empty coin list or unreachable amount returns
+\(-1\). Duplicate denominations do not change the minimum but perform
+unneeded work. A top-down memoized solution uses the same update rule and
+is valuable when only a small subset of amounts is reached.
+
+For example, \texttt{coins=[2]} and \texttt{amount=3} leaves \(dp[3]\) at the
+sentinel because neither amount 1 nor amount 3 can be formed. This is different
+from a valid answer of zero, which occurs only when the requested amount is
+zero.
+
+\begin{revisionbox}{How to explain it simply}
+I define \(dp[x]\) as the fewest coins needed for amount \(x\). For every
+amount, I try each denomination as the final coin and extend the already
+best state \(dp[x-c]\). The table prevents repeated recursion and gives
+\(O(A m)\) time with \(O(A)\) space.
+\end{revisionbox}
+\chaptercheckpoint
+  {Reusable choices build a target and the objective asks for a minimum.}
+  {A DP entry for the minimum coins required by every smaller amount.}
+  {Using zero for unreachable states or forgetting the amount-zero base case.}
+  {$O(A m)$ time and $O(A)$ space.}
+\judgeclassnote
+
+
+\problemstart{Combination Sum IV}{377}{Medium}{Ordered-count dynamic programming}{One-dimensional DP}
+
+\subsection{The Problem}
+Given distinct positive integers and a target, count the ordered sequences that
+sum to the target. With \texttt{nums=[1,2,3]} and target \(4\), the answer is
+\(7\). For example, \([1,3]\) and \([3,1]\) are different combinations.
+
+\subsection{Reasoning and Loop Order}
+Let \(dp[x]\) be the number of ordered sequences totaling \(x\). The empty
+sequence is one way to create zero, so \(dp[0]=1\). For every target value
+from \(1\) upward, try every number as the final element: \(dp[x] = \sum_{v\le x} dp[x-v].\)
+The outer loop must be the current total and the inner loop the choice
+number. Reversing them counts unordered coin combinations instead.
+
+\begin{invariantbox}{the table counts every ordered sequence by its final value}
+Before computing \(dp[x]\), all counts for smaller totals are complete. The
+sequences ending with different final values do not overlap, so adding
+\(dp[x-v]\) over every valid \(v\) counts each ordered sequence exactly once.
+\end{invariantbox}
+
+\begin{visualbox}{Three last-number choices build the answer for 4}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,visited] (one) at (0,1.35) {last number 1\\4 ways to make 3};
+  \node[dsnode] (two) at (0,0) {last number 2\\2 ways to make 2};
+  \node[dsnode,fill=softorange] (three) at (0,-1.35) {last number 3\\1 way to make 1};
+  \node[dsnode,active,minimum width=27mm] (answer) at (4.8,0)
+    {total ways for 4\\\(4+2+1=7\)};
+  \draw[flowarrow,teal] (one.east)--(answer.north west);
+  \draw[flowarrow,navy] (two.east)--(answer.west);
+  \draw[flowarrow,orange] (three.east)--(answer.south west);
+  \foreach \x/\v in {0/1,1/1,2/2,3/4,4/7} {
+    \node[arraycell,minimum width=11mm] (dp\x) at ({1.1+1.3*\x},-2.75) {\v};
+    \node[below=1mm of dp\x,font=\scriptsize] {\(dp[\x]\)};
+  }
+  \node[draw=orange,very thick,fit=(dp4),inner sep=1mm] {};
+\end{tikzpicture}
+
+\smallskip
+For total 4, group the sequences by their last number. The three groups contain
+4, 2, and 1 sequence, giving \(4+2+1=7\).
+\end{visualbox}
+
+\begin{dryrunbox}{DP for \texttt{[1,2,3]} and target 4}
+\begin{center}
+\begin{tabular}{c|ccccc}
+Target \(x\) & 0 & 1 & 2 & 3 & 4 \\ \hline
+\(dp[x]\) & 1 & 1 & 2 & 4 & 7
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Pseudocode and C++ Implementation}
+\begin{lstlisting}[style=pseudocode]
+dp[0] = 1
+for total from 1 through target:
+    for value in nums:
+        if value <= total:
+            dp[total] += dp[total - value]
+return dp[target]
+\end{lstlisting}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Combination Sum IV}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int combinationSum4(vector<int>& nums, int target) {
+        vector<unsigned long long> dp(target + 1, 0);
+        dp[0] = 1;
+        for (int total = 1; total <= target; ++total) {
+            for (const int value : nums) {
+                if (value <= total) dp[total] += dp[total - value];
+            }
+        }
+        return static_cast<int>(dp[target]);
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works, Complexity, and Common Mistakes}
+Every valid sequence totaling \(x\) has one final value \(v\); removing it
+leaves a sequence counted by \(dp[x-v]\). These groups do not overlap, so their
+counts add exactly. Time is \(O(Tm)\), space is \(O(T)\), where \(T\) is the
+target and \(m\) is the number of values. Do not set \(dp[0]=0\), and remember
+that order matters in this problem.
+
+\begin{revisionbox}{How to explain it in an interview}
+I count ways for every smaller total. The base \(dp[0]=1\) represents choosing
+nothing. For each total, I try each number as the last choice and add the ways
+to form the remaining total. This produces ordered sequences in \(O(Tm)\).
+\end{revisionbox}
+
+\subsection{Why the Loop Order Counts Ordered Sequences}
+The worked example contains seven sequences for target 4. The important detail is
+that \([1,3]\) and \([3,1]\) are different. The outer loop chooses
+the total being built, while the inner loop tries every possible final value.
+For each final value, all prefixes that form the remaining total are appended
+with that value.
+
+If the loops were reversed---numbers outside and totals inside---the table
+would count unordered coin combinations instead. Loop order is part of the
+meaning of the state, not merely a coding preference.
+
+\subsection{Complete Dry Run}
+\begin{dryrunbox}{Seven sequences for target 4}
+\begin{center}
+\begin{tabular}{@{}c c l@{}}
+\toprule
+Total & Ways & Sequences added by their last value \\
+\midrule
+0 & 1 & empty prefix \\
+1 & 1 & \([1]\) \\
+2 & 2 & \([1,1],[2]\) \\
+3 & 4 & \([1,1,1],[2,1],[1,2],[3]\) \\
+4 & 7 & \([1,1,1,1],[2,1,1],[1,2,1],[3,1],\) \\
+  &   & \([1,1,2],[2,2],[1,3]\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Code Walkthrough and Safety}
+The unsigned table provides extra intermediate range, while the problem
+guarantees the final answer fits a signed 32-bit integer. The base value 1 at
+index zero represents the one valid empty prefix. Every access uses
+\texttt{total - value} only after confirming that the result is non-negative.
+
+\subsection{Edge Cases and Follow-ups}
+Target zero has one empty sequence. A number greater than the target is simply
+ignored. Inputs must be positive; allowing zero or negative values would
+break the increasing-state dependency and could create infinitely many
+sequences. A common follow-up asks for unordered combinations, which requires
+reversing the loop order.
+
+\begin{revisionbox}{Practice checkpoint}
+Explain why \(dp[0]\) is one even though the answer contains no number. Then
+rewrite the update rule for combinations where order does not matter.
+\end{revisionbox}
+\chaptercheckpoint
+  {The problem counts ordered ways to reach a target.}
+  {A DP count for each total, beginning with the empty sequence at zero.}
+  {Reversing the loops and accidentally counting unordered combinations.}
+  {$O(Tm)$ time and $O(T)$ space.}
+\judgeclassnote
+
+
+\patternintoc{Tree Construction}
+\problemstart{Construct Binary Tree from Preorder and Inorder Traversal}{105}{Medium}{Recursive partitioning}{Tree and hash map}
+
+\subsection{The Problem}
+Preorder lists each root before its subtrees. Inorder lists the left subtree,
+then the root, then the right subtree. Reconstruct and return the unique tree
+when all values are distinct.
+
+\begin{conceptbox}{Example}
+\texttt{preorder=[3,9,20,15,7]} and
+\texttt{inorder=[9,3,15,20,7]} reconstruct the tree rooted at \(3\), with
+left child \(9\) and right subtree rooted at \(20\).
+\end{conceptbox}
+
+\subsection{Recursive Split}
+The next unused preorder value is the current root. Its position in inorder
+splits the current interval into left and right subtrees. A hash map gives that
+position in average \(O(1)\) time, avoiding a repeated linear search.
+
+\begin{invariantbox}{the next preorder value roots the current inorder interval}
+Each recursive call owns exactly one consecutive inorder interval. The shared
+preorder index points to that interval's root; after the left call consumes
+all left-subtree nodes, the right call begins at exactly the next unused
+preorder value.
+\end{invariantbox}
+
+\begin{visualbox}{Preorder gives the root; inorder shows its left and right sides}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[dsnode,fill=softorange] (pre) {preorder\\\texttt{3 | 9 | 20 15 7}};
+  \node[dsnode,below=10mm of pre] (in) {inorder\\\texttt{9 | 3 | 15 20 7}};
+  \draw[flowarrow,orange] (pre.south)--node[edgelabel,right,font=\scriptsize]{root 3} (in.north);
+  \node[below left=9mm and 13mm of in,text=teal] {left side: \texttt{[9]}};
+  \node[below right=9mm and 13mm of in,text=navy] {right side: \texttt{[15,20,7]}};
+\end{tikzpicture}
+\end{visualbox}
+
+\begin{visualbox}{The map finds each root; the stack remembers unfinished ranges}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,align=left,fill=softteal] (map) {
+    \textbf{position of each value}\\
+    \(9\to0\)\quad \(3\to1\)\\
+    \(15\to2\)\quad \(20\to3\)\\
+    \(7\to4\)};
+  \node[draw=navy,fill=softblue,minimum width=46mm,minimum height=8mm,
+    right=28mm of map] (b0) {whole range: root 3};
+  \node[draw=navy,fill=softblue,minimum width=46mm,minimum height=8mm,
+    above=0mm of b0] (b1) {left range: root 9};
+  \node[draw=orange,fill=softorange,minimum width=46mm,minimum height=8mm,
+    above=0mm of b1] (b2) {empty range: stop};
+  \node[above=5mm of map,text=teal,font=\bfseries] {find the root quickly};
+  \node[right=7mm of b2,text=orange,font=\bfseries,align=left] {working\\now};
+  \draw[flowarrow,teal] (map.east)--node[edgelabel,above,font=\scriptsize]{root position} (b0.west);
+\end{tikzpicture}
+
+\smallskip
+The map tells us where the root sits. The stack remembers which left and right
+parts still need to be built.
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+build(left, right):
+    if left > right: return null
+    rootValue = preorder[preorderIndex++]
+    root = new TreeNode(rootValue)
+    middle = inorderPosition[rootValue]
+    root.left = build(left, middle - 1)
+    root.right = build(middle + 1, right)
+    return root
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Construct Binary Tree}]
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    const vector<int>* preorderValues = nullptr;
+    unordered_map<int, int> inorderIndex;
+    int preorderIndex = 0;
+
+    TreeNode* build(int left, int right) {
+        if (left > right) return nullptr;
+        const int rootValue = (*preorderValues)[preorderIndex++];
+        TreeNode* root = new TreeNode(rootValue);
+        const int middle = inorderIndex[rootValue];
+        root->left = build(left, middle - 1);
+        root->right = build(middle + 1, right);
+        return root;
+    }
+
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        preorderValues = &preorder;
+        preorderIndex = 0;
+        inorderIndex.clear();
+        for (int i = 0; i < static_cast<int>(inorder.size()); ++i) {
+            inorderIndex[inorder[i]] = i;
+        }
+        return build(0, static_cast<int>(inorder.size()) - 1);
+    }
+};
+\end{lstlisting}
+\judgeclassnote
+
+\subsection{Why It Works, Time, and Space}
+Each call consumes exactly one preorder root and assigns it the inorder range
+that contains exactly its descendants. Building the left range before the
+right range matches preorder order. Every node is created once, so time and
+stored map space are \(O(n)\); recursion uses \(O(h)\) stack space.
+
+\begin{revisionbox}{Common mistakes}
+Build the left subtree before the right subtree because preorder lists the
+entire left subtree first. Use interval boundaries instead of copying array
+slices. The distinct-value assumption is what makes the inorder index unique.
+\end{revisionbox}
+
+\subsection{Direct Method and Its Limitation}
+A simple recursive version can search the full inorder array for every new
+root. It constructs the correct tree, but the repeated linear searches cost
+\(O(n^2)\) for a skewed tree. Building a value-to-index map once changes every
+root lookup to average \(O(1)\), producing an \(O(n)\) construction.
+
+\subsection{Detailed Recursive Walkthrough}
+\begin{dryrunbox}{Preorder \texttt{[3,9,20,15,7]}, inorder \texttt{[9,3,15,20,7]}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c c X@{}}
+\toprule
+Call & Next preorder root & Inorder interval & Result \\
+\midrule
+1 & 3 & \([0,4]\) & split at index 1; left \([0,0]\), right \([2,4]\) \\
+2 & 9 & \([0,0]\) & leaf; both child intervals are empty \\
+3 & 20 & \([2,4]\) & split at index 3 \\
+4 & 15 & \([2,2]\) & left leaf of 20 \\
+5 & 7 & \([4,4]\) & right leaf of 20 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{dryrunbox}
+
+\begin{visualbox}{The tree after all left and right parts are built}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (r) {3};
+  \node[trienode,below left=13mm and 22mm of r] (n9) {9};
+  \node[trienode,below right=13mm and 22mm of r] (n20) {20};
+  \node[trienode,visited,below left=13mm and 9mm of n20] (n15) {15};
+  \node[trienode,visited,below right=13mm and 9mm of n20] (n7) {7};
+  \draw[flowarrow] (r)--node[edgelabel,above left,font=\scriptsize]{left side} (n9);
+  \draw[flowarrow] (r)--node[edgelabel,above right,font=\scriptsize]{right side} (n20);
+  \draw[flowarrow] (n20)--(n15); \draw[flowarrow] (n20)--(n7);
+  \node[below=5mm of n9,font=\scriptsize,text=teal]{position 0};
+  \node[below=5mm of n15,font=\scriptsize,text=teal]{position 2};
+  \node[below=5mm of n7,font=\scriptsize,text=teal]{position 4};
+\end{tikzpicture}
+\end{visualbox}
+
+The preorder pointer advances exactly once per created node. The inorder
+boundaries determine when a subtree is empty; no array slices need to be
+allocated.
+
+\subsection{Code Walkthrough}
+The public method stores a pointer to the preorder vector, resets the shared
+index, and creates the inorder lookup map. The helper reads the next root,
+allocates it, finds its inorder position, and recursively builds the left
+interval before the right interval. The base case \texttt{left > right}
+returns a null child.
+
+\subsection{Assumptions, Edge Cases, and Follow-ups}
+The traversals must contain the same distinct values and represent a valid
+tree. Empty arrays produce a null root. A skewed tree uses \(O(n)\) recursion
+depth. Duplicate values make the reconstruction ambiguous unless extra
+occurrence information is supplied. A useful variation reconstructs from
+inorder and postorder; in that case roots are consumed from the end and the
+right subtree must be built first.
+
+\begin{revisionbox}{How to explain it simply}
+Preorder tells me the next root. Its position in inorder divides the exact
+left and right descendant ranges. A hash map removes repeated searches, and a
+single preorder index ensures each node is consumed once, for \(O(n)\) time.
+\end{revisionbox}
+\chaptercheckpoint
+  {Two traversals reveal roots and subtree boundaries in complementary orders.}
+  {A preorder cursor, inorder index map, and recursive interval boundaries.}
+  {Building the right subtree first or copying slices at every call.}
+  {$O(n)$ time, $O(n)$ map space, and $O(h)$ recursion space.}

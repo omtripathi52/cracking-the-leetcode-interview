@@ -1,0 +1,951 @@
+% Additional lessons: heaps, search, hashing, and house robber DP.
+
+\patternintoc{Heaps and Streaming Data}
+\problemstart{Find Median from Data Stream}{295}{Hard}{Two balanced heaps}{Priority queues}
+
+\subsection{The Problem}
+Design a class that accepts integers one at a time and returns the median of
+all values seen so far. An odd-sized stream has one middle value; an even-sized
+stream uses the average of the two middle values.
+
+\subsection{Two-Heap Model}
+A sorted vector makes median lookup easy but insertion costs \(O(n)\). Instead,
+split the stream into two halves:
+\begin{itemize}
+  \item \texttt{lower}: a max heap containing the smaller half;
+  \item \texttt{upper}: a min heap containing the larger half.
+\end{itemize}
+Keep \(|\texttt{lower}|=|\texttt{upper}|\) or one extra item in
+\texttt{lower}, and keep every lower value no greater than every upper value.
+
+\begin{invariantbox}{the heap tops are always the middle boundary}
+After every insertion, all lower-heap values are no greater than all
+upper-heap values, and the lower heap has either the same size or one extra
+value. These two facts place the median at \texttt{lower.top()} or between the
+two heap tops.
+\end{invariantbox}
+
+\begin{visualbox}{The two top values give the median}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[dsnode,fill=softblue,minimum width=42mm] (lo)
+    {smaller half\\largest here \(=3\)\\values \(\{1,2,3\}\)};
+  \node[dsnode,fill=softteal,minimum width=42mm,right=18mm of lo] (hi)
+    {larger half\\smallest here \(=4\)\\values \(\{4,5,8\}\)};
+  \draw[flowarrow] (lo)--node[edgelabel,above]{middle split} (hi);
+  \node[below=8mm of $(lo)!0.5!(hi)$,draw=orange,fill=softorange,rounded corners]
+    {median \(=(3+4)/2=3.5\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Adding a Number}
+Push the new value into \texttt{lower}. Move the largest lower value to
+\texttt{upper}; this restores ordering. If \texttt{upper} becomes larger, move
+its smallest value back to \texttt{lower}. This restores the size rule.
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+addNum(value):
+    push value into lower max heap
+    move lower.maximum into upper min heap
+    if upper has more values than lower:
+        move upper.minimum back into lower
+
+findMedian():
+    if lower has one extra value: return lower.maximum
+    return average(lower.maximum, upper.minimum)
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ data structure: MedianFinder}]
+#include <functional>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+class MedianFinder {
+    priority_queue<int> lower;
+    priority_queue<int, vector<int>, greater<int>> upper;
+
+public:
+    void addNum(int num) {
+        lower.push(num);
+        upper.push(lower.top());
+        lower.pop();
+
+        if (upper.size() > lower.size()) {
+            lower.push(upper.top());
+            upper.pop();
+        }
+    }
+
+    double findMedian() const {
+        if (lower.size() > upper.size()) return lower.top();
+        return (static_cast<double>(lower.top()) + upper.top()) / 2.0;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works and Complexity}
+Moving the maximum lower value into \texttt{upper} ensures all lower values
+remain no greater than all upper values. Rebalancing changes sizes by one, so
+the middle value or values remain at the heap tops. Insertion costs
+\(O(\log n)\), median lookup costs \(O(1)\), and stored space is \(O(n)\).
+
+\begin{revisionbox}{Common mistakes}
+Use a max heap for the lower half and a min heap for the upper half. Convert to
+\texttt{double} before averaging to avoid integer truncation and overflow.
+\end{revisionbox}
+
+\subsection{From a Sorted Vector to Two Heaps}
+Keeping every value in a sorted vector makes the median easy to read, but an
+insertion may shift \(O(n)\) values. Sorting from scratch after every insertion
+is even more expensive. Two heaps keep only the ordering information needed
+for the middle: the maximum of the lower half and the minimum of the upper
+half.
+
+The keeped invariants are:
+\begin{enumerate}
+  \item every value in \texttt{lower} is at most every value in
+  \texttt{upper};
+  \item the heaps have equal sizes or \texttt{lower} has one extra value.
+\end{enumerate}
+
+\subsection{Insertion Dry Run}
+\begin{dryrunbox}{Adding \(5,2,8,3\)}
+\begin{center}
+\begin{tabular}{@{}c c c c@{}}
+\toprule
+Inserted & Lower max heap & Upper min heap & Median \\
+\midrule
+5 & \(\{5\}\) & \(\{\}\) & 5 \\
+2 & \(\{2\}\) & \(\{5\}\) & 3.5 \\
+8 & \(\{5,2\}\) & \(\{8\}\) & 5 \\
+3 & \(\{3,2\}\) & \(\{5,8\}\) & 4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The braces show heap contents conceptually; only each heap's top is ordered
+for direct access.
+\end{dryrunbox}
+
+\begin{visualbox}{The top of each heap is one middle value}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (l0) at (0,1.2) {3};
+  \node[trienode,below=10mm of l0] (l1) {2};
+  \draw[-,thick,navy] (l0)--(l1);
+  \node[above=5mm of l0,text=orange,font=\bfseries]{smaller half};
+  \node[below=5mm of l1,font=\scriptsize]{top = largest in this half};
+
+  \node[trienode,visited] (u0) at (5.2,1.2) {5};
+  \node[trienode,below=10mm of u0] (u1) {8};
+  \draw[-,thick,navy] (u0)--(u1);
+  \node[above=5mm of u0,text=teal,font=\bfseries]{larger half};
+  \node[below=5mm of u1,font=\scriptsize]{top = smallest in this half};
+
+  \draw[<->,very thick,navy] (l0.east)--node[edgelabel,above]{middle split} (u0.west);
+  \node[below=17mm of $(l0)!0.5!(u0)$,draw=orange,fill=softorange,
+    rounded corners]{median \(=(3+5)/2=4\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Code Walkthrough}
+Every new value first enters \texttt{lower}. Moving \texttt{lower.top()} to
+\texttt{upper} guarantees the ordering boundary. If upper now has more
+values, moving its minimum back restores the size rule. The median is
+then one lower top for an odd count or the average of both tops for an even
+count.
+
+\subsection{Edge Cases, Overflow, and Follow-ups}
+The problem calls \texttt{findMedian} only after at least one insertion.
+Duplicate and negative values require no special handling. Cast before adding
+the two middle values; otherwise two large integers can overflow before being
+converted. A harder follow-up supports deletions or a sliding window, usually
+with lazy deletion maps because priority queues cannot erase arbitrary values
+efficiently.
+
+\begin{revisionbox}{How to explain it simply}
+I split the stream around the median. A max heap exposes the largest lower
+value and a min heap exposes the smallest upper value. After every insertion I
+restore ordering and a one-element size difference, giving \(O(\log n)\)
+updates and \(O(1)\) median queries.
+\end{revisionbox}
+\chaptercheckpoint
+  {Values arrive online and the middle must remain quickly accessible.}
+  {A lower max heap and upper min heap with ordering and size invariants.}
+  {Using two heaps of the same type or averaging before converting to double.}
+  {$O(\log n)$ insertion, $O(1)$ query, and $O(n)$ storage.}
+\judgeclassnote
+
+
+\patternintoc{Binary Search}
+\problemstart{Find Minimum in Rotated Sorted Array}{153}{Medium}{Binary search}{Array}
+
+\subsection{The Problem}
+A strictly increasing array has been rotated. Return its minimum value in
+\(O(\log n)\) time. All values are distinct.
+
+\begin{conceptbox}{Example}
+\texttt{[4,5,6,7,0,1,2]} has minimum \(0\). An unrotated array such as
+\texttt{[1,2,3]} has minimum \(1\).
+\end{conceptbox}
+
+\subsection{Binary-Search Decision}
+Compare the midpoint with the right endpoint:
+\begin{itemize}
+  \item If \(nums[mid]>nums[right]\), the rotation point is strictly right of
+  \(mid\), so set \(left=mid+1\).
+  \item Otherwise, \(mid\) may itself be the minimum, so set \(right=mid\).
+\end{itemize}
+
+\begin{invariantbox}{the closed interval always contains the rotation minimum}
+The comparison with the right endpoint identifies a half that cannot contain
+the minimum. The algorithm removes only that half, retaining \texttt{mid}
+when it may itself be the answer, until both boundaries meet at the minimum.
+\end{invariantbox}
+
+\begin{visualbox}{Because \(7>2\), the minimum must be to the right}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \foreach \x/\v in {0/4,1/5,2/6,3/7,4/0,5/1,6/2} {
+    \node[arraycell] (a\x) at (1.1*\x,0) {\v};
+  }
+  \node[above=6mm of a0,text=teal] {left};
+  \node[above=6mm of a3,text=orange] {mid};
+  \node[above=6mm of a6,text=navy] {right};
+  \draw[flowarrow,orange] (a3.south) to[bend right=25]
+    node[edgelabel,below]{keep the right half} (a4.south);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+left = 0
+right = nums.length - 1
+while left < right:
+    middle = left + (right - left) / 2
+    if nums[middle] > nums[right]:
+        left = middle + 1
+    else:
+        right = middle
+return nums[left]
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Find Minimum in Rotated Sorted Array}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int left = 0;
+        int right = static_cast<int>(nums.size()) - 1;
+        while (left < right) {
+            const int middle = left + (right - left) / 2;
+            if (nums[middle] > nums[right]) left = middle + 1;
+            else right = middle;
+        }
+        return nums[left];
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works, Complexity, and Common Mistakes}
+The search interval always contains the minimum. Each comparison safely
+discards one half while retaining \(mid\) when it may be the answer. Interval
+size halves each iteration: \(O(\log n)\) time and \(O(1)\) space. Use
+\(right=mid\), not \(mid-1\), in the second branch.
+
+\subsection{From Linear Scan to Binary Search}
+A linear scan can return the smallest value in \(O(n)\), but the rotated
+sorted structure allows a logarithmic decision. Comparing the midpoint with
+the right endpoint reveals whether the midpoint lies in the high rotated
+portion or in the low portion containing the minimum.
+
+\subsection{Boundary Dry Run}
+\begin{dryrunbox}{Searching \texttt{[4,5,6,7,0,1,2]}}
+\begin{center}
+\begin{tabular}{@{}c c c c c@{}}
+\toprule
+Left & Mid & Right & Comparison & New interval \\
+\midrule
+0 (4) & 3 (7) & 6 (2) & \(7>2\) & \([4,6]\) \\
+4 (0) & 5 (1) & 6 (2) & \(1\le2\) & \([4,5]\) \\
+4 (0) & 4 (0) & 5 (1) & \(0\le1\) & \([4,4]\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The loop stops when both boundaries identify the minimum value 0.
+\end{dryrunbox}
+
+\subsection{Why Compare with the Right Endpoint?}
+If \(nums[mid]>nums[right]\), the sorted order breaks somewhere strictly to
+the right of mid, so mid cannot be the minimum. Otherwise mid belongs to the
+low sorted portion and may itself be the minimum, which is why the assignment
+is \texttt{right = middle} rather than \texttt{middle - 1}.
+
+\subsection{Edge Cases and Variations}
+A one-element or unrotated array works without a special branch. The proof
+uses distinct values. If duplicates are allowed, equality may not identify a
+safe half; a common adaptation decrements the right boundary on equality,
+which can degrade to \(O(n)\). Compute the midpoint as
+\texttt{left + (right-left)/2} to avoid integer overflow.
+
+\begin{revisionbox}{Practice checkpoint}
+Trace the algorithm on \texttt{[2,3,4,5,1]} and \texttt{[1,2,3,4]}. At every
+step state why the discarded half cannot contain the minimum.
+\end{revisionbox}
+\chaptercheckpoint
+  {A sorted array has one rotation break and logarithmic time is required.}
+  {A closed binary-search interval containing the minimum.}
+  {Using \texttt{right=mid-1} when the midpoint may be the answer.}
+  {$O(\log n)$ time and $O(1)$ space for distinct values.}
+\judgeclassnote
+
+
+\patternintoc{Undirected Graphs}
+\problemstart{Graph Valid Tree}{261}{Medium}{DFS cycle and connectivity check}{Adjacency list}
+
+\subsection{The Problem}
+Given \(n\) labeled vertices and undirected edges, return whether the graph is
+a tree. A tree must be connected and contain no cycle.
+
+\subsection{Two Conditions}
+An undirected tree with \(n\) vertices has exactly \(n-1\) edges. That count is
+a quick rejection. Then DFS from vertex zero, ignoring the edge back to the
+parent. Reaching any other visited neighbor proves a cycle. Finally, every
+vertex must have been reached.
+
+\begin{invariantbox}{visited nodes form the explored part of one rooted traversal}
+Every recursive frame records the edge used to enter its node as the parent
+edge. That one reverse edge is expected in an undirected graph and is skipped;
+any other visited neighbor closes a cycle. After DFS, full visitation proves
+that no disconnected component was omitted.
+\end{invariantbox}
+
+\begin{visualbox}{A tree is connected and has no loop}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[trienode,visited] (a) {0}; \node[trienode,visited,below left=12mm and 12mm of a] (b) {1};
+  \node[trienode,visited,below right=12mm and 12mm of a] (c) {2};
+  \draw[-,teal,thick] (a)--(b); \draw[-,teal,thick] (a)--(c);
+  \node[below=7mm of $(b)!0.5!(c)$,text=teal] {valid tree};
+  \node[trienode,right=42mm of a] (x) {0}; \node[trienode,below left=12mm and 10mm of x] (y) {1};
+  \node[trienode,below right=12mm and 10mm of x] (z) {2};
+  \draw[-,orange,thick] (x)--(y)--(z)--(x);
+  \node[below=7mm of $(y)!0.5!(z)$,text=orange] {loop: not a tree};
+\end{tikzpicture}
+\end{visualbox}
+
+\begin{visualbox}{Neighbor lists, visited marks, and the path being checked}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,align=left,fill=softteal] (adj) {
+    \textbf{neighbors}\\
+    \texttt{0: [1,2,3]}\\
+    \texttt{1: [0,4]}\\
+    \texttt{2: [0]}\\
+    \texttt{3: [0]}\\
+    \texttt{4: [1]}};
+  \node[draw=navy,fill=softblue,minimum width=42mm,minimum height=8mm,
+    right=27mm of adj] (f0) {visit 0; no parent};
+  \node[draw=navy,fill=softblue,minimum width=42mm,minimum height=8mm,
+    above=0mm of f0] (f1) {visit 1; came from 0};
+  \node[draw=orange,fill=softorange,minimum width=42mm,minimum height=8mm,
+    above=0mm of f1] (f2) {visit 4; came from 1};
+  \node[right=6mm of f2,text=orange,font=\bfseries,align=left] {working\\now};
+  \draw[flowarrow,teal] (adj.east)--(f0.west);
+  \foreach \x/\v in {0/T,1/T,2/F,3/F,4/T} {
+    \node[arraycell,minimum width=10mm] (seen\x) at ({3.0+1.1*\x},-1.45) {\v};
+    \node[below=1mm of seen\x,font=\scriptsize] {\x};
+  }
+  \node[below=7mm of seen2,text=navy,font=\bfseries] {nodes already seen};
+\end{tikzpicture}
+
+\smallskip
+The list shows connected nodes, the stack remembers how we arrived, and the
+marks show which nodes were already visited.
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+if edge count is not n - 1: return false
+build an undirected adjacency list
+dfs(node, parent):
+    if node is already visited: return false
+    mark node visited
+    for neighbor in graph[node]:
+        skip parent
+        if dfs(neighbor, node) is false: return false
+    return true
+run dfs from node 0
+return dfs succeeded and every node was visited
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Graph Valid Tree}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    bool dfs(int node, int parent,
+             const vector<vector<int>>& graph,
+             vector<bool>& visited) {
+        if (visited[node]) return false;
+        visited[node] = true;
+        for (const int neighbor : graph[node]) {
+            if (neighbor == parent) continue;
+            if (!dfs(neighbor, node, graph, visited)) return false;
+        }
+        return true;
+    }
+
+public:
+    bool validTree(int n, vector<vector<int>>& edges) {
+        if (static_cast<int>(edges.size()) != n - 1) return false;
+        vector<vector<int>> graph(n);
+        for (const auto& edge : edges) {
+            graph[edge[0]].push_back(edge[1]);
+            graph[edge[1]].push_back(edge[0]);
+        }
+        vector<bool> visited(n, false);
+        if (!dfs(0, -1, graph, visited)) return false;
+        for (const bool reached : visited) if (!reached) return false;
+        return true;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works and Complexity}
+The parent check prevents treating the same undirected edge as a cycle. Any
+other repeated vertex closes a cycle. The final visited check proves
+connectivity. DFS and adjacency construction take \(O(V+E)\) time and space.
+
+\begin{revisionbox}{How to explain it in an interview}
+A tree is connected and acyclic. I first verify the needed \(n-1\) edge
+count, then DFS while passing the parent. A visited non-parent neighbor is a
+cycle; any unvisited vertex afterward means the graph is disconnected.
+\end{revisionbox}
+
+\subsection{Why Both Conditions Matter}
+A connected graph may still contain a cycle, and an acyclic graph may be a
+disconnected forest. So checking only one property is inenough.
+The \(n-1\) edge count is a fast needed condition, while DFS verifies the
+actual structure.
+
+\subsection{DFS Dry Run}
+\begin{dryrunbox}{Edges \texttt{[[0,1],[0,2],[0,3],[1,4]]}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c X@{}}
+\toprule
+Current & Parent & Action \\
+\midrule
+0 & -1 & mark 0; recurse to 1, 2, and 3 \\
+1 & 0 & ignore edge back to 0; recurse to 4 \\
+4 & 1 & ignore edge back to 1; return true \\
+2, 3 & 0 & each is new and has only its parent edge \\
+finish & -- & all five vertices are visited; return true \\
+\bottomrule
+\end{tabularx}
+\end{center}
+An extra edge \([1,2]\) would lead from one DFS branch to an already visited
+non-parent vertex and prove a cycle.
+\end{dryrunbox}
+
+\subsection{Code Walkthrough}
+The edge-count guard rejects obvious non-trees before allocating the graph.
+Each undirected edge is stored in both adjacency lists. DFS marks a node,
+skips exactly the edge to its parent, and rejects any other repeated node. The
+final loop confirms that vertex zero's traversal reached every component.
+
+\subsection{Alternative and Edge Cases}
+Union find is a high-value alternative: union every edge and reject an edge
+whose endpoints already share a representative, then confirm \(n-1\) edges.
+For \(n=1\), an empty edge list is a valid tree. Self-loops and parallel edges
+create cycles. The recursive DFS may use \(O(n)\) stack space on a chain.
+
+\begin{revisionbox}{Practice checkpoint}
+Explain why the parent edge is skipped but any other visited neighbor is a
+cycle. Then outline the union-find version and compare its state with DFS.
+\end{revisionbox}
+\chaptercheckpoint
+  {An undirected graph must be both connected and acyclic.}
+  {An adjacency list, visited array, DFS parent, and the \(n-1\) edge test.}
+  {Treating the parent edge as a cycle or checking only connectivity.}
+  {$O(V+E)$ time and $O(V+E)$ space.}
+\judgeclassnote
+
+
+\patternintoc{Arrays and Hashing}
+\problemstart{Group Anagrams}{49}{Medium}{Standard-key hashing}{Hash map}
+
+\subsection{The Problem}
+Group strings that contain the same letters with the same frequencies. The
+groups and strings within them may be returned in any order.
+
+\subsection{Sorted Standard Key}
+Anagrams become identical after sorting their characters. Use the sorted word
+as a hash-map key and append the original word to that bucket.
+
+\begin{invariantbox}{each processed word is stored in its unique standard bucket}
+After processing a prefix of the input, every word from that prefix appears in
+the bucket indexed by its sorted characters. Two words share a bucket exactly
+when their character multisets match, so no later comparison between words is
+needed.
+\end{invariantbox}
+
+\begin{visualbox}{Sort each word to find its group}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[dsnode] (a) {\texttt{eat}}; \node[dsnode,below=5mm of a] (b) {\texttt{tea}};
+  \node[dsnode,below=5mm of b] (c) {\texttt{ate}};
+  \node[dsnode,right=25mm of b,fill=softorange] (key) {sorted letters\\\texttt{aet}};
+  \draw[flowarrow] (a)--(key); \draw[flowarrow] (b)--(key); \draw[flowarrow] (c)--(key);
+  \node[dsnode,right=22mm of key,fill=softteal] (bucket)
+    {one group\\\texttt{[eat,tea,ate]}};
+  \draw[flowarrow,teal] (key)--(bucket);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+groups = empty map from sorted key to words
+for word in strings:
+    key = characters of word sorted
+    append word to groups[key]
+return all map buckets
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Group Anagrams}]
+#include <algorithm>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<string>>
+    groupAnagrams(vector<string>& strings) {
+        unordered_map<string, vector<string>> groups;
+        for (const string& word : strings) {
+            string key = word;
+            sort(key.begin(), key.end());
+            groups[key].push_back(word);
+        }
+
+        vector<vector<string>> result;
+        result.reserve(groups.size());
+        for (auto& entry : groups) result.push_back(move(entry.second));
+        return result;
+    }
+};
+\end{lstlisting}
+
+\subsection{Complexity and Alternatives}
+For \(n\) strings of maximum length \(k\), sorting keys costs
+\(O(nk\log k)\); stored keys and output use \(O(nk)\) space. A 26-count
+frequency signature avoids sorting and gives \(O(nk)\) time, but the sorted
+key is simpler and easy to explain.
+
+\begin{revisionbox}{Common mistakes}
+Append the original word, not the sorted key. Empty strings correctly share an
+empty key. Do not assume the order of buckets from an unordered map.
+\end{revisionbox}
+
+\subsection{From Pairwise Comparison to a Standard Form}
+A direct method can compare every pair of strings by character frequencies,
+which costs roughly \(O(n^2k)\). The repeated work is deciding the same
+anagram identity again and again. A standard key gives every anagram in a
+group one identical representation, so one hash lookup finds its bucket.
+
+\subsection{Detailed Grouping Walkthrough}
+\begin{dryrunbox}{Worked example}
+\begin{center}
+\begin{tabular}{@{}c c c@{}}
+\toprule
+Word & Sorted key & Bucket after insertion \\
+\midrule
+\texttt{eat} & \texttt{aet} & \texttt{[eat]} \\
+\texttt{tea} & \texttt{aet} & \texttt{[eat,tea]} \\
+\texttt{tan} & \texttt{ant} & \texttt{[tan]} \\
+\texttt{ate} & \texttt{aet} & \texttt{[eat,tea,ate]} \\
+\texttt{nat} & \texttt{ant} & \texttt{[tan,nat]} \\
+\texttt{bat} & \texttt{abt} & \texttt{[bat]} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Code Walkthrough}
+For each original word, the code makes one copy named \texttt{key}, sorts that
+copy, and appends the untouched word to \texttt{groups[key]}. After all words
+are classified, each map value is moved into the returned vector. Moving
+avoids copying every string bucket again.
+
+\subsection{Complexity Details, Edge Cases, and Alternative}
+If string lengths differ, a more precise sorting bound is
+\(O(\sum_i k_i\log k_i)\). The map stores standard keys in addition to the
+returned strings. Empty strings all use the empty key, and repeated identical
+words remain repeated in the same group. Output order is unspecified because
+\texttt{unordered\_map} iteration order is unspecified.
+
+For lowercase English letters, a 26-element frequency signature avoids
+sorting. It runs in \(O(\sum_i k_i)\) time but needs a collision-free way to
+serialize counts, such as separators between decimal values.
+
+\begin{visualbox}{Count the letters instead of sorting}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode] (word) {\texttt{tea}};
+  \node[dsnode,right=17mm of word,fill=softorange] (count)
+    {\(a:1,\ e:1,\ t:1\)};
+  \node[dsnode,right=17mm of count,fill=softteal] (bucket)
+    {same group as\\\texttt{eat}, \texttt{ate}};
+  \draw[flowarrow,orange] (word)--node[edgelabel,above,font=\scriptsize]{count letters} (count);
+  \draw[flowarrow,teal] (count)--node[edgelabel,above,font=\scriptsize]{use these counts} (bucket);
+\end{tikzpicture}
+\end{visualbox}
+\begin{revisionbox}{How to explain it simply}
+Anagrams become equal after sorting. I use that sorted form as a hash key and
+append the original word to its bucket. This converts repeated pairwise
+comparisons into one key construction and average constant-time lookup per
+word.
+\end{revisionbox}
+\chaptercheckpoint
+  {Items should be grouped by an equivalence relation.}
+  {A standard string or frequency signature mapped to a vector of originals.}
+  {Appending the transformed key instead of the original word.}
+  {$O(nk\log k)$ with sorting, or $O(nk)$ with fixed alphabet counts.}
+\judgeclassnote
+
+
+\patternintoc{House Robber DP}
+\problemstart{House Robber}{198}{Medium}{Rolling dynamic programming}{Two running values}
+
+\subsection{The Problem}
+Houses lie on a line. Return the maximum amount that can be robbed without
+choosing two adjacent houses.
+
+\subsection{From DP Array to Two Variables}
+At each house, choose between skipping it and taking it with the best result
+from two houses earlier: \(current=\max(previous, twoBack+money).\)
+Only the previous two states are needed, which is the space-optimized approach
+used in the displayed implementation.
+
+\begin{invariantbox}{the two variables are the last two best prefixes}
+Before processing a house, \texttt{previous} is the optimum for all houses
+already seen and \texttt{twoBack} is the optimum before the immediately
+previous house. Computing the new value before shifting keeps both choices
+required by the update rule.
+\end{invariantbox}
+
+\begin{visualbox}{Compare skipping this house with taking it}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,fill=softblue] (skip) {skip it\\keep 11};
+  \node[dsnode,fill=softorange,below=8mm of skip] (take) {take it\\\(7+3=10\)};
+  \node[dsnode,active,right=28mm of skip,yshift=-6mm] (cur) {best now\\11};
+  \draw[flowarrow,navy] (skip.east)--(cur.west);
+  \draw[flowarrow,orange] (take.east)--(cur.west);
+  \node[left=12mm of skip,align=right,text=navy]
+    {best before\\this house};
+  \node[left=12mm of take,align=right,text=orange]
+    {best two houses back\\plus this house};
+\end{tikzpicture}
+
+\smallskip
+After the decision, \texttt{previous} becomes the new answer and the old
+\texttt{previous} shifts into \texttt{twoBack} for the next house.
+\end{visualbox}
+
+\begin{dryrunbox}{Rolling states for \texttt{[2,7,9,3,1]}}
+\begin{center}
+\begin{tabular}{c|ccccc}
+House value & 2 & 7 & 9 & 3 & 1 \\ \hline
+Best so far & 2 & 7 & 11 & 11 & 12
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+twoBack = 0
+previous = 0
+for money in houses:
+    current = max(previous, twoBack + money)
+    twoBack = previous
+    previous = current
+return previous
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: House Robber}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int twoBack = 0;
+        int previous = 0;
+        for (const int money : nums) {
+            const int current = max(previous, twoBack + money);
+            twoBack = previous;
+            previous = current;
+        }
+        return previous;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why the Solution Works, Complexity, and Revision}
+The update rule considers both possibilities for every best prefix: the last
+house is skipped or included. Updating \texttt{twoBack} only after computing
+\texttt{current} keeps the old states. Time is \(O(n)\), extra space is
+\(O(1)\), and empty input naturally returns zero.
+
+\begin{revisionbox}{House Robber pattern}
+\textbf{State:} best answer for a prefix.\quad
+\textbf{Choice:} skip current or take current plus the answer two positions
+back.\quad \textbf{Signal:} adjacent choices cannot both be selected.
+\end{revisionbox}
+
+\subsection{From Subsets to Dynamic Programming}
+Brute force chooses or skips every house, producing up to \(2^n\) subsets and
+then rejecting those with adjacent selections. The useful fact is
+that the best decision for the first \(i\) houses depends only on the best
+answers for the first \(i-1\) and \(i-2\) houses.
+
+For the current house, every best solution is in exactly one group:
+\begin{itemize}
+  \item skip it and keep the best previous result;
+  \item take it, which forces the previous house to be skipped, and add its
+  money to the best result two positions back.
+\end{itemize}
+
+\subsection{Detailed Rolling-State Trace}
+\begin{dryrunbox}{Houses \texttt{[2,7,9,3,1]}}
+\begin{center}
+\begin{tabular}{@{}c c c c c@{}}
+\toprule
+Money & Two back & Previous & Take current & New best \\
+\midrule
+2 & 0 & 0 & 2 & 2 \\
+7 & 0 & 2 & 7 & 7 \\
+9 & 2 & 7 & 11 & 11 \\
+3 & 7 & 11 & 10 & 11 \\
+1 & 11 & 11 & 12 & 12 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Code Walkthrough}
+Before each iteration, \texttt{previous} is the best answer for the houses
+already processed and \texttt{twoBack} is the answer one prefix earlier. The
+code calculates \texttt{current} before overwriting either old value. It then
+shifts the states forward. This keeps the update rule without allocating a
+full DP array.
+
+\subsection{Edge Cases and Interview Variations}
+Empty input returns zero, one house returns its value, and two houses return
+the larger value. The standard problem uses non-negative money. If negative
+values were allowed and robbing no house remained valid, the zero
+initialization would correctly ignore them. Variations include circular
+houses, reconstructing which houses were chosen, or a minimum gap larger than
+one between selected positions.
+
+\begin{revisionbox}{How to explain it simply}
+At each house I either skip it and keep the previous optimum, or take it
+and add its money to the optimum from two houses back. Only those two earlier
+states are needed, so the solution is \(O(n)\) time and \(O(1)\) extra space.
+\end{revisionbox}
+\chaptercheckpoint
+  {Adjacent choices conflict and every prefix has a take-or-skip decision.}
+  {The best values for the previous prefix and the prefix two steps back.}
+  {Overwriting an old state before calculating the current decision.}
+  {$O(n)$ time and $O(1)$ extra space.}
+\judgeclassnote
+
+
+\problemstart{House Robber II}{213}{Medium}{Two linear DP scans}{Dynamic programming}
+
+\subsection{The Problem}
+Houses form a circle, so the first and last houses are adjacent. Maximize the
+money robbed without choosing adjacent houses.
+
+\begin{conceptbox}{From a line to a circle}
+The circular problem uses the same take-or-skip update rule as a linear row of
+houses. Its only additional restriction is that the first and last houses
+cannot both be selected.
+\end{conceptbox}
+
+\subsection{Break the Circle}
+No valid solution can contain both the first and last houses. So, solve
+two ordinary linear cases and take the larger result:
+\begin{enumerate}
+  \item houses \(0\) through \(n-2\), excluding the last;
+  \item houses \(1\) through \(n-1\), excluding the first.
+\end{enumerate}
+
+\begin{visualbox}{Break the circle into two straight rows}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \foreach \angle/\name/\v in {90/a/2,18/b/3,-54/c/2,-126/d/3,162/e/5} {
+    \node[trienode] (\name) at (\angle:1.7cm) {\v};
+  }
+  \draw[-,navy,thick] (a)--(b)--(c)--(d)--(e)--(a);
+  \node[right=18mm of c,align=left] {
+    row A: skip the first house\\
+    row B: skip the last house};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Linear DP Update Rule}
+For a range beginning at \(s\), let \(dp[i]\) be the best value using its first
+\(i\) houses. Then \(dp[i]=\max(dp[i-1],dp[i-2]+\text{current house}).\)
+
+\begin{visualbox}{Solve each straight row separately}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[anchor=east,text=navy,font=\bfseries] at (-0.5,1.35) {exclude last};
+  \foreach \x/\v in {0/1,1/2,2/3} {
+    \node[arraycell,minimum width=11mm] (ha\x) at (1.2*\x,1.35) {\v};
+  }
+  \node[arraycell,minimum width=11mm,fill=softteal] (da0) at (4.7,1.35) {1};
+  \node[arraycell,minimum width=11mm,fill=softteal] (da1) at (5.9,1.35) {2};
+  \node[arraycell,minimum width=11mm,fill=softteal] (da2) at (7.1,1.35) {4};
+  \node[text=teal,font=\bfseries] at (3.7,1.35) {\(\rightarrow\) best totals};
+
+  \node[anchor=east,text=navy,font=\bfseries] at (-0.5,-0.15) {exclude first};
+  \foreach \x/\v in {0/2,1/3,2/1} {
+    \node[arraycell,minimum width=11mm] (hb\x) at (1.2*\x,-0.15) {\v};
+  }
+  \node[arraycell,minimum width=11mm,fill=softorange] (db0) at (4.7,-0.15) {2};
+  \node[arraycell,minimum width=11mm,fill=softorange] (db1) at (5.9,-0.15) {3};
+  \node[arraycell,minimum width=11mm,fill=softorange] (db2) at (7.1,-0.15) {3};
+  \node[text=orange,font=\bfseries] at (3.7,-0.15) {\(\rightarrow\) best totals};
+  \node[below=8mm of db1,draw=teal,fill=softteal,rounded corners]
+    {take \(\max(4,3)=4\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+robRange(start, end):
+    dp[0] = 0
+    dp[1] = nums[start]
+    for each later house in the range:
+        dp[i] = max(dp[i - 1], dp[i - 2] + houseValue)
+    return final dp value
+
+if there is only one house: return its money
+return max(robRange(0, n - 2), robRange(1, n - 1))
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: House Robber II}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    int robRange(const vector<int>& nums, int start, int end) {
+        const int length = end - start + 1;
+        vector<int> dp(length + 1, 0);
+        dp[1] = nums[start];
+        for (int i = 2; i <= length; ++i) {
+            const int value = nums[start + i - 1];
+            dp[i] = max(dp[i - 1], dp[i - 2] + value);
+        }
+        return dp[length];
+    }
+
+public:
+    int rob(vector<int>& nums) {
+        const int n = static_cast<int>(nums.size());
+        if (n == 0) return 0;
+        if (n == 1) return nums[0];
+        return max(robRange(nums, 0, n - 2),
+                        robRange(nums, 1, n - 1));
+    }
+};
+\end{lstlisting}
+
+\subsection{Complexity and Space-Optimized Follow-up}
+Both scans are linear, so time is \(O(n)\). The DP arrays use
+\(O(n)\) space. Each scan can instead keep only the previous two states,
+reducing extra space to \(O(1)\).
+
+\begin{revisionbox}{How to explain it in an interview}
+Because the first and last houses conflict, I solve two linear robber problems:
+exclude the first or exclude the last. The linear update rule chooses between
+skipping the current house and taking it with the best value two positions
+back.
+\end{revisionbox}
+
+\subsection{Why Two Linear Cases Are Complete}
+No legal robbery can contain both endpoint houses because they are adjacent
+in the circle. Every legal solution belongs to at least one of two
+sets: solutions that exclude the first house or solutions that exclude the
+last. Taking the better optimum from those two sets covers every possibility.
+
+\begin{invariantbox}{each helper call solves one complete legal linear case}
+Within a chosen range, the DP value after each house is the best legal robbery
+of that processed prefix. The two ranges together cover every circular
+solution because no legal solution can contain both endpoint houses.
+\end{invariantbox}
+
+\subsection{Detailed Visual Dry Run}
+\begin{dryrunbox}{Houses \texttt{[1,2,3,1]}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c c X@{}}
+\toprule
+Linear case & Range & DP values & Best choice \\
+\midrule
+Exclude last & \texttt{[1,2,3]} & \(1,2,4\) & rob houses with 1 and 3 \\
+Exclude first & \texttt{[2,3,1]} & \(2,3,3\) & rob the middle value 3 \\
+Final & -- & \(\max(4,3)\) & return 4 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+For \texttt{[2,3,2]}, both endpoint values 2 cannot be taken together, so the
+middle house gives the answer 3.
+\end{dryrunbox}
+
+\subsection{Code Walkthrough}
+\texttt{robRange} creates a DP table for one inclusive interval. The first
+entry is the money in the first allowed house. Every later entry chooses
+between the previous optimum and the current house plus the optimum two
+positions earlier. The public method handles zero and one house before calling
+the helper on the two non-empty ranges.
+
+\subsection{Edge Cases, Space Optimization, and Follow-ups}
+The special case for one house prevents both ranges from becoming empty. Two
+houses return the larger value. Zero-valued houses work naturally. Each range
+can use the two-variable rolling state from House Robber, reducing extra
+space from \(O(n)\) to \(O(1)\) while preserving \(O(n)\) time.
+
+\begin{revisionbox}{Practice checkpoint}
+Write down the two ranges for five houses. Prove that a legal solution that
+chooses neither endpoint is still considered by both ranges and so is
+not lost.
+\end{revisionbox}
+\chaptercheckpoint
+  {A linear adjacency rule becomes circular because the endpoints conflict.}
+  {Two linear take-or-skip DP scans over complementary ranges.}
+  {Running one DP over all houses and accidentally allowing both endpoints.}
+  {$O(n)$ time and $O(n)$ DP-array space, reducible to $O(1)$.}
+\judgeclassnote

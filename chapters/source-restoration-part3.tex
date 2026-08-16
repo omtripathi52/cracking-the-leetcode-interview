@@ -1,0 +1,359 @@
+% Additional explanations for the final group of lessons.
+
+\expandafter\def\csname sourcewalkthrough@50\endcsname{%
+The restriction against division matters most when zeros appear. Prefix and
+suffix products avoid that problem completely. First move left to right. At
+index \(i\), store the product of every value strictly before \(i\), then
+multiply the running prefix by \texttt{nums[i]}.
+
+Next move right to left with a running suffix. Multiply the stored prefix by
+the product of every value strictly after the index, then update the suffix.
+For \texttt{[1,2,3,4]}, the first pass stores \texttt{[1,1,2,6]}. The second
+pass multiplies by suffixes 24, 12, 4, and 1 to produce
+\texttt{[24,12,8,6]}. One zero makes every answer except its own position
+zero; two zeros make every answer zero, all without a special branch. The
+returned array is not counted as auxiliary space, so the algorithm uses
+constant extra state.}
+
+\expandafter\def\csname sourcewalkthrough@51\endcsname{%
+The main difficulty is finding the node to remove without first measuring the
+list length. Put both pointers at a dummy node before the head. Move the fast
+pointer \(n+1\) steps so there are exactly \(n\) nodes between fast and slow.
+
+Then move both pointers together until fast becomes null. Slow now points to
+the node immediately before the target, so one link update removes it. The
+dummy node is important when the first real node must be deleted. For
+\texttt{1->2->3->4->5} with \(n=2\), slow stops at 3 and changes its next
+link from 4 to 5. The method assumes \(n\) is valid for the list. It uses one
+pass after creating the gap, runs in \(O(L)\) time, and uses constant extra
+space.}
+
+\expandafter\def\csname sourcewalkthrough@52\endcsname{%
+Reordering is easier when split into three familiar linked-list operations.
+First find the middle with slow and fast pointers. Cut the list into two
+halves. Reverse the second half, then weave one node from the first half with
+one node from the reversed half.
+
+For \texttt{1->2->3->4->5}, the halves become \texttt{1->2->3} and
+\texttt{4->5}. Reversing the second gives \texttt{5->4}. Weaving produces
+\texttt{1->5->2->4->3}. Before changing either next pointer, save both next
+nodes so the unprocessed suffixes are not lost. Odd and even lengths differ
+only in whether the first half has one extra node. No values need to be copied
+and no array is required. Each phase is linear, so the complete operation is
+\(O(n)\) time and \(O(1)\) extra space.}
+
+\expandafter\def\csname sourcewalkthrough@53\endcsname{%
+Reversing a list means redirecting each next pointer toward the node that was
+previously before it. Three pointers are enough: \texttt{previous},
+\texttt{current}, and a saved \texttt{next} node.
+
+At each step, save \texttt{current->next} before overwriting it. Point current
+backward to previous, then advance previous and current. Starting with
+\texttt{1->2->3}, the first update makes \texttt{1->null}; the second makes
+\texttt{2->1}; the third makes \texttt{3->2->1}. When current becomes null,
+previous is the new head. Forgetting to save the forward link loses the rest
+of the list after the first update. The empty list and a one-node list pass
+through the same loop without special restructuring. Every node is changed
+once, giving linear time and constant extra space.}
+
+\expandafter\def\csname sourcewalkthrough@54\endcsname{%
+The result has exactly 32 bits, so the loop should always run 32 times,
+including leading zeros. On each iteration, shift the result left to make room
+for one new bit. Copy the lowest bit of the input with \texttt{n \& 1}, then
+shift the input right.
+
+This reads the input from right to left while building the answer from left to
+right. For a small pattern such as \texttt{00000101}, the read bits are
+1, 0, 1, followed by zeros, and they appear at the opposite end of the result.
+Use an unsigned 32-bit type so the right shift inserts zeros instead of
+extending a sign bit. A loop that stops when \(n\) becomes zero would fail to
+place the remaining leading zeros in their correct reversed positions unless
+the result position were tracked separately.}
+
+\expandafter\def\csname sourcewalkthrough@55\endcsname{%
+A square matrix can be rotated without another matrix by separating the
+movement into two simple operations. Transpose across the main diagonal, then
+reverse every row. The transpose changes rows into columns; the row reversal
+puts those columns in clockwise order.
+
+For
+\(\begin{smallmatrix}1&2&3\\4&5&6\\7&8&9\end{smallmatrix}\), transposing gives
+\(\begin{smallmatrix}1&4&7\\2&5&8\\3&6&9\end{smallmatrix}\). Reversing each
+row gives
+\(\begin{smallmatrix}7&4&1\\8&5&2\\9&6&3\end{smallmatrix}\). During the
+transpose, swap only cells above the diagonal with their reflected partners;
+visiting both halves would swap every pair twice and undo the work. The matrix
+must be square for this direct in-place mapping. Time is \(O(n^2)\), with
+constant auxiliary space.}
+
+\expandafter\def\csname sourcewalkthrough@56\endcsname{%
+Two trees are the same only when their structure and values match at every
+corresponding position. The recursive cases follow that statement directly.
+Two null pointers match. One null pointer and one real node do not. Two real
+nodes match only if their values match and both pairs of children match.
+
+The recursion should compare left with left and right with right. It cannot
+ignore missing children, because trees with the same values in different
+shapes are not the same. The method stops as soon as a mismatch is found.
+When the trees match, every corresponding node is visited once, so time is
+\(O(n)\). The call stack uses \(O(h)\) space, where \(h\) is the larger tree
+height. Testing two empty trees, one empty tree, unequal roots, and equal
+values with different shapes covers the important base cases.}
+
+\expandafter\def\csname sourcewalkthrough@57\endcsname{%
+Serialization needs to preserve structure, not only values. Preorder traversal
+records a node before its children, and a special null marker records every
+missing child. Those markers make the representation unambiguous.
+
+For a node, write its value, then serialize the left and right subtrees. For a
+null pointer, write a marker such as \texttt{N}. Deserialization reads tokens
+in the same order. A null marker returns a null pointer; a number creates a
+node whose left and right children are built recursively. A tree containing
+only values cannot distinguish a left child from a right child, which is why
+the markers are essential. Negative and multi-digit values need a delimiter,
+not character-by-character parsing. Both directions process one token per
+node or null link, so their time is linear in the representation size.}
+
+\expandafter\def\csname sourcewalkthrough@58\endcsname{%
+Using the first row and first column as marker storage avoids a second matrix.
+When a zero is found at \((r,c)\), set the first cell of row \(r\) and the
+first cell of column \(c\) to zero. Later passes use those markers to clear
+interior cells.
+
+The first row and first column need separate Boolean flags because their cells
+are also being used as storage. Scan them before writing markers. Then mark
+zeros from the interior, clear interior rows and columns from the markers, and
+finally clear the first row or column if its original flag was true. Changing
+cells to zero during the first scan without this plan can create new zeros
+that incorrectly spread farther. Every cell is visited a constant number of
+times, giving \(O(mn)\) time and constant auxiliary space.}
+
+\expandafter\def\csname sourcewalkthrough@59\endcsname{%
+Four boundaries describe the unvisited rectangle: top, bottom, left, and
+right. Read the top row from left to right and move top down. Read the right
+column from top to bottom and move right left. Then, if rows remain, read the
+bottom row backward; if columns remain, read the left column upward.
+
+The two safety checks are necessary for a single remaining row or column.
+Without them, those cells are added twice. For a \(3\times4\) matrix, the
+first round consumes the complete outer ring, and the boundaries then describe
+only the inner row. Each cell enters the output exactly once, so time is
+\(O(mn)\). Apart from the returned vector, only four indexes are stored.}
+
+\expandafter\def\csname sourcewalkthrough@60\endcsname{%
+At each node of the main tree, ask whether a tree starting there is exactly
+the target subtree. This uses two recursive functions with different jobs.
+The outer function searches possible starting nodes; the inner function checks
+whether two trees match completely.
+
+If the inner comparison succeeds, return true. Otherwise search the current
+node's left and right subtrees. A null target is a subtree of any tree, while
+a non-null target cannot be found inside a null main tree. The equality helper
+must check both values and structure, just like Same Tree. In the worst case,
+many candidate roots have the target's root value and the comparison repeats,
+leading to \(O(mn)\) time. The direct method is still clear and reliable for
+interview constraints; subtree hashing is a more advanced optimization.}
+
+\expandafter\def\csname sourcewalkthrough@61\endcsname{%
+Binary addition can be expressed without the plus operator. XOR adds two bits
+without carrying: equal bits produce 0 and different bits produce 1. AND finds
+positions where both bits are 1, and shifting that result left places the
+carry in the next position.
+
+Repeat with \texttt{sum=a\char94 b} and \texttt{carry=(a\&b)<<1}. Replace \texttt{a}
+with sum and \texttt{b} with carry until no carry remains. For 5 and 3,
+\texttt{0101 XOR 0011} gives \texttt{0110}, while the carry is
+\texttt{0010}. Further rounds propagate that carry to produce 8. Unsigned
+intermediate values avoid undefined behavior when a carry enters the sign bit;
+the final bit pattern can then be converted back to \texttt{int}. Fixed-width
+carry propagation takes a bounded number of rounds.}
+
+\expandafter\def\csname sourcewalkthrough@62\endcsname{%
+First count how many times each value appears. The answer needs only the
+\(k\) largest frequencies, so a min heap of size at most \(k\) is enough.
+Push each value-frequency pair. Whenever the heap grows beyond \(k\), remove
+the smallest frequency.
+
+After all pairs are processed, every item left in the heap belongs to the top
+\(k\). The returned order usually does not matter. If there are \(u\) unique
+values, counting takes expected \(O(n)\) time and heap work costs
+\(O(u\log k)\). A heap containing all unique values would also work but would
+use more space and perform more expensive operations. Bucket sorting by
+frequency is a linear alternative, but the bounded heap is a useful pattern
+whenever only a small number of best items are requested.}
+
+\expandafter\def\csname sourcewalkthrough@63\endcsname{%
+Each grid position can be reached only from the cell above or the cell to the
+left. Therefore the number of paths to a cell is the sum of those two counts.
+The first row and first column each contain only one path because movement is
+restricted to right and down.
+
+A one-dimensional array can represent the current row. Initialize every entry
+to one. For each later row, update from left to right with
+\texttt{dp[col] += dp[col-1]}. Before the update, \texttt{dp[col]} is the
+count from above; \texttt{dp[col-1]} is the newly computed count from the
+left. For a \(3\times7\) grid the final value is 28. This reduces space from
+\(O(mn)\) to \(O(n)\) while keeping the same \(O(mn)\) time.}
+
+\expandafter\def\csname sourcewalkthrough@64\endcsname{%
+Two strings are anagrams when every character appears the same number of
+times. With lowercase English letters, a fixed array of 26 counts is simpler
+than sorting. First reject different lengths, because no count adjustment can
+repair that mismatch.
+
+For each position, increase the count for the character in the first string
+and decrease the count for the character in the second. At the end, every
+entry must be zero. Combining the two updates in one loop is safe because the
+strings have equal length. For \texttt{anagram} and \texttt{nagaram}, the same
+letters cancel even though their positions differ. Sorting would take
+\(O(n\log n)\); counting takes \(O(n)\) time and constant alphabet space. A
+larger or Unicode alphabet would use a hash map instead of a 26-cell array.}
+
+\expandafter\def\csname sourcewalkthrough@65\endcsname{%
+Move one pointer from each end. Skip any character that is not a letter or
+digit, then compare lowercase forms of the remaining characters. A mismatch
+proves the string is not a palindrome; matching characters let both pointers
+move inward.
+
+For \texttt{A man, a plan, a canal: Panama}, spaces and punctuation are
+ignored, leaving matching pairs from the outside inward. Character functions
+should receive an \texttt{unsigned char} value so non-ASCII negative
+\texttt{char} values do not cause undefined behavior. The pointers must be
+checked after each skip so an input containing only punctuation does not read
+outside the string. Every position is passed at most once, giving linear time
+and constant extra space without constructing a filtered copy.}
+
+\expandafter\def\csname sourcewalkthrough@66\endcsname{%
+An opening delimiter creates work that must be completed later, so store it on
+a stack. A closing delimiter must match the most recent unmatched opening
+delimiter. This last-in, first-out rule is exactly the stack order.
+
+Push \texttt{(}, \texttt{[}, or \texttt{\{} when it appears. For a closing
+character, first ensure the stack is not empty, then compare it with the top.
+Pop only after a correct match. At the end, the stack must be empty; otherwise
+some opening delimiter was never closed. The string \texttt{([\{\}])} works
+because closures occur in reverse opening order, while \texttt{([)]} fails at
+the first closing parenthesis. Each character causes at most one push or pop,
+so the solution is linear.}
+
+\expandafter\def\csname sourcewalkthrough@67\endcsname{%
+Every node in a BST must satisfy restrictions created by all its ancestors,
+not only by its parent. Pass a lower and upper bound into the recursive call.
+The current value must lie strictly between them.
+
+The left child inherits the lower bound and receives the current value as its
+new upper bound. The right child inherits the upper bound and receives the
+current value as its new lower bound. Wide integer bounds avoid trouble when a
+node contains \texttt{INT\_MIN} or \texttt{INT\_MAX}. Strict comparisons also
+reject duplicates when the problem defines a strict BST. A local parent check
+can miss a value deep in the left subtree that is larger than the root; the
+carried interval correctly rejects it. Every node is checked once.}
+
+\expandafter\def\csname sourcewalkthrough@68\endcsname{%
+Let \texttt{dp[i]} mean that the prefix ending just before index \(i\) can be
+split into dictionary words. Start with \texttt{dp[0]=true}, representing the
+empty prefix. From each reachable position, test dictionary words or later end
+positions and mark a new prefix when the intervening substring is a word.
+
+For \texttt{leetcode} with \texttt{leet} and \texttt{code}, the reachable
+positions become 0, 4, and 8. A word match from an unreachable position must
+not be used, because the text before it has no valid split. A hash set gives
+fast dictionary lookup, though substring construction still has a cost. The
+basic index-based solution is often described as \(O(n^2)\) plus substring
+work. The key idea is that each Boolean summarizes all possible segmentations
+of one prefix.}
+
+\expandafter\def\csname sourcewalkthrough@69\endcsname{%
+Searching separately from every grid cell repeats prefix work for every word.
+A Trie shares those prefixes. Insert all words, then start backtracking from
+each cell whose character is a child of the Trie root.
+
+During DFS, the current Trie node tells which next letters can still lead to a
+word. A missing child stops the branch immediately. When a Trie node stores a
+complete word, add it to the answer and clear or mark that stored word so the
+same result is not returned twice. Temporarily mark the board cell as visited,
+explore four neighbors, then restore it for other paths. Removing exhausted
+Trie branches is an optional pruning improvement. The important distinction is
+that board state prevents cell reuse in one path, while Trie state prevents
+searching prefixes that belong to no requested word.}
+
+\expandafter\def\csname sourcewalkthrough@70\endcsname{%
+Try to match the word one character at a time. A recursive state contains the
+grid position and the index of the next required character. If the index
+reaches the word length, the complete word has been matched.
+
+Reject a state when it is outside the grid, the cell is already used in this
+path, or its character differs. Otherwise temporarily mark the cell, explore
+the four neighbors for the next character, and restore the cell before
+returning. Restoration is essential because a cell used by one attempted path
+may be needed by another. The outer loops try every cell as a possible start.
+Simple checks such as a word longer than the number of cells can fail early.
+The worst case is exponential because many matching prefixes may branch, but
+pruning happens immediately on every mismatch.}
+
+\expandafter\def\csname sourcewalkthrough@71\endcsname{%
+At least one half of the current interval is normally sorted, even though the
+whole array is rotated. Compare the middle value with the boundaries to decide
+which half has normal order. Then ask whether the target lies inside that
+sorted value range.
+
+If the left half is sorted and the target is between the left value and the
+middle value, discard the right half; otherwise discard the left. Apply the
+mirror rule when the right half is sorted. For \texttt{[4,5,6,7,0,1,2]} and
+target 0, the first middle is 7. The left half is sorted but does not contain
+0, so the search moves right and finds the target. Careful inclusive and
+exclusive comparisons prevent losing a boundary target. Each decision halves
+the search range, so time is logarithmic when values are distinct.}
+
+\expandafter\def\csname sourcewalkthrough@72\endcsname{%
+The direct dynamic-programming state is \texttt{dp[i]}, the length of the
+longest increasing subsequence that ends exactly at index \(i\). Every single
+value can form a length-one subsequence. Look at earlier positions \(j<i\);
+when \texttt{nums[j] < nums[i]}, value \(i\) can extend the subsequence ending
+at \(j\).
+
+Take the largest \texttt{dp[j]+1} among those valid predecessors, then keep the
+largest state anywhere as the final answer. In \texttt{[10,9,2,5,3,7,101,18]},
+the value 7 can extend subsequences ending at 2, 5, or 3; the best choice gives
+length three at that point. The values need not be adjacent, which separates a
+subsequence from a subarray. This clear recurrence uses \(O(n^2)\) time and
+\(O(n)\) space; the tails/binary-search method is a later optimization.}
+
+\expandafter\def\csname sourcewalkthrough@73\endcsname{%
+To reach step \(i\), the final move must come from step \(i-1\) or step
+\(i-2\). Therefore the number of ways is the sum of the previous two counts.
+This is the Fibonacci pattern with problem-specific starting values.
+
+For one step there is one way. For two steps there are two ways: \(1+1\) or
+2. Keep only those two previous values because no older state is needed. Each
+new step computes their sum, then shifts the pair forward. For five steps the
+counts are 1, 2, 3, 5, and 8. Defining the base cases clearly prevents the
+common off-by-one error. The loop uses \(O(n)\) time and \(O(1)\) space,
+whereas plain recursion repeats the same smaller stair counts many times.}
+
+\expandafter\def\csname sourcewalkthrough@74\endcsname{%
+Inverting a tree is a local operation repeated at every node. Swap the left
+and right child pointers, then recursively invert the two child subtrees. A
+null pointer is the base case.
+
+The order can be swap-then-recurse or recurse-then-swap as long as the calls
+follow the pointers consistently. For a root 4 with children 2 and 7, the
+first swap places 7 on the left and 2 on the right; recursion then mirrors the
+children below them. No new nodes are required because only links change.
+Every node is visited once, so time is \(O(n)\). Recursive stack space is
+\(O(h)\); a queue can perform the same transformation breadth first. A
+one-node tree and a completely skewed tree are useful tests.}
+
+\expandafter\def\csname sourcewalkthrough@75\endcsname{%
+Water normally flows from a cell to an equal or lower neighbor. Starting from
+every cell and simulating that direction repeats a great deal of work. Reverse
+the question: begin at each ocean and move from a cell to neighbors with equal
+or greater height. Every reached cell can flow back down to that ocean.
+
+Run one multi-source DFS or BFS from the Pacific borders and another from the
+Atlantic borders. Store the reached cells in two Boolean grids. A cell belongs
+in the answer when both grids mark it. The reverse height comparison is the
+most important detail; using the original downhill comparison from the ocean
+would move in the wrong direction. Each ocean traversal processes a cell at
+most once, so total time and storage are \(O(mn)\). Corners may begin in both
+searches, and equal-height plateaus are connected in both directions.}

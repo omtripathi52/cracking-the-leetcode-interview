@@ -1,0 +1,361 @@
+% Visual reference for every core data structure used in this volume.
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{section}{Visual Data Structure Guide}
+\section*{Visual Data Structure Guide}
+\markboth{Visual Data Structure Guide}{Foundations}
+
+Algorithms are easier to follow when saved values have a clear shape. Orange
+shows what we are working on now, teal shows what is finished or kept, and
+navy shows saved information. The different borders also remain clear when
+the page is printed in grayscale.
+
+% A guide entry should never leave its heading and explanation at the bottom
+% while moving the diagram to the next page.
+\newcommand{\visualguidesection}[1]{\Needspace{22\baselineskip}\subsection{#1}}
+
+\begin{visualbox}{Visual legend used throughout the book}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]},node distance=13mm]
+  \node[dsnode] (stored) {saved};
+  \node[dsnode,active,right=of stored] (current) {working now};
+  \node[dsnode,visited,right=of current] (done) {finished / kept};
+  \draw[flowarrow] (stored)--(current);
+  \draw[flowarrow,teal] (current)--(done);
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Array and \texttt{vector}}
+An array is a row of values. Each box has a number called an index. A C++
+\texttt{vector} can grow, but we still use indexes in the same way.
+
+\begin{visualbox}{An array is a row of numbered boxes}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/4,1/7,2/1,3/9,4/3,5/6} {
+    \node[arraycell] (a\x) at (1.15*\x,0) {\v};
+    \node[below=1mm of a\x,font=\scriptsize,text=navy] {\x};
+  }
+  \node[above=8mm of a0,text=teal,font=\bfseries] (l) {left};
+  \node[above=8mm of a5,text=orange,font=\bfseries] (r) {right};
+  \draw[->,very thick,teal] (l)--(a0.north);
+  \draw[->,very thick,orange] (r)--(a5.north);
+  \draw[decorate,decoration={brace,amplitude=5pt},navy]
+    ([yshift=-8mm]a0.south west)--([yshift=-8mm]a5.south east)
+    node[midway,below=6mm]{use index \texttt{i} to open box \texttt{values[i]}};
+\end{tikzpicture}
+\end{visualbox}
+
+Arrays appear in two-pointer scans, binary search, bit results, prices, house
+values, traversal orders, and one-dimensional dynamic programming.
+
+\visualguidesection{String and reading position}
+A string is a row of characters. We keep one position to show where reading
+starts and use the length to know where it stops.
+
+\begin{visualbox}{The first number tells us how many letters to read}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/4,1/\#,2/c,3/o,4/d,5/e,6/3,7/\#,8/c,9/+,10/+} {
+    \node[arraycell,minimum width=8.5mm] (s\x) at (0.88*\x,0) {\v};
+    \node[below=1mm of s\x,font=\scriptsize,text=navy] {\x};
+  }
+  \node[dsnode,active,above=9mm of s0] (cursor) {start here};
+  \draw[flowarrow,orange] (cursor)--(s0.north);
+  \node[dsnode,visited,above=9mm of s3] (payload) {read the next 4};
+  \draw[flowarrow,teal] (payload)--(s3.north);
+  \draw[decorate,decoration={brace,amplitude=5pt},teal]
+    ([yshift=-8mm]s2.south west)--([yshift=-8mm]s5.south east)
+    node[midway,below=6mm]{the word \texttt{code}};
+\end{tikzpicture}
+
+\smallskip
+The first number is 4, so we read the next four letters.
+\end{visualbox}
+
+\visualguidesection{Remember the best earlier value}
+For stock profit, we only need the cheapest price seen before today.
+
+\begin{visualbox}{For each sell day, use the cheapest earlier price}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/7,1/1,2/5,3/3,4/6,5/4} {
+    \node[arraycell,minimum width=11mm] (p\x) at (1.18*\x,0) {\v};
+    \node[below=1mm of p\x,font=\scriptsize] {day \x};
+  }
+  \node[dsnode,visited,above=11mm of p1] (buy) {cheapest earlier price\\buy at 1};
+  \node[dsnode,active,above=11mm of p4] (sell) {sell now at 6};
+  \draw[flowarrow,teal] (buy)--(p1.north);
+  \draw[flowarrow,orange] (sell)--(p4.north);
+  \draw[->,very thick,navy] (p1.north east) to[bend left=24]
+    node[edgelabel,above]{profit \(6-1=5\)} (p4.north west);
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Hash set and hash map}
+A hash set answers ``Have I seen this key?'' A hash map saves extra information
+beside the key, such as an index.
+
+\begin{visualbox}{A key is changed into a small bucket number}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]},node distance=5mm]
+  \node[dsnode,fill=softorange] (key) {key 7};
+  \node[dsnode,right=14mm of key] (hash) {hash\\rule};
+  \draw[flowarrow] (key)--(hash);
+  \foreach \y/\label in {0/0,1/1,2/2,3/3} {
+    \node[draw=navy,minimum width=18mm,minimum height=7mm,
+      right=18mm of hash,yshift={(1.5-\y)*8mm}] (b\y) {bucket \label};
+  }
+  \draw[flowarrow,orange] (hash.east)--(b3.west);
+  \node[dsnode,right=14mm of b3,fill=softteal] (set) {set:\\found 7};
+  \node[dsnode,right=8mm of set,fill=softblue] (map) {map:\\saved index 4};
+  \draw[flowarrow,teal] (b3)--(set);
+  \draw[flowarrow] (set)--(map);
+\end{tikzpicture}
+
+\smallskip
+A hash table normally finds a saved key quickly. Spreading keys among the
+buckets keeps it fast.
+\end{visualbox}
+
+\visualguidesection{Stack and function calls}
+A stack handles the newest item first. Function calls use a stack too: the
+newest call finishes before the older call below it.
+
+\begin{visualbox}{Function calls stack on top of one another}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[draw=navy,fill=softblue,minimum width=42mm,minimum height=8mm] (f0) at (0,0)
+    {\texttt{dfs(node 3)}};
+  \node[draw=navy,fill=softblue,minimum width=42mm,minimum height=8mm,
+    above=0mm of f0] (f1) {\texttt{dfs(node 20)}};
+  \node[draw=orange,fill=softorange,minimum width=42mm,minimum height=8mm,
+    above=0mm of f1] (f2) {\texttt{dfs(node 15)}};
+  \node[left=14mm of f2,text=orange,font=\bfseries,align=right] (top) {next to\\finish};
+  \draw[flowarrow,orange] (top)--(f2);
+  \draw[->,thick,teal] ([xshift=12mm]f2.east) arc[start angle=90,end angle=-90,radius=9mm]
+    node[edgelabel,right=7mm,midway,align=left]{finish\\and remove};
+\end{tikzpicture}
+\end{visualbox}
+
+The stack grows by one box for each unfinished function call.
+
+\visualguidesection{A problem can split into choices}
+This picture shows every choice a function may try. Each choice creates a
+smaller version of the same problem.
+
+\begin{visualbox}{One problem splits into smaller choices}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,active] (r) {solve this case};
+  \node[dsnode,below left=13mm and 22mm of r] (a) {try choice A};
+  \node[dsnode,below right=13mm and 22mm of r] (b) {try choice B};
+  \node[dsnode,visited,below left=12mm and 7mm of a] (a1) {small case};
+  \node[dsnode,below right=12mm and 7mm of a] (a2) {smaller case};
+  \node[dsnode,below=12mm of b] (b1) {smaller case};
+  \draw[flowarrow] (r)--(a); \draw[flowarrow] (r)--(b);
+  \draw[flowarrow] (a)--(a1); \draw[flowarrow] (a)--(a2);
+  \draw[flowarrow] (b)--(b1);
+  \draw[flowarrow,teal] (a1.west)
+    to[out=180,in=180,looseness=1.35]
+    node[edgelabel,left,font=\footnotesize]{back} (a.west);
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Queue}
+A queue removes the oldest item first. We remove from the front and add new
+items at the back.
+
+\begin{visualbox}{Queue: remove at the front, add at the back}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/9,1/20,2/15,3/7} {
+    \node[arraycell,minimum width=13mm] (q\x) at (1.35*\x,0) {\v};
+  }
+  \node[left=10mm of q0,text=teal,font=\bfseries] (front) {front};
+  \node[right=10mm of q3,text=orange,font=\bfseries] (back) {back};
+  \draw[flowarrow,teal] (front)--(q0);
+  \draw[flowarrow,orange] (back)--(q3);
+  \node[above=9mm of q0,text=teal,font=\bfseries] (pop) {remove next};
+  \node[above=9mm of q3,text=orange,font=\bfseries] (push) {add new};
+  \draw[flowarrow,teal] (q0.north)--(pop.south);
+  \draw[flowarrow,orange] (push.south)--(q3.north);
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Singly linked list}
+Each node stores a value and an arrow to the next node. To move through the
+list, follow the arrows.
+
+\begin{visualbox}{Each node points to the next node}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/3,1/2,2/0,3/-4} {
+    \node[draw=navy,fill=softblue,minimum width=9mm,minimum height=9mm] (v\x)
+      at (2.45*\x,0.7) {\v};
+    \node[draw=navy,fill=white,minimum width=11mm,minimum height=9mm,
+      right=0mm of v\x,font=\scriptsize] (p\x) {next};
+  }
+  \draw[flowarrow] (p0.east)--(v1.west);
+  \draw[flowarrow] (p1.east)--(v2.west);
+  \draw[flowarrow] (p2.east)--(v3.west);
+  \draw[->,very thick,orange] (p3.south)
+    to[out=-90,in=-90,looseness=1.35]
+    node[edgelabel,midway,below=9mm,font=\small]{last node points back to 2} (v1.south);
+  \node[above=7mm of v0,text=teal,font=\bfseries] (head) {head};
+  \draw[flowarrow,teal] (head)--(v0.north);
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Binary tree}
+A binary-tree node can point to a left child and a right child. Every node
+below one node forms that node's branch.
+
+\begin{visualbox}{A node can have a left and a right child}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (r) {3};
+  \node[trienode,below left=13mm and 22mm of r] (l) {9};
+  \node[trienode,below right=13mm and 22mm of r] (q) {20};
+  \node[trienode,visited,below left=13mm and 10mm of q] (a) {15};
+  \node[trienode,visited,below right=13mm and 10mm of q] (b) {7};
+  \draw[flowarrow] (r)--node[edgelabel,above left,font=\scriptsize]{left} (l);
+  \draw[flowarrow] (r)--node[edgelabel,above right,font=\scriptsize]{right} (q);
+  \draw[flowarrow] (q)--(a); \draw[flowarrow] (q)--(b);
+  \node[draw=teal,dashed,fit=(q)(a)(b),inner sep=4mm,
+    label=right:{\scriptsize this whole branch starts at 20}] {};
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Trie: words that share a beginning}
+A Trie stores one letter at a time. Words with the same beginning follow the
+same path until their letters become different.
+
+\begin{visualbox}{The words \texttt{app} and \texttt{apple} share one path}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]},node distance=11mm]
+  \node[trienode] (r) {root};
+  \node[trienode,right=of r] (a) {a};
+  \node[trienode,right=of a] (p1) {p};
+  \node[trienode,visited,right=of p1] (p2) {p};
+  \node[trienode,right=of p2] (l) {l};
+  \node[trienode,visited,right=of l] (e) {e};
+  \draw[flowarrow] (r)--(a)--(p1)--(p2)--(l)--(e);
+  \node[below=5mm of p2,text=teal]{\texttt{app} ends here};
+  \node[below=5mm of e,text=teal]{\texttt{apple} ends here};
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Graph and adjacency list}
+A graph has numbered points joined by lines. For each point, a neighbor list
+records the points directly connected to it.
+
+\begin{visualbox}{The same graph shown as neighbor lists}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode] (g1) at (0,1) {1};
+  \node[trienode] (g2) at (1.6,1) {2};
+  \node[trienode] (g3) at (1.6,-0.5) {3};
+  \node[trienode] (g4) at (0,-0.5) {4};
+  \draw[-,thick,navy] (g1)--(g2)--(g3)--(g4)--(g1);
+  \node[dsnode,align=left,right=25mm of g2] (adj) {
+    \textbf{neighbors of each point}\\
+    1: [2,4]\\2: [1,3]\\3: [2,4]\\4: [1,3]
+  };
+  \draw[flowarrow,teal] (g2.east)--(adj.west);
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Heap: quickly see the largest or smallest value}
+A max heap keeps the largest value on top. A min heap keeps the smallest value
+on top, so that value can be taken next.
+
+\begin{visualbox}{The top shows the next value we can take}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (ma) at (0,1.4) {5};
+  \node[trienode,below left=10mm and 9mm of ma] (mb) {2};
+  \node[trienode,below right=10mm and 9mm of ma] (mc) {3};
+  \draw[-,thick,navy] (ma)--(mb); \draw[-,thick,navy] (ma)--(mc);
+  \node[above=4mm of ma,text=orange,font=\bfseries]{largest on top};
+
+  \node[trienode,visited] (na) at (5.2,1.4) {6};
+  \node[trienode,below left=10mm and 9mm of na] (nb) {8};
+  \node[trienode,below right=10mm and 9mm of na] (nc) {9};
+  \draw[-,thick,navy] (na)--(nb); \draw[-,thick,navy] (na)--(nc);
+  \node[above=4mm of na,text=teal,font=\bfseries]{smallest on top};
+  \draw[<->,very thick,navy] (ma.east)--node[edgelabel,above]{middle values meet here} (na.west);
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{A table that reuses earlier answers}
+A DP array saves answers already found. The colored boxes show which earlier
+answers are used for the next box.
+
+\begin{visualbox}{Choose the better of two earlier answers}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/0,1/2,2/7,3/11,4/11,5/12} {
+    \node[arraycell] (d\x) at (1.15*\x,0) {\v};
+    \node[below=1mm of d\x,font=\scriptsize] {\(dp[\x]\)};
+  }
+  \node[draw=teal,line width=1pt,fit=(d3),inner sep=0.6pt] {};
+  \node[draw=orange,line width=1pt,fit=(d4),inner sep=0.6pt] {};
+  \node[draw=orange,very thick,fit=(d5),inner sep=1mm] {};
+  \node[dsnode,fill=softblue,right=16mm of d5,align=left] (rule) {
+    \textcolor{orange}{option 1: }keep 11\\
+    \textcolor{teal}{option 2: }\(11+1=12\)\\
+    \textbf{choose: }12};
+  \node[below=8mm of d5,text=orange,font=\bfseries] {answer for this box};
+\end{tikzpicture}
+\end{visualbox}
+
+First decide what each box means. Then fill the boxes only after the earlier
+answers they need are ready.
+
+\visualguidesection{Binary-search interval}
+Binary search keeps the part that may still contain the answer and throws away
+the half that cannot contain it.
+
+\begin{visualbox}{Keep only the half that may contain the answer}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/4,1/5,2/6,3/7,4/0,5/1,6/2} {
+    \node[arraycell] (b\x) at (0.95*\x,0) {\v};
+  }
+  \node[above=8mm of b0,text=teal,font=\bfseries] (left) {left};
+  \node[above=8mm of b3,text=orange,font=\bfseries] (mid) {mid};
+  \node[above=8mm of b6,text=navy,font=\bfseries] (right) {right};
+  \draw[flowarrow,teal] (left)--(b0.north);
+  \draw[flowarrow,orange] (mid)--(b3.north);
+  \draw[flowarrow] (right)--(b6.north);
+  \node[draw=orange,very thick,dashed,fit=(b4)(b5)(b6),inner sep=2mm,
+    label=below:{keep this half}] {};
+\end{tikzpicture}
+\end{visualbox}
+
+\visualguidesection{Binary digits and right shift}
+A number can be written with only 0s and 1s. Shifting right removes the last
+binary digit and leaves a smaller number.
+
+\begin{visualbox}{Shifting right drops the last binary digit}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[arraycell] (x3) at (0,0) {1};
+  \node[arraycell,right=0mm of x3] (x2) {1};
+  \node[arraycell,right=0mm of x2] (x1) {0};
+  \node[arraycell,active,right=0mm of x1] (x0) {1};
+  \node[left=10mm of x3,font=\bfseries,text=navy] {13};
+  \node[right=9mm of x0,text=orange] {last bit is 1};
+
+  \node[arraycell,below=15mm of x3] (y2) {1};
+  \node[arraycell,right=0mm of y2] (y1) {1};
+  \node[arraycell,right=0mm of y1] (y0) {0};
+  \node[left=10mm of y2,font=\bfseries,text=teal] {6};
+  \draw[flowarrow,teal] (x2.south)--node[edgelabel,right]{shift 13 right} (y1.north);
+  \node[right=9mm of y0,text=navy] {13 becomes 6};
+\end{tikzpicture}
+\end{visualbox}
+
+\clearpage

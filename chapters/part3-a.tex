@@ -1,0 +1,1054 @@
+% Lessons 50--62: arrays, linked lists, bits, matrices, trees, and heaps.
+
+\patternintoc{Prefix and Suffix Products}
+\problemstart{Product of Array Except Self}{238}{Medium}{Prefix and suffix products}{Array}
+
+\subsection{The Problem}
+Return an array where position \(i\) contains the product of every input value
+except \texttt{nums[i]}. Do not use division.
+
+\subsection{Combine Products from Both Sides}
+First store the product strictly to the left of each index. A reverse scan
+keeps the product strictly to the right and multiplies it into the answer.
+
+\begin{invariantbox}{the current answer combines all known outside values}
+After the forward pass, \texttt{answer[i]} is the left prefix product. During
+the reverse pass, \texttt{suffix} is the product right of \(i\), so their
+product excludes exactly the current value.
+\end{invariantbox}
+
+\begin{visualbox}{Left and right products meet at one index}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/1,1/2,2/3,3/4}{\node[arraycell] (a\x) at (1.2*\x,0) {\v};}
+  \node[draw=orange,very thick,fit=(a2),inner sep=1mm] {};
+  \node[above=5mm of a2,text=orange,font=\bfseries] {leave out index 2};
+  \node[below=9mm of a0,xshift=-2mm,draw=teal,fill=softteal,rounded corners,
+    minimum width=27mm] (left) {left product: $1\times2=2$};
+  \node[below=9mm of a3,xshift=12mm,draw=orange,fill=softorange,rounded corners,
+    minimum width=23mm] (right) {right product: $4$};
+  \node[below=11mm of left,xshift=22mm,draw=navy,fill=softblue,rounded corners]
+    {combine: $2\times4=8$};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+prefix = 1
+for i from left to right:
+    answer[i] = prefix
+    prefix *= nums[i]
+suffix = 1
+for i from right to left:
+    answer[i] *= suffix
+    suffix *= nums[i]
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Product of Array Except Self}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        vector<int> answer(nums.size(), 1);
+        int prefix = 1;
+        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {
+            answer[i] = prefix; prefix *= nums[i];
+        }
+        int suffix = 1;
+        for (int i = static_cast<int>(nums.size()) - 1; i >= 0; --i) {
+            answer[i] *= suffix; suffix *= nums[i];
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time, Space, and Edge Cases}
+Time is \(O(n)\); excluding output, space is \(O(1)\). Zero values require no
+special case: the products naturally become zero in the appropriate positions.
+
+\lessonexpansion
+  {For \texttt{[1,2,3,4]}, the left pass writes \([1,1,2,6]\). The right
+   pass multiplies by suffixes \(24,12,4,1\), producing
+   \([24,12,8,6]\). Neither pass includes the value at its own index.}
+  {Before the right pass, \texttt{answer[i]} equals the product strictly left
+   of \(i\). Multiplying by the running product strictly right of \(i\) gives
+   exactly the required product of every other position.}
+  {Check one zero, two zeroes, negative values, two elements, and products
+   equal to one. Use wider arithmetic if adapting beyond the stated bounds.}
+  {I first store every left-side product in the output. A reverse pass
+   multiplies each entry by its right-side product, achieving linear time
+   without division or extra arrays.}
+
+\chaptercheckpoint{Each output excludes exactly one array position.}
+  {A stored left product and a rolling right product.}
+  {Multiplying the current value before writing its prefix.}
+  {$O(n)$ time and $O(1)$ extra space.}
+
+
+\patternintoc{Linked-List Pointers}
+\problemstart{Remove Nth Node From End of List}{19}{Medium}{Fixed pointer gap}{Linked list}
+
+\subsection{The Problem}
+Remove the \(n\)-th node from the end of a singly linked list and return the
+head.
+
+\subsection{Create an n-Node Gap}
+A dummy node handles deletion of the original head. Advance \texttt{fast}
+\(n+1\) steps from the dummy, then move both pointers until \texttt{fast}
+reaches null. \texttt{slow} then precedes the node to delete.
+
+\begin{invariantbox}{fast stays n+1 links ahead of slow}
+The fixed gap makes the remaining distance after \texttt{fast} reaches null
+equal to the required offset from the end. So \texttt{slow->next} is
+the target node.
+\end{invariantbox}
+
+\begin{visualbox}{The pointer gap locates the previous}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode] (d) {dummy}; \node[dsnode,right=7mm of d] (a) {1};
+  \node[dsnode,right=7mm of a] (b) {2}; \node[dsnode,active,right=7mm of b] (c) {3};
+  \node[dsnode,right=7mm of c] (e) {4}; \node[dsnode,right=7mm of e] (f) {5};
+  \draw[flowarrow] (d)--(a)--(b)--(c)--(e)--(f);
+  \node[below=7mm of b,text=teal]{slow}; \node[above=7mm of f,text=orange]{fast};
+  \node[below=7mm of c,text=orange]{remove for \(n=3\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dummy.next = head; fast = slow = dummy
+move fast forward n + 1 steps
+while fast exists:
+    move fast and slow one step
+slow.next = slow.next.next
+return dummy.next
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Remove Nth Node From End}]
+using namespace std;
+
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode dummy(0); dummy.next = head;
+        ListNode* fast = &dummy; ListNode* slow = &dummy;
+        for (int i = 0; i <= n; ++i) fast = fast->next;
+        while (fast != nullptr) { fast = fast->next; slow = slow->next; }
+        slow->next = slow->next->next;
+        return dummy.next;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+One pass uses \(O(L)\) time and \(O(1)\) space. The dummy node makes removing
+the first real node identical to every other deletion.
+
+\lessonexpansion
+  {For \texttt{1->2->3->4->5} with \(n=2\), advance \texttt{fast} three
+   links beyond the dummy. Move both pointers until \texttt{fast} becomes
+   null; \texttt{slow} then precedes node 4, which is bypassed.}
+  {The initial gap is \(n+1\) links. Moving both pointers keeps it, so
+   when \texttt{fast} reaches null, \texttt{slow.next} is exactly the
+   \(n\)-th node from the end.}
+  {Check a one-node list, removing the head, removing the tail, \(n=1\), and
+   \(n\) equal to the list length.}
+  {A dummy node eliminates the head-deletion special case. I create a fixed
+   pointer gap, advance both pointers together, and bypass the node after the
+   slow pointer.}
+
+\chaptercheckpoint{A list position is measured from the tail.}
+  {Two pointers separated by $n+1$ links.}
+  {Using an $n$-link gap and landing on the target instead of its previous.}
+  {$O(L)$ time and $O(1)$ space.}
+
+
+\problemstart{Reorder List}{143}{Medium}{Split, reverse, and weave}{Linked list}
+
+\subsection{The Problem}
+Transform \(L_0\to L_1\to\cdots\to L_n\) into
+\(L_0\to L_n\to L_1\to L_{n-1}\to\cdots\) in place.
+
+\subsection{Three Pointer Phases}
+Use slow and fast pointers to find the middle, reverse the second half, then
+alternate nodes from the first half and the reversed second half.
+
+\begin{invariantbox}{the woven prefix already has final order}
+During merging, every node before the two current pointers is fixed in the
+required outside-in order. Saved next pointers keep both unmerged suffixes.
+\end{invariantbox}
+
+\begin{visualbox}{Reverse the back half, then alternate}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode] (a) {1}; \node[dsnode,right=7mm of a] (b) {2};
+  \node[dsnode,right=7mm of b] (c) {3}; \node[dsnode,right=7mm of c] (d) {4};
+  \node[dsnode,right=7mm of d] (e) {5};
+  \draw[flowarrow] (a)--(b)--(c)--(d)--(e);
+  \node[below=12mm of c,dsnode,active] (out) {1 $\to$ 5 $\to$ 2 $\to$ 4 $\to$ 3};
+  \draw[flowarrow,teal] (c)--(out);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+find the middle with slow and fast pointers
+reverse the second half
+first = head; second = reversed half
+while second exists:
+    save both next pointers
+    link first -> second -> next first
+    advance both halves
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Reorder List}]
+using namespace std;
+
+class Solution {
+public:
+    void reorderList(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) return;
+        ListNode *slow = head, *fast = head;
+        while (fast->next != nullptr && fast->next->next != nullptr) {
+            slow = slow->next; fast = fast->next->next;
+        }
+        ListNode* second = slow->next; slow->next = nullptr;
+        ListNode* previous = nullptr;
+        while (second != nullptr) {
+            ListNode* next = second->next; second->next = previous;
+            previous = second; second = next;
+        }
+        ListNode* first = head; second = previous;
+        while (second != nullptr) {
+            ListNode* nextFirst = first->next;
+            ListNode* nextSecond = second->next;
+            first->next = second; second->next = nextFirst;
+            first = nextFirst; second = nextSecond;
+        }
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Each phase is linear, so total time is \(O(n)\) and space is \(O(1)\). Cutting
+the first half before reversing prevents an accidental cycle.
+
+\lessonexpansion
+  {For \texttt{1->2->3->4->5}, slow stops at 3. Cut after 3 and reverse
+   \texttt{4->5} into \texttt{5->4}. Weave 1 with 5, then 2 with 4; the first
+   half's remaining node 3 stays last, producing
+   \texttt{1->5->2->4->3}.}
+  {The middle split creates two independent lists. Reversal places the original
+   tail at the front of the second half. Each weaving step appends the next
+   unused front node followed by the next unused back node, exactly matching
+   the required order.}
+  {Check two nodes, three nodes, even and odd lengths, repeated values, and a
+   one-node list. Verify that the final node points to null and no cycle is
+   introduced.}
+  {I solve the problem in three linear phases: find the middle, reverse the
+   second half, and alternate the two halves. Saved next pointers prevent the
+   unmerged suffixes from being lost.}
+
+\chaptercheckpoint{List nodes must be woven from alternating ends.}
+  {Middle pointers, a reversed second half, and two merge cursors.}
+  {Failing to disconnect the halves before weaving.}{$O(n)$ time and $O(1)$ space.}
+
+
+\problemstart{Reverse Linked List}{206}{Easy}{Iterative pointer reversal}{Linked list}
+
+\subsection{The Problem}
+Reverse every link in a singly linked list and return the new head.
+
+\subsection{Keep Next Before Rewiring}
+Keep a reversed prefix and an untouched suffix. Save the current node's
+next pointer, redirect it toward the prefix, and advance both boundaries.
+
+\begin{invariantbox}{previous heads the fully reversed prefix}
+Before each iteration, \texttt{previous} is a correctly reversed list of all
+processed nodes, while \texttt{current} heads the untouched remainder.
+\end{invariantbox}
+
+\begin{visualbox}{One link changes direction per step}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,visited] (a) {1}; \node[dsnode,active,right=12mm of a] (b) {2};
+  \node[dsnode,right=12mm of b] (c) {3};
+  \draw[flowarrow,teal] (b)--(a); \draw[flowarrow] (b)--(c);
+  \node[above=6mm of a]{reversed prefix}; \node[above=6mm of c]{saved next};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+previous = null; current = head
+while current exists:
+    nextNode = current.next
+    current.next = previous
+    previous = current
+    current = nextNode
+return previous
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Reverse Linked List}]
+using namespace std;
+
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode* previous = nullptr;
+        while (head != nullptr) {
+            ListNode* next = head->next;
+            head->next = previous;
+            previous = head;
+            head = next;
+        }
+        return previous;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(n)\), space is \(O(1)\). Rewiring before saving the next pointer
+loses the unprocessed suffix.
+
+\lessonexpansion
+  {For \texttt{1->2->3}, save node 2 before changing node 1 to point to null.
+   Then make 2 point to 1 and 3 point to 2. The final \texttt{previous}
+   pointer is the new head 3.}
+  {Before each iteration, \texttt{previous} heads the reversed prefix and
+   \texttt{head} heads the untouched suffix. Saving the suffix link before
+   rewiring keeps all nodes and grows the reversed prefix by one.}
+  {Check a null list, one node, two nodes, repeated values, and a long list
+   where pointer loss would be visible.}
+  {I keep a reversed prefix and an unprocessed suffix. Each iteration
+   saves the next node, reverses one pointer, and advances both boundaries.}
+
+\chaptercheckpoint{Every next pointer must reverse direction.}
+  {A reversed prefix, current node, and saved next node.}
+  {Overwriting the only pointer to the remaining list.}{$O(n)$ time and $O(1)$ space.}
+
+
+\patternintoc{Bit Manipulation}
+\problemstart{Reverse Bits}{190}{Easy}{Fixed-width bit scan}{Unsigned integer}
+
+\subsection{The Problem}
+Reverse the order of all 32 bits in an unsigned integer.
+
+\begin{invariantbox}{the result contains the reversed processed suffix}
+After \(i\) iterations, the result's lowest \(i\) construction steps contain
+the first \(i\) input bits in reverse order. Shifting before insertion opens
+the next output position.
+\end{invariantbox}
+
+\begin{visualbox}{Bits leave the right and enter the left-to-right result}
+\centering
+\begin{tikzpicture}[font=\ttfamily\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode] (in) {input: 101100};
+  \node[dsnode,active,right=25mm of in] (bit) {take 0};
+  \node[dsnode,visited,right=25mm of bit] (out) {result: ...0};
+  \draw[flowarrow] (in)--(bit)--(out);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+answer = 0
+repeat 32 times:
+    answer = (answer << 1) OR (n AND 1)
+    n = n >> 1
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Reverse Bits}]
+#include <cstdint>
+
+using namespace std;
+
+class Solution {
+public:
+    uint32_t reverseBits(uint32_t n) {
+        uint32_t result = 0;
+        for (int i = 0; i < 32; ++i) {
+            result = (result << 1) | (n & 1U);
+            n >>= 1;
+        }
+        return result;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Exactly 32 iterations give \(O(1)\) time and space. Processing all positions,
+including leading zeros, is essential.
+
+\lessonexpansion
+  {Using an 8-bit illustration, \texttt{00010110} is consumed from the right.
+   Appending its bits to the result produces \texttt{01101000}. The real
+   implementation repeats the same operation exactly 32 times.}
+  {At iteration \(i\), the result contains the lowest \(i\) input bits in
+   reversed order. Shifting before appending makes room for the next bit;
+   exactly 32 rounds also place original leading zeroes correctly.}
+  {Check zero, one, only the highest bit, all bits set, and alternating bit
+   patterns.}
+  {I read one low bit at a time, shift the result left, append that bit, and
+   shift the input right. A fixed 32 iterations keep leading zeroes.}
+
+\chaptercheckpoint{Reverse a fixed-width bit representation.}
+  {An input shift register and an output running value.}
+  {Stopping when the input becomes zero and losing leading positions.}{32 steps and $O(1)$ space.}
+
+
+\patternintoc{Matrix Transformations}
+\problemstart{Rotate Image}{48}{Medium}{Transpose and reverse rows}{Square matrix}
+
+\subsection{The Problem}
+Rotate an \(n\times n\) matrix 90 degrees clockwise in place.
+
+\subsection{Two In-place Reflections}
+Transposing swaps \((r,c)\) with \((c,r)\). Reversing every row then moves
+the transposed columns into their clockwise positions.
+
+\begin{invariantbox}{each swap fixes a symmetric pair}
+The transpose loop visits only cells above the diagonal, so every off-diagonal
+pair is exchanged exactly once. Row reversal then completes the mapping
+\((r,c)\mapsto(c,n-1-r)\).
+\end{invariantbox}
+
+\begin{visualbox}{Transpose, then reverse each row}
+\centering
+\begin{tikzpicture}[font=\small]
+  \matrix[matrix of nodes,nodes={arraycell,minimum width=7mm,minimum height=7mm},
+    row sep=-\pgflinewidth,column sep=-\pgflinewidth] (a) {1&2&3\\4&5&6\\7&8&9\\};
+  \matrix[right=24mm of a,matrix of nodes,nodes={arraycell,minimum width=7mm,minimum height=7mm},
+    row sep=-\pgflinewidth,column sep=-\pgflinewidth] (b) {1&4&7\\2&5&8\\3&6&9\\};
+  \matrix[right=24mm of b,matrix of nodes,nodes={arraycell,minimum width=7mm,minimum height=7mm},
+    row sep=-\pgflinewidth,column sep=-\pgflinewidth] (c) {7&4&1\\8&5&2\\9&6&3\\};
+  \draw[flowarrow] (a.east) -- node[edgelabel,above=2mm,fill=white]{transpose} (b.west);
+  \draw[flowarrow,teal] (b.east) -- node[edgelabel,above=2mm,fill=white]{reverse rows} (c.west);
+  \node[below=5mm of a]{start}; \node[below=5mm of c,text=teal,font=\bfseries]{rotated};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+for every pair above the main diagonal:
+    swap matrix[row][col] with matrix[col][row]
+for every row:
+    reverse the row
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Rotate Image}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+        int n = static_cast<int>(matrix.size());
+        for (int r = 0; r < n; ++r)
+            for (int c = r + 1; c < n; ++c)
+                swap(matrix[r][c], matrix[c][r]);
+        for (auto& row : matrix) reverse(row.begin(), row.end());
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Every cell is touched a constant number of times: \(O(n^2)\) time and
+\(O(1)\) extra space.
+
+\lessonexpansion
+  {For \(\begin{smallmatrix}1&2&3\\4&5&6\\7&8&9\end{smallmatrix}\),
+   transposition gives
+   \(\begin{smallmatrix}1&4&7\\2&5&8\\3&6&9\end{smallmatrix}\).
+   Reversing each row then yields the clockwise rotation
+   \(\begin{smallmatrix}7&4&1\\8&5&2\\9&6&3\end{smallmatrix}\).}
+  {Transposition maps \((r,c)\) to \((c,r)\). Reversing each row then maps it
+   to \((c,n-1-r)\), which is exactly the coordinate transformation for a
+   90-degree clockwise rotation.}
+  {Check \(1\times1\), \(2\times2\), odd and even dimensions, negative
+   entries, and avoid swapping diagonal pairs twice.}
+  {I decompose the rotation into two in-place symmetries: transpose across the
+   main diagonal, then reverse every row.}
+
+\chaptercheckpoint{A square matrix must rotate in place.}
+  {Symmetric transpose pairs followed by row boundaries.}
+  {Swapping both halves of the transpose and undoing the work.}{$O(n^2)$ time.}
+
+
+\patternintoc{Tree Comparison and Serialization}
+\problemstart{Same Tree}{100}{Easy}{Paired recursion}{Two binary trees}
+
+\subsection{The Problem}
+Return whether two binary trees have identical structure and equal values at
+matching nodes.
+
+\begin{invariantbox}{each call compares matching subtrees}
+Two null nodes match; exactly one null node fails; otherwise equal roots and
+matching left and right subtree pairs are needed and enough.
+\end{invariantbox}
+
+\begin{visualbox}{Matching nodes are compared in pairs}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[trienode] (a) {1}; \node[trienode,below left=10mm and 8mm of a] (a1) {2};
+  \node[trienode,below right=10mm and 8mm of a] (a2) {3};
+  \node[trienode,right=40mm of a] (b) {1}; \node[trienode,below left=10mm and 8mm of b] (b1) {2};
+  \node[trienode,below right=10mm and 8mm of b] (b2) {3};
+  \draw[-,navy] (a)--(a1) (a)--(a2) (b)--(b1) (b)--(b2);
+  \node[draw=teal,rounded corners,fill=softteal,below=18mm of a,xshift=20mm,
+    align=center] {compare $(1,1)$, then $(2,2)$ and $(3,3)$\\all values and positions match};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+same(p, q):
+    if both are null: return true
+    if exactly one is null or values differ: return false
+    return same(p.left, q.left) AND same(p.right, q.right)
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Same Tree}]
+using namespace std;
+
+class Solution {
+public:
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        if (p == nullptr || q == nullptr) return p == q;
+        return p->val == q->val && isSameTree(p->left, q->left) &&
+               isSameTree(p->right, q->right);
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+At most all nodes are compared: \(O(n)\) time and \(O(h)\) recursion space.
+
+\lessonexpansion
+  {Compare roots first. If both contain 1, recursively compare their left
+   children and then their right children. A missing child on only one side
+   fails immediately even if every remaining value matches.}
+  {Two rooted trees are equal exactly when their roots match and their
+   matching left and right subtrees are equal. The base cases handle
+   matching nulls and structural mismatches, proving the recursive test.}
+  {Check two null trees, one null tree, equal values with different shapes,
+   one differing leaf, and identical skewed trees.}
+  {I compare matching nodes. Two nulls match; one null or unequal values
+   fail; otherwise both matching child pairs must also match.}
+
+\chaptercheckpoint{Two trees must match in both shape and values.}
+  {Pairs of matching subtree roots.}
+  {Comparing traversal values while ignoring null structure.}{$O(n)$ time and $O(h)$ space.}
+
+
+\problemstart{Serialize and Deserialize Binary Tree}{297}{Hard}{Preorder with null markers}{Tree and string stream}
+
+\subsection{The Problem}
+Convert a binary tree into a string and reconstruct the identical tree from
+that string.
+
+\subsection{Keep Shape with Null Tokens}
+Preorder values alone are ambiguous. Emit a marker for every null child. The
+decoder consumes tokens in the same recursive order, so each value receives
+the exact left and right structure it originally had.
+
+\begin{invariantbox}{each recursive decode consumes one complete subtree}
+The current token is the root description. A null marker consumes one token;
+a value consumes itself followed by exactly the tokens for its left and right
+subtrees.
+\end{invariantbox}
+
+\begin{visualbox}{Null markers make tree shape explicit}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode] (r) {1}; \node[trienode,below left=10mm and 12mm of r] (a) {2};
+  \node[trienode,below right=10mm and 12mm of r] (b) {3};
+  \draw[flowarrow] (r)--(a); \draw[flowarrow] (r)--(b);
+  \node[dsnode,right=28mm of r] {\texttt{1,2,\#,\#,3,\#,\#}};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+serialize(node):
+    if null: append null marker
+    else append value, serialize left, serialize right
+deserialize(tokens):
+    read next token
+    if null marker: return null
+    node = new node(token)
+    node.left = deserialize(tokens)
+    node.right = deserialize(tokens)
+    return node
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Serialize and Deserialize Tree}]
+#include <sstream>
+#include <string>
+
+using namespace std;
+
+class Codec {
+    void write(TreeNode* node, ostringstream& out) {
+        if (node == nullptr) { out << "# "; return; }
+        out << node->val << ' '; write(node->left, out); write(node->right, out);
+    }
+    TreeNode* read(istringstream& in) {
+        string token; in >> token;
+        if (token == "#") return nullptr;
+        TreeNode* node = new TreeNode(stoi(token));
+        node->left = read(in); node->right = read(in); return node;
+    }
+public:
+    string serialize(TreeNode* root) { ostringstream out; write(root, out); return out.str(); }
+    TreeNode* deserialize(string data) { istringstream in(data); return read(in); }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Both operations visit every node and null child: \(O(n)\) time, \(O(n)\)
+output/tree space, and \(O(h)\) recursion space.
+
+\lessonexpansion
+  {For a root 1 with left child 2 and right child 3, preorder serialization
+   emits \texttt{1 2 \# \# 3 \# \#}. During decoding, token 1 creates the
+   root; the next complete token group constructs its left subtree, and the
+   remaining group constructs its right subtree.}
+  {Preorder plus null markers is clear. A value token determines one
+   node and recursively consumes exactly two subtree encodings; a null marker
+   ends one child. Working upward from the leaves shows that
+   decoding recreates the original shape and values.}
+  {Check an empty tree, one node, negative values, a left-only chain, a
+   right-only chain, repeated values, and a tree whose shape would be ambiguous
+   without null markers.}
+  {I serialize in preorder and write an explicit token for every null pointer.
+   The decoder reads the same grammar recursively, so each call consumes one
+   complete subtree. Both operations are linear.}
+
+\chaptercheckpoint{A tree must round-trip through a string without losing shape.}
+  {Preorder tokens including explicit null markers.}
+  {Serializing only values and making shapes ambiguous.}{$O(n)$ time per operation.}
+
+
+\patternintoc{Matrix State}
+\problemstart{Set Matrix Zeroes}{73}{Medium}{First-row and first-column markers}{Matrix}
+
+\subsection{The Problem}
+If a matrix cell is zero, set its entire row and column to zero in place.
+
+\subsection{Store Markers Inside the Matrix}
+Use the first cell of each row and column as a zero marker, plus one Boolean
+for whether the original first column contained zero. Apply markers after the
+discovery pass so newly written zeros do not spread incorrectly.
+
+\begin{invariantbox}{markers describe original zero rows and columns}
+After discovery, \texttt{matrix[r][0]} and \texttt{matrix[0][c]} are zero
+exactly when row \(r\) or column \(c\) must be cleared.
+\end{invariantbox}
+
+\begin{visualbox}{A zero writes one row marker and one column marker}
+\centering
+\begin{tikzpicture}[font=\small]
+  \matrix[matrix of nodes,nodes={arraycell},row sep=-\pgflinewidth,column sep=-\pgflinewidth] (a) {
+    1&1&1\\1&0&1\\1&1&1\\};
+  \node[draw=orange,very thick,fit=(a-2-2),inner sep=1mm] {};
+  \matrix[right=22mm of a,matrix of nodes,nodes={arraycell},row sep=-\pgflinewidth,column sep=-\pgflinewidth] (b) {
+    1&0&1\\0&0&0\\1&0&1\\};
+  \draw[flowarrow] (a.east)--node[edgelabel,above,fill=white]{mark row and column}(b.west);
+  \node[below=5mm of a]{original};
+  \node[below=5mm of b,text=teal,font=\bfseries]{final matrix};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+record whether first row or first column originally contains zero
+use first row and first column to mark zeroed rows and columns
+zero all marked interior cells
+zero the first row and first column when originally required
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Set Matrix Zeroes}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& a) {
+        int rows = a.size(), cols = a[0].size(); bool firstCol = false;
+        for (int r = 0; r < rows; ++r) {
+            if (a[r][0] == 0) firstCol = true;
+            for (int c = 1; c < cols; ++c)
+                if (a[r][c] == 0) a[r][0] = a[0][c] = 0;
+        }
+        for (int r = rows - 1; r >= 0; --r) {
+            for (int c = cols - 1; c >= 1; --c)
+                if (a[r][0] == 0 || a[0][c] == 0) a[r][c] = 0;
+            if (firstCol) a[r][0] = 0;
+        }
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(mn)\), extra space \(O(1)\). The separate first-column flag
+resolves the shared marker at \texttt{matrix[0][0]}.
+
+\lessonexpansion
+  {For \texttt{[[1,1,1],[1,0,1],[1,1,1]]}, discovery writes zero into the
+   first cell of row 1 and column 1. The second pass clears every interior cell
+   whose row or column marker is zero, producing
+   \texttt{[[1,0,1],[0,0,0],[1,0,1]]}.}
+  {Markers are written only while reading the original matrix. Once discovery
+   is complete, a cell must become zero exactly when its row marker or column
+   marker is zero. The separate first-column flag resolves the dual meaning of
+   the top-left marker.}
+  {Check one cell, one row, one column, a zero at \((0,0)\), zeros only in the
+   first row or first column, multiple zeroes, and an all-zero matrix.}
+  {I reuse the first row and first column as marker storage, which avoids
+   allocating separate Boolean arrays. I delay mutation of the remaining cells
+   until all original zero locations have been recorded.}
+
+\chaptercheckpoint{Zeros propagate across complete rows and columns.}
+  {First-row/column markers and one first-column flag.}
+  {Clearing while still discovering original zeros.}{$O(mn)$ time and $O(1)$ space.}
+
+
+\problemstart{Spiral Matrix}{54}{Medium}{Shrinking boundaries}{Matrix}
+
+\subsection{The Problem}
+Return matrix values in clockwise spiral order.
+
+\begin{invariantbox}{the boundaries enclose every unvisited cell}
+At the start of each round, all cells outside \texttt{top}, \texttt{bottom},
+\texttt{left}, and \texttt{right} have been emitted exactly once. Traversing
+the perimeter and shrinking its sides keeps this condition.
+\end{invariantbox}
+
+\begin{visualbox}{Four boundaries peel one rectangular layer}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \matrix[matrix of nodes,nodes={arraycell},row sep=-\pgflinewidth,column sep=-\pgflinewidth] (m) {
+    1&2&3\\8&9&4\\7&6&5\\};
+  \foreach \cell/\num in {m-1-1/1,m-1-2/2,m-1-3/3,m-2-3/4,
+    m-3-3/5,m-3-2/6,m-3-1/7,m-2-1/8,m-2-2/9}
+    \node[font=\tiny,text=orange,anchor=north east] at (\cell.north east) {\num};
+  \draw[orange,very thick,rounded corners=2mm]
+    ([xshift=-2mm,yshift=2mm]m-1-1.north west) rectangle
+    ([xshift=2mm,yshift=-2mm]m-3-3.south east);
+  \node[right=10mm of m-2-3,align=left]
+    {read the outside: $1,2,3,4,5,6,7,8$\\then read the center: $9$};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+set top, bottom, left, right boundaries
+while boundaries are valid:
+    read top left-to-right; increment top
+    read right top-to-bottom; decrement right
+    if rows remain: read bottom right-to-left; decrement bottom
+    if columns remain: read left bottom-to-top; increment left
+return output
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Spiral Matrix}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& a) {
+        vector<int> out; int top=0, bottom=a.size()-1, left=0, right=a[0].size()-1;
+        while (top <= bottom && left <= right) {
+            for (int c=left;c<=right;++c) out.push_back(a[top][c]); ++top;
+            for (int r=top;r<=bottom;++r) out.push_back(a[r][right]); --right;
+            if (top <= bottom) { for (int c=right;c>=left;--c) out.push_back(a[bottom][c]); --bottom; }
+            if (left <= right) { for (int r=bottom;r>=top;--r) out.push_back(a[r][left]); ++left; }
+        }
+        return out;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Every cell is emitted once: \(O(mn)\) time and \(O(1)\) extra space.
+The checks before the bottom and left traversals prevent duplicates in a
+single remaining row or column.
+
+\lessonexpansion
+  {For a \(3\times4\) matrix, read the top row, right column, bottom row in
+   reverse, and left column upward. The boundaries then describe only the
+   inner row, which is read left-to-right without revisiting a cell.}
+  {After each side is emitted, moving its boundary inward removes exactly
+   those cells from the remaining rectangle. Conditional bottom and left
+   passes prevent duplication when that rectangle collapses to one dimension.}
+  {Check one cell, one row, one column, \(2\times n\), \(m\times2\), and
+   non-square matrices.}
+  {I keep four boundaries around the unvisited rectangle and consume its
+   sides clockwise. Each cell leaves the rectangle exactly once.}
+
+\chaptercheckpoint{Read a matrix by successive outer layers.}
+  {Four shrinking boundaries.}
+  {Traversing the final row or column twice.}{$O(mn)$ time.}
+
+
+\patternintoc{Tree Containment}
+\problemstart{Subtree of Another Tree}{572}{Easy}{Tree matching at every root}{Binary trees}
+
+\subsection{The Problem}
+Return whether \texttt{subRoot} occurs as an identical subtree within
+\texttt{root}.
+
+\subsection{Separate Search from Equality}
+At every main-tree node, test full tree equality. If it fails, recursively
+search the left and right subtrees.
+
+\begin{invariantbox}{every possible matching root is examined}
+The search call returns true exactly when a matching root occurs in its
+current subtree. The equality helper verifies both values and null structure.
+\end{invariantbox}
+
+\begin{visualbox}{Choose a possible root, then compare its full shape}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[trienode] (r) {3}; \node[trienode,active,below left=11mm and 15mm of r] (a) {4};
+  \node[trienode,below right=11mm and 15mm of r] (b) {5};
+  \node[trienode,visited,below left=10mm and 7mm of a] (c) {1};
+  \node[trienode,visited,below right=10mm and 7mm of a] (d) {2};
+  \draw[-,navy] (r)--(a) (r)--(b) (a)--(c) (a)--(d);
+  \node[draw=teal,dashed,fit=(a)(c)(d),inner sep=3mm]{ };
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+isSubtree(root, subRoot):
+    if subRoot is null: return true
+    if root is null: return false
+    if sameTree(root, subRoot): return true
+    return isSubtree(root.left, subRoot)
+           OR isSubtree(root.right, subRoot)
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Subtree of Another Tree}]
+using namespace std;
+
+class Solution {
+    bool same(TreeNode* a, TreeNode* b) {
+        if (a == nullptr || b == nullptr) return a == b;
+        return a->val == b->val && same(a->left,b->left) && same(a->right,b->right);
+    }
+public:
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) {
+        if (root == nullptr) return false;
+        return same(root, subRoot) || isSubtree(root->left, subRoot) ||
+               isSubtree(root->right, subRoot);
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Worst-case time is \(O(mn)\) when equality is retried at many similar nodes;
+recursion uses \(O(h)\) combined depth. Hashing subtrees can improve repeated
+comparison but is more complex.
+
+\lessonexpansion
+  {If \texttt{subRoot} begins with value 4, visit every value-4 node in the
+   larger tree. At each choice, compare the complete left and right shapes;
+   one extra descendant is enough to reject that choice.}
+  {Any valid subtree must begin at some node of the larger tree. The outer
+   recursion examines every possible root, and the equality helper accepts
+   exactly when the entire rooted structure and all values match.}
+  {Check identical trees, a one-node subtree, repeated choice values,
+   matching values with different shape, and a possible subtree larger than the host.}
+  {I treat every node as a possible subtree root and run an exact tree-equality
+   check there. If it fails, I continue recursively on both child subtrees.}
+
+\chaptercheckpoint{Find one tree as an exact rooted region of another.}
+  {A choice-root search plus a paired equality test.}
+  {Matching only values while ignoring extra descendants.}{$O(mn)$ worst-case time.}
+
+
+\patternintoc{Bitwise Arithmetic}
+\problemstart{Sum of Two Integers}{371}{Medium}{XOR and carry}{Bits}
+
+\subsection{The Problem}
+Add two integers without using \texttt{+} or \texttt{-}.
+
+\subsection{Separate Partial Sum and Carry}
+XOR adds bits without carry. AND finds positions generating carry, shifted one
+place left. Repeat until no carry remains.
+
+\begin{invariantbox}{partial sum plus carry equals the original total}
+At every iteration, \texttt{a} contains the carry-free partial sum and
+\texttt{b} contains all pending carries. Redistributing them with XOR and AND
+keeps their mathematical sum.
+\end{invariantbox}
+
+\begin{visualbox}{XOR writes sum bits; AND creates carries}
+\centering
+\begin{tikzpicture}[font=\ttfamily\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode] (a) {0101}; \node[dsnode,below=7mm of a] (b) {0011};
+  \node[dsnode,right=20mm of a] (x) {XOR: 0110};
+  \node[dsnode,active,right=20mm of b] (c) {carry: 0010};
+  \draw[flowarrow] (a)--(x); \draw[flowarrow] (b)--(c);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+while b is not zero:
+    carry = (a AND b) << 1
+    a = a XOR b
+    b = carry
+return a
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Sum of Two Integers}]
+#include <cstdint>
+
+using namespace std;
+
+class Solution {
+public:
+    int getSum(int a, int b) {
+        uint32_t x = static_cast<uint32_t>(a);
+        uint32_t y = static_cast<uint32_t>(b);
+        while (y != 0) { uint32_t carry = (x & y) << 1; x ^= y; y = carry; }
+        return static_cast<int>(x);
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+For 32-bit integers, at most 32 carry movements give \(O(1)\) time and space.
+Unsigned intermediates make left shifting well-defined.
+
+\lessonexpansion
+  {For 5 and 3, XOR gives 6, the sum without carries. AND identifies the
+   shared low bit and shifting produces carry 2. Repeating with 6 and 2 gives
+   partial sum 4 and carry 4, then final result 8.}
+  {XOR adds each bit without carry, while shifted AND contains exactly the
+   carries required at the next position. Repeating until no carry remains is
+   is equivalent to ordinary binary addition.}
+  {Check zero, two positive values, opposite signs, two negative values, and
+   results near the 32-bit limits.}
+  {I separate binary addition into a carry-free sum using XOR and a carry mask
+   using shifted AND. I repeat until the carry mask becomes zero.}
+
+\chaptercheckpoint{Perform addition through bit operations.}
+  {A carry-free XOR sum and shifted carry bits.}
+  {Shifting negative signed integers.}{At most 32 iterations.}
+
+
+\patternintoc{Frequencies and Heaps}
+\problemstart{Top K Frequent Elements}{347}{Medium}{Frequency heap}{Hash map and min heap}
+
+\subsection{The Problem}
+Return the \(k\) values occurring most often in an array.
+
+\subsection{Count, Then Keep Only k Choices}
+Build a frequency map. A min heap ordered by frequency stores at most \(k\)
+entries; when it grows larger, remove the least frequent choice.
+
+\begin{invariantbox}{the heap contains the best k frequencies seen so far}
+After each map entry is processed, any discarded element has frequency no
+greater than every retained element. So the final heap contains exactly a
+valid top-\(k\) set.
+\end{invariantbox}
+
+\begin{visualbox}{The smallest retained frequency is easiest to evict}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[dsnode] (map) {value:count\\\(1:3,\ 2:2,\ 3:1\)};
+  \node[trienode,active,right=30mm of map] (h) {\(2:2\)};
+  \node[trienode,below=11mm of h] (a) {\(1:3\)};
+  \draw[-,thick,navy] (h)--(a);
+  \node[above=5mm of h,font=\bfseries,align=center]
+    {min heap for \(k=2\)\\root has the smallest retained count};
+  \node[right=24mm of h,dsnode,active,align=center]
+    {\(3:1\)\\count 1 was removed};
+  \node[below=4mm of a,text=teal] {retained counts: 2 and 3};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+count every value in a hash map
+minHeap = empty
+for each (value, frequency):
+    push pair into heap
+    if heap size exceeds k: pop smallest frequency
+return the values remaining in the heap
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Top K Frequent Elements}]
+#include <queue>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int,int> count; for (int x:nums) ++count[x];
+        using Entry=pair<int,int>;
+        priority_queue<Entry,vector<Entry>,greater<Entry>> heap;
+        for (const auto& entry : count) {
+            heap.push({entry.second, entry.first});
+            if ((int)heap.size() > k) heap.pop();
+        }
+        vector<int> answer; while(!heap.empty()){answer.push_back(heap.top().second);heap.pop();}
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+For \(n\) values and \(u\) distinct values, time is \(O(n+u\log k)\), with
+\(O(u+k)\) space. Any output order is accepted.
+
+\lessonexpansion
+  {For \texttt{[1,1,1,2,2,3]} with \(k=2\), the map stores
+   \(1\mapsto3\), \(2\mapsto2\), and \(3\mapsto1\). A size-two min heap
+   eventually retains frequencies three and two, so the returned values are
+   1 and 2.}
+  {After processing any number of map entries, evicting the smallest frequency
+   whenever the heap exceeds \(k\) leaves the best \(k\) entries seen so far.
+   Induction over the entries proves the final heap is a valid top-\(k\) set.}
+  {Check \(k=1\), \(k\) equal to the number of distinct values, negative
+   values, tied frequencies, one input value, and heavily duplicated input.}
+  {I count first, then keep only \(k\) choices in a min heap. Keeping
+   the weakest retained choice at the top makes replacement efficient and
+   avoids sorting all distinct values.}
+
+\chaptercheckpoint{Select values by frequency rather than numeric magnitude.}
+  {A count map and a size-$k$ min heap.}
+  {Building a max heap of all values when only $k$ are needed.}{$O(n+u\log k)$ time.}

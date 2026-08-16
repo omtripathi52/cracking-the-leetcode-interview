@@ -1,0 +1,1048 @@
+% Additional lessons: arrays, bits, graphs, lists, and strings.
+
+\patternintoc{Two Pointers}
+\problemstart{Container With Most Water}{11}{Medium}{Two pointers}{Array}
+
+\subsection{The Problem}
+Each array value is the height of a vertical line. Choose two lines that form
+the container with the greatest area. For indexes \(l<r\): \(\text{area}=\min(h_l,h_r)(r-l).\)
+
+\begin{conceptbox}{Example}
+For \texttt{[1,8,6,2,5,4,8,3,7]}, lines at indexes \(1\) and \(8\) create
+area \(\min(8,7)\cdot7=49\).
+\end{conceptbox}
+
+\subsection{From Brute Force to Two Pointers}
+Checking every pair takes \(O(n^2)\). Start with the widest possible pair.
+The shorter line limits the area. Moving the taller line inward only reduces
+width while keeping the same limiting height or worse, so it cannot improve
+that pair. Move the shorter line and search for a taller boundary.
+
+\begin{invariantbox}{every removed wall is safely dominated}
+Before each iteration, every pair outside the current interval has already
+been measured or proved unable to beat a measured pair. Once the current area
+is recorded, any narrower pair that keeps the shorter wall has no greater
+limiting height, so that wall may be discarded.
+\end{invariantbox}
+
+\begin{visualbox}{The shorter wall limits how much water fits}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,x=8mm,y=4mm]
+  \foreach \x/\h in {0/1,1/8,2/6,3/2,4/5,5/4,6/8,7/3,8/7} {
+    \draw[navy,very thick] (\x,0)--(\x,\h);
+    \node[below] at (\x,0) {\scriptsize \x};
+  }
+  \begin{scope}[on background layer]
+    \fill[softteal,opacity=.65] (1,0) rectangle (8,7);
+  \end{scope}
+  \draw[teal,very thick] (1,0)--(1,8); \draw[orange,very thick] (8,0)--(8,7);
+  \node[above=2mm,text=teal,font=\bfseries] at (1,8) {left: 8};
+  \node[above=2mm,text=orange,font=\bfseries] at (8,7) {right: 7};
+  \draw[decorate,decoration={brace,amplitude=4pt},navy]
+    (1,-1.1)--(8,-1.1) node[midway,below=4mm]{width \(=7\)};
+  \node[fill=white,rounded corners,inner sep=2mm] at (4.5,3.5)
+    {area \(=7\times7=49\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode and C++ Implementation}
+\begin{lstlisting}[style=pseudocode]
+left = 0, right = n - 1, best = 0
+while left < right:
+    best = max(best, min(height[left], height[right]) * (right-left))
+    if height[left] <= height[right]: left++
+    else: right--
+return best
+\end{lstlisting}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Container With Most Water}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int left = 0;
+        int right = static_cast<int>(height.size()) - 1;
+        long long best = 0;
+
+        while (left < right) {
+            const long long width = right - left;
+            const long long wall = min(height[left], height[right]);
+            best = max(best, width * wall);
+            if (height[left] <= height[right]) ++left;
+            else --right;
+        }
+        return static_cast<int>(best);
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works, Time, and Space}
+When a pair is processed, every pair that keeps its shorter wall and uses a
+smaller width is no better. Discarding that wall cannot remove the best
+unseen pair. Each pointer moves at most \(n-1\) times, so time is \(O(n)\) and
+space is \(O(1)\).
+
+\begin{revisionbox}{Common mistake}
+Area uses the smaller height, not the larger one. This is not binary search:
+the pointers move according to which boundary limits the current container.
+\end{revisionbox}
+
+\subsection{Detailed Pointer Dry Run}
+\begin{dryrunbox}{Worked example \texttt{[1,8,6,2,5,4,8,3,7]}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c c c X@{}}
+\toprule
+Left, right & Heights & Width & Area & Pointer removed \\
+\midrule
+0, 8 & 1, 7 & 8 & 8 & left: height 1 limits the pair \\
+1, 8 & 8, 7 & 7 & 49 & right: height 7 is shorter \\
+1, 7 & 8, 3 & 6 & 18 & right \\
+1, 6 & 8, 8 & 5 & 40 & either equal wall may move \\
+2, 6 & 6, 8 & 4 & 24 & left \\
+\bottomrule
+\end{tabularx}
+\end{center}
+No later pair exceeds 49, so the answer is the container between indexes 1
+and 8.
+\end{dryrunbox}
+
+\subsection{Why Moving the Shorter Wall Is Safe}
+Suppose the left wall is shorter. Keeping it while moving the right pointer
+inward reduces the width and cannot increase the limiting height above that
+same left wall. Every such pair is no better than the current pair. The only
+chance to improve is to discard the shorter wall and search for a taller one.
+This reason is the key rule behind the two-pointer method.
+
+\subsection{Code Walkthrough}
+The code begins with the widest possible pair. It calculates width and the
+smaller boundary with \texttt{long long} intermediates, updates the best area,
+and advances exactly one pointer. Since every iteration shrinks the interval,
+the loop terminates after at most \(n-1\) moves.
+
+\subsection{Edge Cases and Follow-ups}
+Two lines form the smallest valid input. Zero-height lines are allowed and
+simply create zero area. Equal boundary heights may move either side because
+the current limiting height cannot improve while the width shrinks. A common
+follow-up asks why sorting is impossible: the original index distance is part
+of the area and must be keepd.
+
+\begin{revisionbox}{How to explain it simply}
+I start with maximum width. The shorter wall limits the current area, and any
+narrower pair that keeps that wall cannot do better. I move the
+shorter side, test each remaining choice once, and obtain \(O(n)\) time and
+\(O(1)\) space.
+\end{revisionbox}
+\chaptercheckpoint
+  {Two boundaries determine an area, and moving inward always reduces width.}
+  {Left and right pointers plus the best area seen so far.}
+  {Moving the taller wall without proving which boundary is safely discardable.}
+  {$O(n)$ time and $O(1)$ extra space.}
+\judgeclassnote
+
+
+\patternintoc{Arrays, Hashing, and Bits}
+\problemstart{Contains Duplicate}{217}{Easy}{Membership hashing}{Hash set}
+
+\subsection{The Problem}
+Return true when any integer appears at least twice. Return false when every
+value is distinct.
+
+\subsection{How We Get to the Solution}
+Comparing every pair costs \(O(n^2)\). Sorting costs \(O(n\log n)\) and changes
+the input order. A hash set answers the exact question we need: have we seen
+this value before?
+
+\begin{invariantbox}{the set equals the distinct processed prefix}
+Immediately before reading \texttt{nums[i]}, the set contains every distinct
+value at an earlier index and no future value. A membership hit is a
+real duplicate; otherwise insertion keeps the statement for the next
+iteration.
+\end{invariantbox}
+
+\begin{visualbox}{Stop when a number appears again}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \foreach \x/\v in {0/1,1/2,2/3,3/1} {
+    \node[arraycell] (a\x) at (1.2*\x,0) {\v};
+  }
+  \node[dsnode,right=22mm of a3] (s) {numbers already seen\\\{1,2,3\}};
+  \draw[flowarrow,orange] (a3)--node[edgelabel,above,font=\scriptsize]{seen 1 before} (s);
+  \node[below=7mm of s,draw=orange,fill=softorange,rounded corners] {duplicate found};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+seen = empty set
+for value in nums:
+    if value is already in seen: return true
+    insert value into seen
+return false
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Contains Duplicate}]
+#include <unordered_set>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    bool containsDuplicate(vector<int>& nums) {
+        unordered_set<int> seen;
+        seen.reserve(nums.size());
+        for (const int value : nums) {
+            if (!seen.insert(value).second) return true;
+        }
+        return false;
+    }
+};
+\end{lstlisting}
+
+\subsection{Complexity and Revision}
+Hash insertion is average-case \(O(1)\), giving average \(O(n)\) time and
+\(O(n)\) space. The worst-case hash bound is \(O(n^2)\), although interview
+analysis normally states the average case. Empty and one-element arrays return
+false.
+
+\begin{revisionbox}{Pattern clue}
+Questions asking whether an item has appeared before usually suggest a set.
+Questions needing information attached to that item suggest a map.
+\end{revisionbox}
+
+\subsection{Example Walkthrough}
+For \texttt{[1,2,3,1]}, the set evolves as follows:
+\begin{dryrunbox}{Insertion result reveals the duplicate}
+\begin{center}
+\begin{tabular}{@{}c c c@{}}
+\toprule
+Current value & Set before insertion & Result \\
+\midrule
+1 & \(\{\}\) & insert succeeds \\
+2 & \(\{1\}\) & insert succeeds \\
+3 & \(\{1,2\}\) & insert succeeds \\
+1 & \(\{1,2,3\}\) & insert fails; return true \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+The set is enough because only membership matters. A map would store an
+unneeded second value.
+
+\subsection{Code Walkthrough and Alternatives}
+\texttt{seen.reserve(nums.size())} reduces avoidable rehashing but is not
+required for why the solution works. \texttt{insert} returns a pair whose Boolean field
+is false when the key already exists, allowing lookup and insertion in one
+operation. Returning immediately avoids scanning the rest of the array.
+
+Sorting is an alternative: sort, then compare adjacent values in
+\(O(n\log n)\) time and constant or implementation-dependent extra space.
+The nested-loop baseline uses \(O(1)\) space but \(O(n^2)\) time.
+
+\subsection{Edge Cases and Interview Notes}
+Empty and one-element inputs are distinct by definition. Negative values and
+zero require no special handling. Repeated values may appear more than twice;
+the second occurrence is enough. Hash operations are average-case constant
+time, not a deterministic worst-case guarantee.
+
+\begin{revisionbox}{Practice checkpoint}
+Change the question to ``return the first duplicated value'' and explain why
+the same scan works. Then change it to ``return each value's frequency'' and
+identify why a map is now required.
+\end{revisionbox}
+\chaptercheckpoint
+  {The question asks whether a value has appeared earlier.}
+  {A hash set containing the distinct processed values.}
+  {Forgetting that hash bounds are average case or using a map when only membership matters.}
+  {$O(n)$ average time and $O(n)$ space.}
+\judgeclassnote
+
+
+\problemstart{Counting Bits}{338}{Easy}{Bit dynamic programming}{Array}
+
+\subsection{The Problem}
+For every integer from \(0\) through \(n\), return the number of set bits in
+its binary representation. For \(n=5\), return \texttt{[0,1,1,2,1,2]}.
+
+\subsection{Update Rule}
+Counting every number bit by bit takes \(O(n\log n)\). Dividing \(i\) by two
+removes its last binary digit, and \(i\&1\) tells us whether that removed digit
+was one: \(bits[i]=bits[i\!>>\!1]+(i\&1).\)
+
+\begin{invariantbox}{the shifted dependency is already solved}
+When the loop reaches \(i\), the index \(i>>1\) is smaller than \(i\), so its
+bit count is already correct. Adding the removed least-significant bit gives
+the exact count for \(i\) and extends the solved prefix by one entry.
+\end{invariantbox}
+
+\begin{visualbox}{Use the answer for 2 to find the answer for 5}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]},node distance=10mm]
+  \node[dsnode,active] (five) {\(5=101_2\)};
+  \node[dsnode,right=of five] (shift) {remove last digit\\\(101\to10\)};
+  \node[dsnode,right=of shift,visited] (known) {ones in 2\\\(=1\)};
+  \node[dsnode,below=12mm of shift,fill=softorange] (last) {removed digit\\is 1};
+  \node[dsnode,right=14mm of last,active] (answer) {ones in 5\\\(=2\)};
+  \draw[flowarrow] (five)--(shift);
+  \draw[flowarrow] (shift)--(known);
+  \draw[flowarrow,teal] (known.south) to[bend right=18] (answer.north);
+  \draw[flowarrow,orange] (last)--(answer);
+  \foreach \x/\v in {0/0,1/1,2/1,3/2,4/1,5/2} {
+    \node[arraycell,minimum width=10mm] (bit\x) at ({-0.2+1.12*\x},-3.35) {\v};
+    \node[below=1mm of bit\x,font=\scriptsize] {\x};
+  }
+  \node[left=8mm of bit0,text=navy,font=\bfseries,align=right] {answers for\\0 through 5};
+  \node[draw=orange,very thick,fit=(bit5),inner sep=1mm] {};
+\end{tikzpicture}
+\end{visualbox}
+
+\begin{dryrunbox}{Binary update rule}
+\begin{center}
+\begin{tabular}{c|cccccc}
+\(i\) & 0 & 1 & 2 & 3 & 4 & 5 \\ \hline
+binary & 0 & 1 & 10 & 11 & 100 & 101 \\
+set bits & 0 & 1 & 1 & 2 & 1 & 2
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+bits[0] = 0
+for value from 1 through n:
+    bits[value] = bits[value / 2] + (value mod 2)
+return bits
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Counting Bits}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> countBits(int n) {
+        vector<int> bits(n + 1, 0);
+        for (int value = 1; value <= n; ++value) {
+            bits[value] = bits[value >> 1] + (value & 1);
+        }
+        return bits;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works and Complexity}
+The update rule reuses the already-computed answer for \(\lfloor i/2\rfloor\)
+and adds the final bit. Time is \(O(n)\); extra working space is \(O(1)\)
+excluding the required \(O(n)\) output. The base \(bits[0]=0\) is essential.
+
+\subsection{Building the Bit Update Rule}
+Every non-negative integer \(i\) can be written as \(i=2\left\lfloor i/2\right\rfloor +(i\bmod 2).\)
+Shifting right removes the final bit. The expression \texttt{i \& 1} is one
+for an odd number and zero for an even number. So the number of set
+bits is the answer for the shifted value plus the removed bit.
+
+\begin{dryrunbox}{Binary states from 0 through 5}
+\begin{center}
+\begin{tabular}{@{}c c c c c@{}}
+\toprule
+\(i\) & Binary & \(i>>1\) & Final bit & \(bits[i]\) \\
+\midrule
+0 & 000 & -- & -- & 0 \\
+1 & 001 & 0 & 1 & \(bits[0]+1=1\) \\
+2 & 010 & 1 & 0 & \(bits[1]+0=1\) \\
+3 & 011 & 1 & 1 & \(bits[1]+1=2\) \\
+4 & 100 & 2 & 0 & \(bits[2]+0=1\) \\
+5 & 101 & 2 & 1 & \(bits[2]+1=2\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Code Explanation, Alternatives, and Edge Cases}
+The output vector is filled with zeros, so the base case is already
+present. The loop starts at one; \texttt{value >> 1} is always smaller and
+has already been computed. A direct method could count bits separately for
+every integer in \(O(n\log n)\). Another useful update rule is
+\(bits[i]=bits[i\&(i-1)]+1\), which removes the lowest set bit.
+
+For \(n=0\), the output is \texttt{[0]}. The vector is required output space,
+so it should not be described as avoidable extra memory.
+
+\begin{revisionbox}{How to explain it in an interview}
+I reuse the count for the number with its final binary digit removed. Right
+shift gives that smaller number, and \texttt{i \& 1} tells whether the removed
+digit contributes one. Each answer is built in constant time, so the entire
+range takes \(O(n)\).
+\end{revisionbox}
+\chaptercheckpoint
+  {Each number reduces to a smaller number whose answer is known.}
+  {The required output array of bit counts from zero through $n$.}
+  {Recounting every binary representation independently.}
+  {$O(n)$ time and $O(n)$ required output storage.}
+\judgeclassnote
+
+
+\patternintoc{Directed Graphs}
+\problemstart{Course Schedule}{207}{Medium}{DFS cycle detection}{Directed graph}
+
+\subsection{The Problem}
+Courses are vertices. A prerequisite pair \([a,b]\) means \(b\rightarrow a\):
+course \(b\) must be completed before \(a\). Return whether every course can
+be finished.
+
+\subsection{Key Observation}
+A valid schedule exists exactly when the prerequisite graph has no directed
+cycle. The three-state method tracks both fully visited nodes and nodes in the current DFS
+path. A three-state array expresses the same idea:
+\begin{itemize}
+  \item \(0\): unvisited,
+  \item \(1\): visiting in the current recursion path,
+  \item \(2\): completely processed and safe.
+\end{itemize}
+
+\begin{invariantbox}{state 1 is exactly the active DFS path}
+A course changes from unvisited to visiting when its DFS frame begins and
+changes to done only after all outgoing edges are proved safe. So an
+edge to state 1 is a back edge and a cycle, whereas an edge to state 2 can be
+reused without more recursion.
+\end{invariantbox}
+
+\begin{visualbox}{Following the arrows returns to course 0}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,node distance=18mm]
+  \node[trienode,active] (a) {0};
+  \node[trienode,active,right=of a] (b) {1};
+  \node[trienode,active,right=of b] (c) {2};
+  \draw[flowarrow,orange] (a)--(b); \draw[flowarrow,orange] (b)--(c);
+  \draw[flowarrow,orange] (c) to[bend left=35] node[edgelabel,above]{returns to active course} (a);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+hasCycle(course):
+    if state[course] == visiting: return true
+    if state[course] == done: return false
+    state[course] = visiting
+    for next in graph[course]:
+        if hasCycle(next): return true
+    state[course] = done
+    return false
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Course Schedule}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    bool hasCycle(int course,
+                  const vector<vector<int>>& graph,
+                  vector<int>& state) {
+        if (state[course] == 1) return true;
+        if (state[course] == 2) return false;
+        state[course] = 1;
+        for (const int next : graph[course]) {
+            if (hasCycle(next, graph, state)) return true;
+        }
+        state[course] = 2;
+        return false;
+    }
+
+public:
+    bool canFinish(int numCourses,
+                   vector<vector<int>>& prerequisites) {
+        vector<vector<int>> graph(numCourses);
+        for (const auto& edge : prerequisites) graph[edge[1]].push_back(edge[0]);
+        vector<int> state(numCourses, 0);
+        for (int course = 0; course < numCourses; ++course) {
+            if (hasCycle(course, graph, state)) return false;
+        }
+        return true;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works, Time, and Space}
+A visiting neighbor is an ancestor in the current DFS path, so that edge closes
+a directed cycle. Done nodes have already been proved cycle-free and need not
+be explored again. Time and storage are \(O(V+E)\); recursion depth is
+\(O(V)\) in the worst case.
+
+\begin{revisionbox}{How to explain it in an interview}
+I build the prerequisite graph and run DFS from every course. A three-state
+array distinguishes an active recursion path from a completed node. Reaching
+an active node proves a cycle, so the courses cannot all be finished.
+\end{revisionbox}
+
+\subsection{Why One Visited Boolean Is Not Enough}
+A node seen in a different completed DFS branch is safe; a node seen again in
+the current recursion path proves a cycle. A single Boolean cannot distinguish
+those situations. The three states mean unvisited, visiting, and completely
+processed. Only an edge to a visiting node is a back edge.
+
+\subsection{Detailed DFS Trace}
+\begin{dryrunbox}{Cycle in prerequisites \texttt{[[1,0],[0,1]]}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c X@{}}
+\toprule
+Action & States \((0,1)\) & Meaning \\
+\midrule
+Enter course 0 & \((1,0)\) & 0 is on the active path \\
+Follow \(0\to1\) & \((1,1)\) & 1 joins the active path \\
+Follow \(1\to0\) & \((1,1)\) & 0 is already visiting; cycle found \\
+\bottomrule
+\end{tabularx}
+\end{center}
+For \texttt{[[1,0]]}, course 1 finishes, changes to state 2, and no back edge
+is found.
+\end{dryrunbox}
+
+\begin{visualbox}{Three labels separate new, active, and finished courses}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (c0) {0};
+  \node[trienode,active,right=18mm of c0] (c1) {1};
+  \draw[flowarrow,orange] (c0) to[bend left=18] (c1);
+  \draw[flowarrow,orange] (c1) to[bend left=18] (c0);
+
+  \node[right=32mm of c1,text=navy,font=\bfseries] (label) {course labels};
+  \node[arraycell,active,below=5mm of label,xshift=-8mm] (s0) {1};
+  \node[arraycell,active,right=5mm of s0] (s1) {1};
+  \node[below=2mm of s0,font=\scriptsize] {course 0};
+  \node[below=2mm of s1,font=\scriptsize] {course 1};
+  \node[below=14mm of s0,anchor=north west,xshift=-2mm,
+    align=left,font=\scriptsize,text=navy] {
+    0 = not started\\1 = being checked now\\2 = finished and safe};
+\end{tikzpicture}
+
+\smallskip
+An arrow to a course labeled 1 returns to the path being checked, so there is
+a cycle.
+\end{visualbox}
+
+\begin{visualbox}{Course arrows and the path being checked}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,align=left,fill=softteal] (adj) {
+    \textbf{next course}\\
+    \texttt{0: [1]}\\
+    \texttt{1: [0]}};
+  \node[draw=navy,fill=softblue,minimum width=44mm,minimum height=8mm,
+    right=30mm of adj] (f0) {check course 0};
+  \node[draw=navy,fill=softblue,minimum width=44mm,minimum height=8mm,
+    above=0mm of f0] (f1) {check course 1};
+  \node[draw=orange,fill=softorange,minimum width=44mm,minimum height=8mm,
+    above=0mm of f1] (f2) {see course 0 again};
+  \node[right=7mm of f2,text=orange,font=\bfseries,align=left] {working\\now};
+  \draw[flowarrow,teal] (adj.east)--node[edgelabel,above,font=\scriptsize]{follow arrow} (f0.west);
+  \node[below=8mm of f0,draw=orange,fill=softorange,rounded corners,
+    font=\scriptsize] {course 0 is already on this path \(\Rightarrow\) cycle};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Code Walkthrough}
+The adjacency list stores edges from each prerequisite to the course unlocked
+by it. The helper returns immediately for visiting and done states. Before
+exploring neighbors it marks the course visiting; after every neighbor is
+proved safe, it marks the course done. The outer loop is needed because
+the graph may contain several disconnected components.
+
+\subsection{Alternative, Edge Cases, and Follow-ups}
+Kahn's topological-sort algorithm is an equally strong alternative: repeatedly
+take zero-indegree courses and check whether all courses are removed. An empty
+prerequisite list is immediately possible. A self-dependency such as
+\([0,0]\) is a cycle. Duplicate edges do not change the DFS result, though
+they add repeated adjacency work.
+
+\begin{visualbox}{Two methods notice the same impossible loop}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,fill=softorange] (dfs) {path view\\returns to an active course};
+  \node[dsnode,right=24mm of dfs,fill=softteal] (kahn)
+    {ready-list view\\no course is ready};
+  \node[dsnode,below=12mm of $(dfs)!0.5!(kahn)$] (blocked)
+    {the loop leaves no valid next course};
+  \draw[flowarrow,orange] (dfs)--(blocked);
+  \draw[flowarrow,teal] (kahn)--(blocked);
+\end{tikzpicture}
+\end{visualbox}
+
+\begin{revisionbox}{Practice checkpoint}
+Modify the solution to return one valid course order. Decide whether DFS
+postorder or Kahn's queue makes that extension easier to explain.
+\end{revisionbox}
+\chaptercheckpoint
+  {Prerequisites form directed dependencies that must admit an ordering.}
+  {An adjacency list and three DFS states, or indegrees and a queue.}
+  {Treating every previously visited node as a cycle instead of only active nodes.}
+  {$O(V+E)$ time and $O(V+E)$ graph/traversal space.}
+\judgeclassnote
+
+
+\patternintoc{String DP}
+\problemstart{Decode Ways}{91}{Medium}{Prefix dynamic programming}{String and DP}
+
+\subsection{The Problem}
+Digits map from \(1\) through \(26\) to letters. Count the ways to split a digit
+string into valid codes. A zero cannot be decoded by itself.
+
+\begin{conceptbox}{Examples}
+\texttt{"12"} has two decodings: \texttt{1|2} and \texttt{12}.
+\texttt{"226"} has three. \texttt{"06"} has zero because a code cannot start
+with zero.
+\end{conceptbox}
+
+\subsection{DP State}
+Let \(dp[i]\) be the number of decodings for the first \(i\) characters.
+Start \(dp[0]=1\) for the empty prefix. At position \(i\):
+\begin{itemize}
+  \item if the one-digit code is \(1\) through \(9\), add \(dp[i-1]\);
+  \item if the two-digit code is \(10\) through \(26\), add \(dp[i-2]\).
+\end{itemize}
+
+\begin{invariantbox}{each prefix count contains every valid ending once}
+After processing length \(i\), \(dp[i]\) counts exactly the decodings of the
+first \(i\) characters. Every decoding ends with either one nonzero digit or
+one valid value from 10 through 26, so the previous groups are complete
+and do not overlap.
+\end{invariantbox}
+
+\begin{visualbox}{For \texttt{226}, count endings \texttt{6} and \texttt{26}}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[arraycell,minimum width=12mm] (s0) {2};
+  \node[arraycell,minimum width=12mm,right=0mm of s0] (s1) {2};
+  \node[arraycell,minimum width=12mm,right=0mm of s1,active] (s2) {6};
+  \node[below=2mm of s0,font=\scriptsize] {1};
+  \node[below=2mm of s1,font=\scriptsize] {2};
+  \node[below=2mm of s2,font=\scriptsize] {3};
+
+  \node[dsnode,above=15mm of s1,xshift=-10mm] (one) {end with \texttt{6}\\2 earlier ways};
+  \node[dsnode,above=15mm of s2,xshift=14mm,fill=softorange] (two) {end with \texttt{26}\\1 earlier way};
+  \node[dsnode,right=20mm of s2,active] (ways) {total\\\(2+1=3\)};
+  \draw[flowarrow,teal] (one)--(ways.north west);
+  \draw[flowarrow,orange] (two)--(ways.north);
+  \foreach \x/\v in {0/1,1/1,2/2,3/3} {
+    \node[arraycell,minimum width=11mm] (decode\x) at ({0.1+1.25*\x},-1.55) {\v};
+    \node[below=1mm of decode\x,font=\scriptsize] {\(dp[\x]\)};
+  }
+  \node[left=8mm of decode0,text=navy,font=\bfseries,align=right] {ways after\\each prefix};
+  \node[draw=orange,very thick,fit=(decode3),inner sep=1mm] {};
+\end{tikzpicture}
+
+\smallskip
+Every decoding ends with either \texttt{6} or \texttt{26}. These are separate
+groups, so their counts are added.
+\end{visualbox}
+
+\begin{dryrunbox}{Decoding \texttt{"226"}}
+\begin{center}
+\begin{tabular}{c|cccc}
+Prefix length & 0 & 1 & 2 & 3 \\ \hline
+Prefix & empty & 2 & 22 & 226 \\
+Ways & 1 & 1 & 2 & 3
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+if text is empty or starts with 0: return 0
+dp[0] = 1
+dp[1] = 1
+for prefixLength from 2 through text.length:
+    if last digit is 1 through 9:
+        dp[prefixLength] += dp[prefixLength - 1]
+    if last two digits form 10 through 26:
+        dp[prefixLength] += dp[prefixLength - 2]
+return dp[text.length]
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Decode Ways}]
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int numDecodings(string s) {
+        if (s.empty() || s[0] == '0') return 0;
+        const int n = static_cast<int>(s.size());
+        vector<int> dp(n + 1, 0);
+        dp[0] = 1;
+        dp[1] = 1;
+
+        for (int i = 2; i <= n; ++i) {
+            if (s[i - 1] != '0') dp[i] += dp[i - 1];
+            const int twoDigits = (s[i - 2] - '0') * 10 + (s[i - 1] - '0');
+            if (twoDigits >= 10 && twoDigits <= 26) dp[i] += dp[i - 2];
+        }
+        return dp[n];
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works, Complexity, and Common Mistakes}
+Every valid decoding ends in exactly one valid one-digit or two-digit code, so
+the update rule splits all possibilities without overlap. Time and space
+are \(O(n)\). Carefully reject standalone zero, values above 26, and prefixes
+such as \texttt{"06"}. The DP can be reduced to \(O(1)\) space because only
+the previous two entries are needed.
+
+\subsection{Brute Force and Repeated Prefixes}
+A recursive solution may decode one digit, decode two digits when valid, and
+recurse on the remaining suffix. For a string of many ones, both branches are
+available repeatedly and the recursion grows exponentially. The same suffix
+or prefix length is solved many times. Dynamic programming stores the number
+of decodings for each prefix exactly once.
+
+\subsection{Detailed Prefix Dry Run}
+\begin{dryrunbox}{Decoding \texttt{"226"}}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c c X@{}}
+\toprule
+Prefix & One-digit choice & Two-digit choice & Ways \\
+\midrule
+empty & -- & -- & \(dp[0]=1\) \\
+\texttt{2} & \texttt{2} is valid & -- & \(dp[1]=1\) \\
+\texttt{22} & append \texttt{2}: \(dp[1]\) & append \texttt{22}: \(dp[0]\) & 2 \\
+\texttt{226} & append \texttt{6}: \(dp[2]\) & append \texttt{26}: \(dp[1]\) & 3 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+The three decodings are \texttt{2|2|6}, \texttt{22|6}, and
+\texttt{2|26}.
+\end{dryrunbox}
+
+\subsection{Code Walkthrough}
+The first-character guard rejects an empty input or leading zero. The table
+uses prefix lengths, so \texttt{dp[i]} describes the first \(i\) characters.
+If the last character is nonzero, every decoding of the previous prefix can
+append it. If the last two characters form 10 through 26, every decoding two
+positions back can append that pair.
+
+\subsection{Important Zero Cases and Follow-ups}
+\texttt{"10"} and \texttt{"20"} each have one decoding. \texttt{"30"},
+\texttt{"06"}, and \texttt{"100"} are invalid. The pair test must require at
+least 10, not merely at most 26. Since only two earlier states are read, the
+table can be compressed to two integers for \(O(1)\) extra space.
+
+\begin{dryrunbox}{Zero-heavy strings that expose invalid transitions}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}c c X@{}}
+\toprule
+String & Ways & Reason \\
+\midrule
+\texttt{0} & 0 & zero cannot stand alone \\
+\texttt{10} & 1 & only the pair 10 is valid \\
+\texttt{101} & 1 & \texttt{10|1}; zero blocks the one-digit transition \\
+\texttt{100} & 0 & the final zero cannot pair with zero \\
+\texttt{226} & 3 & \texttt{2|2|6}, \texttt{22|6}, and \texttt{2|26} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{dryrunbox}
+
+\begin{revisionbox}{How to explain it simply}
+Every decoding ends with either one valid digit or one valid two-digit code.
+Those two groups do not overlap, so I add the matching prefix counts. The
+DP scans once in \(O(n)\) time and explicitly handles zeros.
+\end{revisionbox}
+\chaptercheckpoint
+  {A prefix can end with one-character or two-character codes.}
+  {The number of valid decodings for each processed prefix.}
+  {Allowing zero alone or accepting a two-digit number outside 10--26.}
+  {$O(n)$ time and $O(n)$ space, reducible to $O(1)$.}
+\judgeclassnote
+
+
+\patternintoc{Linked Lists}
+\problemstart{Linked List Cycle}{141}{Easy}{Floyd's two-pointer cycle detection}{Linked list}
+
+\subsection{The Problem}
+Return whether repeatedly following \texttt{next} can revisit a node. The
+platform's cycle position is not passed to the function.
+
+\subsection{Why Slow and Fast Pointers Meet}
+A hash set can store visited pointers in \(O(n)\) space. Floyd's algorithm uses
+two pointers: slow advances one edge and fast advances two. If there is no
+cycle, fast reaches null. Inside a cycle, fast gains one node per iteration on
+slow and must eventually meet it.
+
+\begin{invariantbox}{null proves an end; pointer equality proves repetition}
+After \(k\) rounds, slow has moved \(k\) edges and fast has moved \(2k\). If
+fast reaches null, the list is finite. If both pointers reference the same
+node, different traversal distances have reached one object, which can happen
+only after entering a cycle.
+\end{invariantbox}
+
+\begin{visualbox}{Fast catches slow when the list loops}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,node distance=14mm]
+  \node[trienode] (a) {3}; \node[trienode,right=of a] (b) {2};
+  \node[trienode,right=of b] (c) {0}; \node[trienode,right=of c] (d) {-4};
+  \draw[flowarrow] (a)--(b)--(c)--(d);
+  \draw[flowarrow,orange] (d) to[bend right=45] node[edgelabel,below]{loop back} (b);
+  \node[above=7mm of b,text=teal] {slow};
+  \node[above=7mm of c,text=orange] {fast};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+slow = head
+fast = head
+while fast exists and fast.next exists:
+    slow = slow.next
+    fast = fast.next.next
+    if slow equals fast: return true
+return false
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Linked List Cycle}]
+using namespace std;
+
+class Solution {
+public:
+    bool hasCycle(ListNode* head) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+        while (fast != nullptr && fast->next != nullptr) {
+            slow = slow->next;
+            fast = fast->next->next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Both pointers make \(O(n)\) total progress before fast reaches null or the
+pointers meet. Extra space is \(O(1)\). Check both \texttt{fast} and
+\texttt{fast->next} before advancing two steps.
+
+\begin{revisionbox}{Pattern clue}
+Use slow and fast pointers when repeated next-state transitions may enter a
+cycle and the problem asks for constant extra space.
+\end{revisionbox}
+
+\subsection{From a Hash Set to Constant Space}
+The simplest solution stores every visited node pointer in a hash set. Before
+advancing, it checks whether the current pointer was seen before. This is
+linear time and linear space. Floyd's method removes the set by using two
+walkers with different speeds.
+
+If a cycle exists, slow and fast eventually enter it. After that, fast gains
+one node on slow per iteration, measured around the cycle. The distance
+modulo the cycle length must eventually become zero, so the pointers meet.
+
+\subsection{Pointer Dry Run}
+\begin{dryrunbox}{List \(3\to2\to0\to-4\), with \(-4\to2\)}
+\begin{center}
+\begin{tabular}{@{}c c c@{}}
+\toprule
+Iteration & Slow & Fast \\
+\midrule
+start & 3 & 3 \\
+1 & 2 & 0 \\
+2 & 0 & 2 \\
+3 & -4 & -4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The equal pointers refer to the same node object, not merely equal stored
+values. So a repeated value in an acyclic list does not create a false
+cycle.
+\end{dryrunbox}
+
+\begin{visualbox}{Without a loop, fast reaches the end}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode] (a) {1}; \node[dsnode,right=10mm of a] (b) {2};
+  \node[dsnode,right=10mm of b] (c) {3}; \node[dsnode,right=10mm of c] (d) {4};
+  \node[right=10mm of d] (null) {end};
+  \draw[flowarrow] (a)--(b)--(c)--(d)--(null);
+  \node[above=7mm of b,text=teal,font=\bfseries] {slow};
+  \node[above=7mm of d,text=orange,font=\bfseries] {fast};
+  \node[below=8mm of d,text=navy] {fast reaches the end \(\Rightarrow\) no loop};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Code Explanation and Safety}
+Both pointers begin at the head. The loop verifies that fast and
+\texttt{fast->next} exist before moving fast two edges. The comparison occurs
+after movement; if a cycle exists, the pointers eventually become identical.
+If fast reaches null, the list has a finite end.
+
+\subsection{Edge Cases and Interview Follow-ups}
+Test an empty list, one node without a loop, one node pointing to itself, a
+two-node cycle, and a long non-cyclic prefix before a short cycle. A common
+follow-up asks for the cycle's entry node: after the first meeting, reset one
+pointer to head and advance both one step at a time; their next meeting is the
+entry.
+
+\begin{revisionbox}{Practice checkpoint}
+Explain why comparing \texttt{slow->val == fast->val} is incorrect. Then
+derive how resetting one pointer after the meeting locates the cycle entry.
+\end{revisionbox}
+\chaptercheckpoint
+  {Repeated next-pointer transitions may enter a cycle.}
+  {Slow and fast node pointers.}
+  {Comparing values instead of pointer identity or dereferencing past null.}
+  {$O(n)$ time and $O(1)$ extra space.}
+\judgeclassnote
+
+
+\patternintoc{String Design}
+\problemstart{Encode and Decode Strings}{271}{Medium}{Length-prefixed encoding}{Strings}
+
+\subsection{The Problem}
+Design two operations: encode a vector of arbitrary strings into one string,
+then decode it back exactly. Strings may be empty and may contain delimiter
+characters.
+
+\subsection{Why a Delimiter Alone Fails}
+Joining with \texttt{\#} is ambiguous when a payload itself contains
+\texttt{\#}. Prefix every string with its decimal length and a delimiter: \(\boxed{\texttt{length\#payload}}.\)
+The decoder reads the length first, so it knows exactly how many following
+characters belong to the payload.
+
+\begin{invariantbox}{the cursor always begins at the next frame length}
+After decoding a frame, the cursor has advanced past its decimal length, the
+separator, and exactly the announced payload characters. Separators inside a
+payload are never interpreted, so the next cursor position is clear.
+\end{invariantbox}
+
+\begin{visualbox}{Each stored string says its own length}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[dsnode] (a) {\texttt{4\#lint}};
+  \node[dsnode,right=4mm of a] (b) {\texttt{4\#code}};
+  \node[dsnode,right=4mm of b] (c) {\texttt{0\#}};
+  \node[dsnode,right=4mm of c] (d) {\texttt{3\#a\#b}};
+  \node[below=7mm of $(a)!0.5!(d)$] {the number says how many characters come next};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+encode(strings): append length + '#' + string for every string
+decode(data):
+    i = 0
+    while i < data.length:
+        find next '#'
+        parse length before it
+        copy exactly length characters after it
+        advance i to the next frame
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Encode and Decode Strings}]
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Codec {
+public:
+    string encode(const vector<string>& strings) {
+        string encoded;
+        for (const string& value : strings) {
+            encoded += to_string(value.size());
+            encoded.push_back('#');
+            encoded += value;
+        }
+        return encoded;
+    }
+
+    vector<string> decode(const string& encoded) {
+        vector<string> result;
+        size_t index = 0;
+        while (index < encoded.size()) {
+            const size_t delimiter = encoded.find('#', index);
+            const size_t length =
+                static_cast<size_t>(stoull(encoded.substr(index, delimiter-index)));
+            const size_t start = delimiter + 1;
+            result.push_back(encoded.substr(start, length));
+            index = start + length;
+        }
+        return result;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works, Complexity, and Edge Cases}
+Every frame has one clear numeric prefix. The decoder consumes exactly
+the announced payload length, even when the payload contains \texttt{\#} or is
+empty. Encoding and decoding both take \(O(N)\) time for total character count
+\(N\), with \(O(N)\) returned storage. Test empty vectors, empty strings,
+delimiter characters, and multi-digit lengths.
+
+\begin{revisionbox}{How to explain it in an interview}
+I avoid delimiter ambiguity by storing the payload length before each string.
+The decoder finds the separator, parses the length, copies exactly that many
+characters, and continues at the next frame.
+\end{revisionbox}
+
+\subsection{Why Simple Joining Is Not Reversible}
+Suppose the separator is \texttt{\#}. Encoding
+\texttt{["ab","c\#d"]} as \texttt{ab\#c\#d} loses the information that the
+second separator belongs inside a payload. Escaping separators is possible,
+but then the escape character itself must also be escaped. A length prefix is
+simpler because payload contents no longer affect parsing.
+
+\subsection{Frame-by-Frame Dry Run}
+\begin{dryrunbox}{Encoding \texttt{["lint","code","","a\#b"]}}
+\begin{center}
+\begin{tabular}{@{}c c c@{}}
+\toprule
+String & Frame & Decoder action \\
+\midrule
+\texttt{lint} & \texttt{4\#lint} & read 4, then copy four characters \\
+\texttt{code} & \texttt{4\#code} & read 4, then copy four characters \\
+empty & \texttt{0\#} & read 0 and append an empty string \\
+\texttt{a\#b} & \texttt{3\#a\#b} & copy three characters, including \texttt{\#} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+\subsection{Code Walkthrough}
+Encoding appends the decimal length, one separator, and the untouched payload.
+Decoding searches only for the separator that terminates the numeric length.
+It parses that prefix, calculates the payload start, copies exactly the stated
+number of characters, and advances directly to the next frame. The platform
+supplies strings produced by the matching encoder, so invalid input handling
+is outside this problem's contract.
+
+\subsection{Edge Cases, Complexity Details, and Variations}
+Distinguish an empty vector from a vector containing one empty string: their
+encodings are respectively empty and \texttt{0\#}. Multi-digit lengths must
+be parsed completely. Total work is linear in the encoded data size, although
+repeated string growth may allocate; reserving capacity is a practical
+optimization when total size is known.
+
+\begin{revisionbox}{Practice checkpoint}
+Decode \texttt{5\#hello0\#3\#a\#b} by hand. At each step record the separator
+position, parsed length, payload interval, and next frame index.
+\end{revisionbox}
+\chaptercheckpoint
+  {Arbitrary strings must be combined and separated without ambiguity.}
+  {Length-prefixed frames and a decoder cursor.}
+  {Splitting on a delimiter that may legally occur inside the payload.}
+  {$O(N)$ encoding/decoding time and $O(N)$ returned storage.}
+\judgeclassnote

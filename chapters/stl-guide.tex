@@ -1,0 +1,387 @@
+% Plain-English reference for every standard-library facility used in the book.
+
+\clearpage
+\phantomsection
+\section*{STL Guide for This Book}
+\addcontentsline{toc}{section}{STL Guide for This Book}
+\markboth{STL Guide for This Book}{C++ Standard Library}
+
+The C++ Standard Library gives us ready-made containers and algorithms. The
+name \textbf{STL} is often used for this collection, especially for containers,
+iterators, and algorithms. This guide covers the standard-library tools used
+by the 75 solutions in this book.
+
+\begin{conceptbox}{Version used by the book}
+Every complete solution in this edition compiles as C++11, C++17, and C++23.
+The code deliberately avoids newer-only shortcuts when a clear C++11 form is
+available. This means the same solution can be pasted into an older interview
+environment without changing the algorithm.
+\end{conceptbox}
+
+\subsection{The common setup}
+
+Each solution includes the headers it needs and then uses the standard
+namespace. For example:
+
+\begin{lstlisting}
+#include <algorithm>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> values{4, 1, 7};
+sort(values.begin(), values.end());
+\end{lstlisting}
+
+After \texttt{using namespace std;}, write \texttt{vector}, \texttt{string},
+and \texttt{sort} instead of \texttt{std::vector}, \texttt{std::string}, and
+\texttt{std::sort}. This is convenient in short coding-interview files. In a
+large project or a header file, many teams prefer the explicit \texttt{std::}
+form because it reduces the chance of two libraries using the same name.
+
+\Needspace{25\baselineskip}
+\subsection{C++11, C++17, and C++23}
+
+\begin{revisionbox}{What changes for this book?}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}p{1.5cm}X X@{}}
+\toprule
+Version & What it means here & Command-line example \\
+\midrule
+C++11 & The minimum version required by every solution. It provides
+\texttt{vector}, hash tables, range-based loops, lambdas, \texttt{nullptr},
+\texttt{move}, and the string-to-number functions used here. &
+\texttt{g++ -std=c++11 file.cpp} \\
+C++17 & All book code works unchanged. Features such as structured bindings,
+\texttt{optional}, and \texttt{string\_view} exist, but the solutions do not
+depend on them. & \texttt{g++ -std=c++17 file.cpp} \\
+C++23 & All book code still works unchanged. Newer library additions may make
+other programs shorter, but they do not change the algorithms taught here. &
+\texttt{g++ -std=c++23 file.cpp} \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+The important rule is simple: choose the version accepted by the judge. If the
+judge does not say, C++17 is a common practical choice. The solutions in this
+book remain valid even when the judge selects C++11.
+
+\Needspace{23\baselineskip}
+\subsection{Header guide}
+
+Only include the headers needed by the current solution.
+
+\begin{revisionbox}{Headers used in the 75 solutions}
+\footnotesize
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.0cm}
+  >{\raggedright\arraybackslash}p{4.0cm}X@{}}
+\toprule
+Header & Main names used & Why it is used \\
+\midrule
+\texttt{<algorithm>} & \texttt{sort}, \texttt{min}, \texttt{max}, \texttt{reverse},
+\texttt{swap} & Ordering and small reusable algorithms \\
+\texttt{<array>} & \texttt{array} & Fixed-size frequency tables \\
+\texttt{<cctype>} & \texttt{isalnum}, \texttt{tolower} & Character checks and conversion \\
+\texttt{<cstdint>} & \texttt{uint32\_t} & An integer with an exact bit width \\
+\texttt{<functional>} & \texttt{greater<int>} & Changes a priority queue into a min heap \\
+\texttt{<limits>} & \texttt{numeric\_limits<int>} & Safe smallest or largest starting values \\
+\texttt{<queue>} & \texttt{queue}, \texttt{priority\_queue} & BFS queues and heaps \\
+\texttt{<sstream>} & \texttt{stringstream} & Reading values from a string \\
+\texttt{<stack>} & \texttt{stack} & Last-in, first-out processing \\
+\texttt{<string>} & \texttt{string}, \texttt{to\_string}, \texttt{stoi},
+\texttt{stoull} & Text storage and number conversion \\
+\texttt{<unordered\_map>} & \texttt{unordered\_map} & Key-to-value lookup \\
+\texttt{<unordered\_set>} & \texttt{unordered\_set} & Fast membership tests \\
+\texttt{<utility>} & \texttt{pair}, \texttt{move} & Two-value records and moving containers \\
+\texttt{<vector>} & \texttt{vector} & Resizable arrays and most returned lists \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+\subsection{Vector and array functions}
+
+\begin{revisionbox}{Resizable and fixed-size arrays}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\ttfamily}p{3.1cm}X>{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+Operation & Meaning & Usual cost \\
+\midrule
+v[i] & Read or change the value at index \texttt{i}. & $O(1)$ \\
+v.size() & Number of stored values. & $O(1)$ \\
+v.empty() & True when the container has no values. & $O(1)$ \\
+v.push\_back(x) & Add \texttt{x} at the end. & $O(1)$ average \\
+v.back() & Read the final value. & $O(1)$ \\
+v.reserve(n) & Reserve room before repeated appends. & $O(n)$ when storage moves \\
+v.clear() & Remove all values. & Linear in stored objects \\
+v.begin(), v.end() & Iterator range covering every value. & $O(1)$ \\
+a.fill(x) & Put \texttt{x} in every cell of a fixed \texttt{array}. & $O(n)$ \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+\begin{lstlisting}
+#include <array>
+#include <vector>
+
+using namespace std;
+
+vector<int> values;
+values.reserve(3);
+values.push_back(4);
+values.push_back(7);
+
+array<int, 26> count{};
+count.fill(0);
+\end{lstlisting}
+
+Use \texttt{vector} when the size changes. Use \texttt{array<T,N>} when the
+size is known at compile time, such as the 26 lowercase English letters.
+
+\Needspace{23\baselineskip}
+\subsection{String functions}
+
+\begin{revisionbox}{Text operations used in the book}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.6cm}X@{}}
+\toprule
+Operation & Meaning and important note \\
+\midrule
+\texttt{s[i]} & Character at index \texttt{i}; check the index first. \\
+\texttt{s.size()} & Number of characters; the return type is unsigned. \\
+\texttt{s.empty()} & True when the string has no characters; clearer than \texttt{s.size()==0}. \\
+\texttt{substr(pos,len)} & Copy part of a string; cost is proportional to the copied text. \\
+\texttt{s.find(ch,pos)} & Find the next character or substring; returns \texttt{string::npos} if absent. \\
+\texttt{s.push\_back(ch)} & Add one character; constant time on average. \\
+\texttt{to\_string(x)} & Convert a number to a string; available in C++11. \\
+\texttt{stoi(s)} & Convert text to \texttt{int}; may throw for invalid text. \\
+\texttt{stoull(s)} & Convert text to \texttt{unsigned long long}; useful for stored lengths. \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+\begin{lstlisting}
+#include <string>
+
+using namespace std;
+
+string encoded = "4#code";
+size_t mark = encoded.find('#');
+int length = stoi(encoded.substr(0, mark));
+string word = encoded.substr(mark + 1, length);
+\end{lstlisting}
+
+\subsection{Hash map and hash set functions}
+
+Both containers use hashing. Average lookup, insertion, and removal are
+$O(1)$, although the worst case can be $O(n)$.
+
+\begin{revisionbox}{Fast lookup operations}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.5cm}X@{}}
+\toprule
+Operation & Meaning \\
+\midrule
+\texttt{table[key]} & Read or create the value stored for \texttt{key}. \\
+\texttt{table.find(key)} & Return an iterator to the key, or \texttt{table.end()}. \\
+\texttt{table.count(key)} & Return 0 or 1 for the unique-key containers used here. \\
+\texttt{table.insert(x)} & Add a key or a key-value pair. \\
+\texttt{table.clear()} & Remove all entries. \\
+\texttt{for (auto\& entry : table)} & Visit every stored entry; the order is unspecified. \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+\begin{lstlisting}
+#include <unordered_map>
+#include <unordered_set>
+
+using namespace std;
+
+unordered_map<int, int> indexOf;
+indexOf[7] = 3;
+if (indexOf.count(7)) {
+    int index = indexOf[7];
+}
+
+unordered_set<int> seen;
+seen.insert(12);
+bool alreadySeen = seen.count(12) != 0;
+\end{lstlisting}
+
+Do not use \texttt{operator[]} only to test whether a map key exists: it may
+create a new entry. Use \texttt{count} or \texttt{find} for a pure lookup.
+
+\Needspace{14\baselineskip}
+\subsection{Queue, stack, and priority queue}
+
+\begin{revisionbox}{The accessible end of each structure}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{2.2cm}X X@{}}
+\toprule
+Type & Add, read, remove & Typical use \\
+\midrule
+Queue & \texttt{push}, \texttt{front}, \texttt{pop} & BFS and first-in,
+first-out work \\
+Stack & \texttt{push}, \texttt{top}, \texttt{pop} & Nested delimiters and
+last-in, first-out work \\
+Max heap & \texttt{push}, \texttt{top}, \texttt{pop} & Repeatedly
+take the largest value \\
+Min heap & \texttt{push}, \texttt{top}, \texttt{pop} & Repeatedly take the
+smallest value; the full type appears below. \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+\begin{lstlisting}
+#include <functional>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+queue<int> bfs;
+bfs.push(3);
+int nextNode = bfs.front();
+bfs.pop();
+
+priority_queue<int> maxHeap;
+priority_queue<int, vector<int>, greater<int>> minHeap;
+\end{lstlisting}
+
+Calling \texttt{pop()} does not return the removed value. Read \texttt{front()}
+or \texttt{top()} first, then call \texttt{pop()}.
+
+\subsection{Algorithms used in the book}
+
+Standard algorithms normally receive a half-open range:
+\texttt{[begin,end)}. The first iterator is included; the end iterator points
+one position after the final element.
+
+\begin{revisionbox}{Algorithm quick reference}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.6cm}X>{\raggedright\arraybackslash}p{2.0cm}@{}}
+\toprule
+Operation & Meaning & Cost \\
+\midrule
+\texttt{sort(range)} & Sort in increasing order. & $O(n\log n)$ \\
+\texttt{sort(range,rule)} & Sort using a custom rule. & $O(n\log n)$ \\
+\texttt{min(a,b)}, \texttt{max(a,b)} & Return the smaller or larger value. & $O(1)$ \\
+\texttt{reverse(range)} & Reverse a range in place. & $O(n)$ \\
+\texttt{swap(a,b)} & Exchange two values. & Usually $O(1)$ \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+The following comparison works in C++11 because its parameter types are
+written explicitly:
+
+\begin{lstlisting}
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int>> intervals{{1, 3}, {2, 4}, {3, 5}};
+sort(intervals.begin(), intervals.end(),
+     [](const vector<int>& a, const vector<int>& b) {
+         return a[1] < b[1];
+     });
+\end{lstlisting}
+
+Writing \texttt{const auto\&} as a lambda parameter is shorter, but generic
+lambda parameters require C++14 or newer.
+
+\Needspace{22\baselineskip}
+\subsection{Numbers, characters, streams, and moves}
+
+\begin{revisionbox}{Other library tools used by the solutions}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{3.0cm}X@{}}
+\toprule
+Name & Purpose \\
+\midrule
+Smallest integer & \texttt{numeric\_limits<int>::min()} is useful when every
+valid answer may be negative. \\
+Largest integer & \texttt{numeric\_limits<int>::max()} is useful as an initial
+upper bound. \\
+Exact 32-bit integer & \texttt{uint32\_t} is unsigned and has exactly 32 bits
+when the implementation provides it. \\
+Character check & \texttt{isalnum(ch)} tests whether a character is a letter
+or digit. \\
+Lowercase conversion & \texttt{tolower(ch)} produces the lowercase form of a
+character. \\
+String stream & \texttt{stringstream} reads formatted values from a string. \\
+Move & \texttt{move(value)} allows a container's stored data to be transferred
+instead of copied when possible. \\
+Pair & \texttt{pair<A,B>} stores two related values in \texttt{first} and
+\texttt{second}. \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+When calling \texttt{isalnum} or \texttt{tolower}, cast a possibly negative
+\texttt{char} to \texttt{unsigned char} first. This avoids undefined behavior
+for characters outside the basic ASCII range.
+
+\Needspace{25\baselineskip}
+\subsection{Newer shortcuts not required here}
+
+The following features are useful, but using them would raise the minimum
+language version. The right column shows the portable form used in this book.
+
+\begin{revisionbox}{Version-sensitive alternatives}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{2.7cm}
+  >{\centering\arraybackslash}p{1.5cm}
+  >{\raggedright\arraybackslash}X@{}}
+\toprule
+Newer feature & First version & Form used in this book \\
+\midrule
+Generic lambda & C++14 & Replace an \texttt{auto} parameter with the full type. \\
+Structured bindings & C++17 & Use \texttt{pair.first}, \texttt{pair.second},
+or an ordinary loop variable. \\
+Views and optional values & C++17 & Use \texttt{string}, indexes, pointers, or a
+separate Boolean value. \\
+Membership check & C++20 & Replace \texttt{contains(key)} with \texttt{count(key)} or
+\texttt{find(key)!=end()}. \\
+Range sorting & C++20 & Replace \texttt{ranges::sort(values)} with
+\texttt{sort(values.begin(),values.end())}. \\
+Bit count & C++20 & Replace \texttt{popcount(value)} by clearing the lowest set bit in a loop. \\
+Safe midpoint & C++20 & Use \texttt{left+(right-left)/2}. \\
+Formatted print & C++23 & Online-judge solutions return values; they do not need
+formatted printing. \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+\subsection{Fast checklist before submitting}
+
+\begin{revisionbox}{STL mistakes that often cause wrong answers}
+\begin{itemize}
+  \item Include the correct header instead of relying on another header to
+  include it by accident.
+  \item Check \texttt{empty()} before calling \texttt{front()}, \texttt{back()},
+  or \texttt{top()}.
+  \item Remember that \texttt{pop()} removes an item but does not return it.
+  \item Do not dereference \texttt{end()} after an unsuccessful \texttt{find()}.
+  \item Remember that \texttt{unordered\_map} iteration order is not sorted.
+  \item Use \texttt{static\_cast<int>(container.size())} when mixing a size with
+  signed integer indexes.
+  \item Count sorting and heap operations as $O(n\log n)$ when explaining the
+  final complexity.
+\end{itemize}
+\end{revisionbox}
+
+The rest of the book introduces these tools inside real problems. Return to
+this guide whenever a container operation or header name is unfamiliar.

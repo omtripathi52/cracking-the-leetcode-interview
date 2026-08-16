@@ -1,0 +1,1170 @@
+% Lessons 26--37: arrays, strings, greedy methods, trees, and scheduling.
+
+\patternintoc{Arrays, Strings, and Greedy}
+\problemstart{Maximum Subarray}{53}{Medium}{Kadane's algorithm}{Array and running sum}
+
+\subsection{The Problem}
+Given an integer array, return the largest sum of a non-empty consecutive
+subarray. The chosen values must occupy consecutive positions.
+
+\begin{conceptbox}{Example}
+For \texttt{[-2,1,-3,4,-1,2,1,-5,4]}, the best subarray is
+\texttt{[4,-1,2,1]}, whose sum is \(6\).
+\end{conceptbox}
+
+\subsection{From Repeated Sums to One Scan}
+Trying every pair of boundaries repeats almost the same additions. At each
+position, only one question matters: is the previous running subarray useful,
+or is it better to start again at the current value? A negative prefix can
+only reduce every future extension, so it is discarded.
+
+\begin{invariantbox}{the running sum is the best subarray ending here}
+After processing index \(i\), \texttt{endingHere} is the maximum sum of a
+non-empty subarray whose right endpoint is exactly \(i\). The global answer is
+the best value of \texttt{endingHere} seen at any endpoint.
+\end{invariantbox}
+
+\begin{visualbox}{Keep a useful prefix or restart}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/-2,1/1,2/-3,3/4,4/-1,5/2,6/1,7/-5,8/4}{
+    \node[arraycell] (a\x) at (0.92*\x,0) {\v};
+  }
+  \node[draw=orange,very thick,fit=(a3)(a4)(a5)(a6),inner sep=1mm] {};
+  \draw[decorate,decoration={brace,amplitude=5pt},orange]
+    ([yshift=-7mm]a3.south west)--([yshift=-7mm]a6.south east)
+    node[midway,below=5mm]{best sum \(=6\)};
+  \node[above=7mm of a3,text=teal,font=\bfseries]{restart at 4};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+endingHere = answer = nums[0]
+for each value after the first:
+    endingHere = max(value, endingHere + value)
+    answer = max(answer, endingHere)
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Maximum Subarray}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int endingHere = nums[0];
+        int answer = nums[0];
+        for (int i = 1; i < static_cast<int>(nums.size()); ++i) {
+            endingHere = max(nums[i], endingHere + nums[i]);
+            answer = max(answer, endingHere);
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Dry Run, Why the Solution Works, and Complexity}
+The running sums are \(-2,1,-2,4,3,5,6,1,5\). The maximum is \(6\).
+The update rule considers both possible forms of every best subarray ending
+at a position: start there or extend the best one ending immediately before.
+Time is \(O(n)\), and extra space is \(O(1)\). Start from the first
+value rather than zero so arrays containing only negative values work.
+
+\lessonexpansion
+  {For \texttt{[-2,1,-3,4,-1,2,1,-5,4]}, the ending sums are
+   \(-2,1,-2,4,3,5,6,1,5\). The restart at 4 discards the harmful negative
+   prefix, and the global best becomes 6 after processing the following 1.}
+  {Every non-empty subarray ending at index \(i\) either begins at \(i\) or
+   extends a subarray ending at \(i-1\). Choosing the larger of exactly these
+   two possibilities proves the update rule; taking the maximum over all
+   endpoints proves the final answer.}
+  {Test one negative value, all-negative input, all-positive input, zeros,
+   and an optimum that begins at index zero or ends at the final index.}
+  {I keep the best sum ending at the current position. A negative accumulated
+   prefix is abandoned by comparing extension with a fresh start. The best
+   ending value seen anywhere is the answer, in linear time and constant space.}
+
+\chaptercheckpoint
+  {A maximum-sum answer must use consecutive array positions.}
+  {The best sum ending at the current index and the best overall sum.}
+  {Resetting every negative value instead of every negative running prefix.}
+  {$O(n)$ time and $O(1)$ extra space.}
+
+
+\problemstart{Maximum Product Subarray}{152}{Medium}{Dynamic running extremes}{Array}
+
+\subsection{The Problem}
+Return the largest product of a non-empty consecutive subarray. Values may be
+positive, negative, or zero.
+
+\begin{conceptbox}{Why the minimum matters}
+For \texttt{[-2,3,-4]}, the negative product \(-6\) later becomes the best
+positive product \(24\) when multiplied by \(-4\).
+\end{conceptbox}
+
+\subsection{Building the State}
+For sums, one running maximum is enough. Products are different because a
+negative multiplier swaps large and small values. So each position
+keeps both the maximum and minimum product ending there.
+
+\begin{invariantbox}{both product extremes end at the current position}
+After index \(i\), \texttt{high} and \texttt{low} are respectively the
+largest and smallest products of subarrays ending exactly at \(i\). Their
+three choices are the current value alone, the old high times the value,
+and the old low times the value.
+\end{invariantbox}
+
+\begin{visualbox}{The old low becomes the new high}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[arraycell] (a) {-2}; \node[arraycell,right=0mm of a] (b) {3};
+  \node[arraycell,right=0mm of b,active] (c) {-4};
+  \node[dsnode,visited,below left=14mm and 24mm of c] (lo)
+    {old low times \(-4\)\\\((-6)(-4)=24\)};
+  \node[dsnode,below=14mm of c] (hi)
+    {old high times \(-4\)\\\((3)(-4)=-12\)};
+  \node[dsnode,below right=14mm and 24mm of c] (alone)
+    {start here\\\(-4\)};
+  \node[below=6mm of lo,text=teal,font=\bfseries]{largest choice: 24};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode and C++}
+\begin{lstlisting}[style=pseudocode]
+low = high = answer = nums[0]
+for value in nums[1...]:
+    oldHigh = high; oldLow = low
+    high = max(value, oldHigh*value, oldLow*value)
+    low  = min(value, oldHigh*value, oldLow*value)
+    answer = max(answer, high)
+\end{lstlisting}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Maximum Product Subarray}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int maxProduct(vector<int>& nums) {
+        int high = nums[0], low = nums[0], answer = nums[0];
+        for (int i = 1; i < static_cast<int>(nums.size()); ++i) {
+            const int oldHigh = high, oldLow = low, value = nums[i];
+            high = max({value, oldHigh * value, oldLow * value});
+            low = min({value, oldHigh * value, oldLow * value});
+            answer = max(answer, high);
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time, Space, and Edge Cases}
+Each value performs constant work, so time is \(O(n)\) and space is \(O(1)\).
+Zero automatically starts a new product. Save both old extremes before either
+is overwritten. Test one value, all negatives, zeros between useful segments,
+and an odd or even count of negative values.
+
+\lessonexpansion
+  {For \texttt{[-2,3,-4]}, start with \(high=low=-2\). At value 3, the
+   choices are \(3,-6,-6\), so \(high=3\) and \(low=-6\). At value
+   \(-4\), the choices are \(-4,-12,24\); the old minimum becomes the new
+   maximum, producing the answer \(24\).}
+  {Every product ending at the current index either starts at that value or
+   extends a product ending at the previous index. Multiplication by a
+   negative value can exchange the maximum and minimum, which is why keeping
+   both extremes is enough and needed.}
+  {Check \texttt{[-2]}, \texttt{[0,2]}, \texttt{[-2,0,-1]},
+   \texttt{[-2,3,-4]}, and a sequence containing two separated zeroes.}
+  {I track both the largest and smallest product ending at each position.
+   The smallest is retained because a later negative number can turn it into
+   the largest. Each value has three choices, giving linear time and
+   constant extra space.}
+
+\chaptercheckpoint
+  {Signs can reverse which running product is useful.}
+  {The maximum and minimum product ending at each position.}
+  {Updating the minimum from an already modified maximum.}
+  {$O(n)$ time and $O(1)$ space.}
+
+
+\problemstart{Longest Repeating Character Replacement}{424}{Medium}{Sliding window}{Frequency array}
+
+\subsection{The Problem}
+Given an uppercase string and an integer \(k\), return the longest substring
+that can be made of one repeated character after replacing at most \(k\)
+characters.
+
+\subsection{Window Condition}
+Inside a window, keep the most frequent character and replace every other
+position. A window is valid exactly when \(\text{window length}-\text{maximum frequency}\le k.\)
+When this cost becomes too large, move the left boundary.
+
+\begin{invariantbox}{the active window needs at most k replacements}
+After shrinking, the window satisfies the replacement budget. The frequency
+array describes its characters, while \texttt{maxFrequency} is a safe
+nondecreasing upper bound used to decide when the left boundary must move.
+\end{invariantbox}
+
+\begin{visualbox}{Change one B to make four A's}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/A,1/A,2/B,3/A,4/B,5/B,6/A}{
+    \node[arraycell] (s\x) at (1.0*\x,0) {\v};
+  }
+  \node[draw=orange,very thick,fit=(s0)(s1)(s2)(s3),inner sep=1mm] {};
+  \node[below=9mm of s2,text=orange] (change) {change this B to A};
+  \draw[flowarrow,orange] (change.north)--(s2.south);
+  \node[right=12mm of s6,align=left,text=navy]
+    {four positions, three already A\\so only one change is needed};
+  \node[above=7mm of s0,text=teal]{left};
+  \node[above=7mm of s3,text=orange]{right};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode and C++}
+\begin{lstlisting}[style=pseudocode]
+left = 0; maxFrequency = 0; answer = 0
+for right from 0 to n-1:
+    increment count[s[right]]
+    update maxFrequency
+    while windowLength - maxFrequency > k:
+        decrement count[s[left++]]
+    update answer with windowLength
+\end{lstlisting}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Character Replacement}]
+#include <algorithm>
+#include <array>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    int characterReplacement(string s, int k) {
+        array<int, 26> count{};
+        int left = 0, maxFrequency = 0, answer = 0;
+        for (int right = 0; right < static_cast<int>(s.size()); ++right) {
+            maxFrequency = max(maxFrequency, ++count[s[right] - 'A']);
+            while (right - left + 1 - maxFrequency > k) {
+                --count[s[left] - 'A'];
+                ++left;
+            }
+            answer = max(answer, right - left + 1);
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why a Stale Maximum Is Safe}
+The stored maximum frequency need not decrease when the left side moves. A
+stale larger value may delay shrinking, but it cannot create a new answer
+longer than a window that was already achievable when that frequency was
+observed. Both boundaries move only forward: \(O(n)\) time and \(O(1)\) space.
+
+\lessonexpansion
+  {For \texttt{AABABBA} with \(k=1\), the window \texttt{AABA} has length
+   four and maximum frequency three, so it needs one replacement. Extending
+   to \texttt{AABAB} needs two replacements; move the left boundary until the
+   window again satisfies \(length-maxFrequency\le1\). The best length remains
+   four.}
+  {For a fixed window, changing every other character is best, so
+   the required replacements equal its length minus its largest frequency.
+   The algorithm records every maximal valid window reached by the right
+   boundary.}
+  {Check \texttt{"A"}, \(k=0\); all-identical text; alternating characters;
+   \(k\) at least the string length; and a best window ending at the final
+   character.}
+  {I use a variable sliding window. Character counts identify the dominant
+   letter, and I shrink only when the replacement cost exceeds \(k\). Since
+   both pointers move forward, the running time is linear.}
+
+\chaptercheckpoint
+  {Find the longest substring repairable with at most $k$ changes.}
+  {Two boundaries, 26 counts, and the largest frequency seen in the window.}
+  {Using the number of distinct characters instead of replacement cost.}
+  {$O(n)$ time and $O(1)$ alphabet space.}
+
+
+\problemstart{Longest Palindromic Substring}{5}{Medium}{Expand around centers}{String boundaries}
+
+\subsection{The Problem}
+Return the longest consecutive substring that reads the same from left to
+right and right to left.
+
+\subsection{Every Palindrome Has a Center}
+There are \(n\) odd-length centers on characters and \(n-1\) even-length
+centers between characters. Expand outward while the two characters match;
+every palindrome is discovered from its unique center.
+
+\begin{invariantbox}{the characters strictly inside the pointers match}
+During an expansion, the substring between \texttt{left+1} and
+\texttt{right-1} is already a palindrome. Equal boundary characters extend it
+by two; the first mismatch proves that center cannot grow further.
+\end{invariantbox}
+
+\begin{visualbox}{A palindrome grows from a letter or a gap}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/b,1/a,2/b,3/a,4/d}{
+    \node[arraycell] (p\x) at (1.1*\x,1.0) {\v};
+  }
+  \node[draw=orange,very thick,fit=(p0)(p1)(p2),inner sep=1mm] {};
+  \node[right=12mm of p4,text=orange]{middle letter: \texttt{a}};
+
+  \foreach \x/\v in {0/c,1/b,2/b,3/d}{
+    \node[arraycell] (q\x) at (1.1*\x,-0.7) {\v};
+  }
+  \node[draw=teal,very thick,fit=(q1)(q2),inner sep=1mm] {};
+  \node[right=12mm of q3,text=teal]{middle gap: between the two b's};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+bestStart = 0; bestLength = 1
+for center from 0 to n-1:
+    expand(center, center)       // odd length
+    expand(center, center + 1)   // even length
+expand(left, right):
+    while boundaries match: move both outward
+    update the longest valid range just crossed
+return the recorded substring
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Longest Palindromic Substring}]
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int bestStart = 0, bestLength = 1;
+        auto expand = [&](int left, int right) {
+            while (left >= 0 && right < static_cast<int>(s.size()) &&
+                   s[left] == s[right]) {
+                --left;
+                ++right;
+            }
+            const int length = right - left - 1;
+            if (length > bestLength) {
+                bestLength = length;
+                bestStart = left + 1;
+            }
+        };
+
+        for (int center = 0; center < static_cast<int>(s.size()); ++center) {
+            expand(center, center);
+            expand(center, center + 1);
+        }
+        return s.substr(bestStart, bestLength);
+    }
+};
+\end{lstlisting}
+
+\subsection{Dry Run and Complexity}
+For \texttt{babad}, expanding around index 1 finds \texttt{bab}; expanding
+around index 2 finds \texttt{aba}. Either maximum is valid. There are
+\(2n-1\) centers and each may expand \(O(n)\), so time is \(O(n^2)\) and
+extra space is \(O(1)\).
+
+\lessonexpansion
+  {For \texttt{cbbd}, the character centers produce only length-one
+   palindromes. The gap between the two \texttt{b} characters expands once to
+   form \texttt{bb}; the next outward comparison \texttt{c} versus
+   \texttt{d} fails, so \texttt{bb} is recorded.}
+  {Every palindrome has one unique center: a character for odd length or a
+   gap for even length. Expansion enumerates every palindrome belonging to
+   that center, so testing all \(2n-1\) centers cannot miss the optimum.}
+  {Check empty handling if the interface permits it, one character, two equal
+   characters, two unequal characters, an even optimum, and tied optima.}
+  {I expand from every character and every adjacent-character gap. Matching
+   boundaries extend a valid palindrome; after the first mismatch I compare
+   the last valid length with the best recorded range.}
+
+\chaptercheckpoint
+  {The answer is a consecutive palindrome, not a subsequence.}
+  {A center and two outward-moving boundaries.}
+  {Checking only odd centers and missing even palindromes.}
+  {$O(n^2)$ time and $O(1)$ extra space.}
+
+
+\problemstart{Longest Substring Without Repeating Characters}{3}{Medium}{Sliding window}{Last-position table}
+
+\subsection{The Problem}
+Return the length of the longest substring containing no repeated character.
+
+\subsection{Jump the Left Boundary}
+When the right character was already seen inside the active window, the next
+valid window must begin after its previous occurrence. A last-position table
+lets the left boundary jump directly rather than removing characters one by
+one.
+
+\begin{invariantbox}{the active window contains unique characters}
+Before recording the answer at each right endpoint, \texttt{left} is greater
+than the previous position of every duplicated character in the window.
+So \texttt{s[left..right]} contains no repeated character.
+\end{invariantbox}
+
+\begin{visualbox}{A repeated a moves the left edge past the old a}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/a,1/b,2/c,3/a,4/b,5/c,6/b,7/b}{
+    \node[arraycell] (u\x) at (0.95*\x,0) {\v};
+  }
+  \node[draw=teal,very thick,fit=(u1)(u2)(u3),inner sep=1mm] {};
+  \node[below=7mm of u0,text=orange]{old a};
+  \node[below=7mm of u3,text=orange]{repeated a};
+  \draw[->,very thick,orange] ([yshift=9mm]u0.north)--
+    node[edgelabel,above]{move the left edge here} ([yshift=9mm]u1.north);
+  \node[above=16mm of u2,text=teal,font=\bfseries]{valid window: \texttt{bca}};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+last position of every character = -1
+left = 0; answer = 0
+for right from 0 to n-1:
+    left = max(left, last[s[right]] + 1)
+    last[s[right]] = right
+    answer = max(answer, right - left + 1)
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Longest Substring Without Repeats}]
+#include <algorithm>
+#include <array>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        array<int, 256> last;
+        last.fill(-1);
+        int left = 0, answer = 0;
+        for (int right = 0; right < static_cast<int>(s.size()); ++right) {
+            const unsigned char ch = static_cast<unsigned char>(s[right]);
+            left = max(left, last[ch] + 1);
+            last[ch] = right;
+            answer = max(answer, right - left + 1);
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works and Complexity}
+The left boundary never moves backward, even if the character's last
+occurrence lies before the current window. Each character is processed once,
+so time is \(O(n)\) and the fixed table uses \(O(1)\) space for byte-valued
+characters. Empty input correctly returns zero.
+
+\lessonexpansion
+  {For \texttt{abba}, the second \texttt{b} moves \texttt{left} from 0 to 2,
+   leaving \texttt{b}. At the final \texttt{a}, its previous position 0 lies
+   outside the current window, so \texttt{left} stays 2 and the valid window
+   becomes \texttt{ba}. The earlier window \texttt{ab} remains the best.}
+  {The left boundary is always one position beyond the most recent duplicate
+   that lies inside the active window. So every recorded window is
+   unique, and every longest unique suffix ending at each right boundary is
+   considered.}
+  {Test an empty string, all identical characters, all unique characters,
+   repeated characters outside the current window, and byte values with a
+   negative plain-\texttt{char} representation.}
+  {I store the latest index of each character. When a repeat appears, the left
+   boundary jumps forward past its previous copy but never moves backward.
+   Each character is processed once, so the algorithm is linear.}
+
+\chaptercheckpoint
+  {A longest substring must contain unique characters.}
+  {Two boundaries and the most recent index of each character.}
+  {Moving left backward to an occurrence outside the current window.}
+  {$O(n)$ time and $O(1)$ table space.}
+
+
+\problemstart{Palindromic Substrings}{647}{Medium}{Interval dynamic programming}{Two-dimensional DP table}
+
+\subsection{The Problem}
+Count every palindromic substring. Equal text at different positions counts
+as different substrings.
+
+\begin{conceptbox}{Examples and positional counting}
+\texttt{"abc"} contains three palindromic substrings: \texttt{"a"},
+\texttt{"b"}, and \texttt{"c"}. The string \texttt{"aaa"} contains six:
+three length-one intervals, two length-two intervals, and one length-three
+interval. Equal text at different positions counts separately.
+\end{conceptbox}
+
+\subsection{From Repeated Checks to Interval DP}
+A direct method can generate every substring and scan inward to determine
+whether it is a palindrome. There are \(O(n^2)\) intervals and each check can
+cost \(O(n)\), producing \(O(n^3)\) work.
+
+Instead, let \(dp[i][j]\) mean that the interval from index \(i\) through
+index \(j\) is a palindrome. The outer characters must match, and the interior
+must already be a palindrome. Intervals of length one and two form the base
+cases: \(dp[i][j]=(s[i]=s[j])\land\bigl(j-i\le1\ \lor\ dp[i+1][j-1]\bigr).\)
+
+\begin{invariantbox}{every interior interval is solved before its exterior}
+The table is filled with \(i\) moving from right to left and \(j\) moving from
+\(i\) to the right. So \(dp[i+1][j-1]\) is known before
+\(dp[i][j]\). Every true table cell corresponds to exactly one pair of
+substring endpoints and increases the answer once.
+\end{invariantbox}
+
+\begin{visualbox}{Six checked cells mean six palindromes in \texttt{aaa}}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \matrix[matrix of nodes,
+    nodes={arraycell,minimum width=13mm,minimum height=10mm},
+    row sep=-\pgflinewidth,column sep=-\pgflinewidth] (m) {
+      \checkmark & \checkmark & \checkmark \\
+                 & \checkmark & \checkmark \\
+                 &            & \checkmark \\
+  };
+  \node[above=3mm of m-1-1]{end 0};
+  \node[above=3mm of m-1-2]{end 1};
+  \node[above=3mm of m-1-3]{end 2};
+  \node[left=3mm of m-1-1]{start 0};
+  \node[left=3mm of m-2-2]{start 1};
+  \node[left=3mm of m-3-3]{start 2};
+  \node[right=18mm of m-2-3,dsnode,fill=softteal]
+    {each check mark is\\one palindrome range};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+count = 0
+dp = n by n table filled with false
+for left from n - 1 down to 0:
+    for right from left to n - 1:
+        shortInterior = (right - left <= 1)
+        if s[left] == s[right] and
+           (shortInterior or dp[left + 1][right - 1]):
+            dp[left][right] = true
+            count++
+return count
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Palindromic Substrings}]
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int countSubstrings(string s) {
+        const int n = static_cast<int>(s.size());
+        vector<vector<bool>> dp(
+            n, vector<bool>(n, false));
+        int answer = 0;
+
+        for (int left = n - 1; left >= 0; --left) {
+            for (int right = left; right < n; ++right) {
+                const bool shortInterior = right - left <= 1;
+                if (s[left] == s[right] &&
+                    (shortInterior || dp[left + 1][right - 1])) {
+                    dp[left][right] = true;
+                    ++answer;
+                }
+            }
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Detailed Visual Dry Run}
+\begin{dryrunbox}{Fill order for \texttt{aaa}}
+\begin{tabularx}{\linewidth}{@{}c c X c@{}}
+\toprule
+\(i\) & \(j\) & Reason & Count \\
+\midrule
+2 & 2 & Single character \texttt{a} & 1 \\
+1 & 1 & Single character \texttt{a} & 2 \\
+1 & 2 & Equal endpoints and length two & 3 \\
+0 & 0 & Single character \texttt{a} & 4 \\
+0 & 1 & Equal endpoints and length two & 5 \\
+0 & 2 & Equal endpoints; \(dp[1][1]\) is true & 6 \\
+\bottomrule
+\end{tabularx}
+\end{dryrunbox}
+
+\subsection{Why It Works, Complexity, and Edge Cases}
+The update rule is needed because a palindrome requires matching endpoints
+and a palindromic interior. It is enough for the same reason. Since every
+interval is represented by one table cell, every palindromic substring is
+counted exactly once. Time and table space are both \(O(n^2)\).
+
+Test one character, all equal characters, no multi-character palindrome, and
+both odd- and even-length palindromes. The loop order must not be reversed,
+because the interior state must already be available.
+
+\lessonexpansion
+  {For \texttt{abba}, the single-character diagonal is true first. Length-two
+   intervals then identify \texttt{bb}. When the cell for indices \((0,3)\)
+   is reached, the endpoints are both \texttt{a} and the interior cell for
+   \texttt{bb} is already true, so \texttt{abba} is counted. Each true cell
+   represents one distinct pair of positions.}
+  {The update rule is needed: unequal endpoints cannot form a palindrome,
+   and a long interval with matching endpoints still fails if its interior is
+   not palindromic. It is enough because matching endpoints placed around
+   a palindromic interior produce a palindrome. The fill order guarantees that
+   the required interior result is available.}
+  {Check an empty string if the surrounding interface permits it, one
+   character, two equal characters, two unequal characters, all-equal input,
+   and strings containing both even- and odd-length palindromes.}
+  {I assign one Boolean state to every substring interval. Matching endpoints
+   form a palindrome when the interval is shorter than three or its interior
+   was already proved palindromic. Filling from right to left resolves that
+   dependency and counts each positional substring once.}
+
+\chaptercheckpoint
+  {Count all palindromic intervals rather than the longest one.}
+  {A Boolean table whose cells represent substring endpoints.}
+  {Reading an interior cell before it has been computed.}
+  {$O(n^2)$ time and $O(n^2)$ space.}
+
+
+\patternintoc{Interval Scheduling}
+\problemstart{Meeting Rooms}{252}{Easy}{Sort and scan}{Intervals}
+
+\subsection{The Problem}
+Given meeting intervals, determine whether one person can attend all of them.
+Meetings conflict when their occupied times overlap.
+
+\subsection{Sort by Start Time}
+After sorting, any overlap must occur between two adjacent meetings: if the
+current start is earlier than the previous end, both require the room at the
+same time.
+
+\begin{invariantbox}{all meetings before the current one are compatible}
+During the scan, every already checked adjacent pair is non-overlapping. The
+previous interval has the latest relevant start among them, so comparing its
+end with the current start is enough.
+\end{invariantbox}
+
+\begin{visualbox}{The first two meetings overlap}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]},x=7mm]
+  \draw[->,navy] (0,0)--(11,0);
+  \foreach \x in {0,2,4,6,8,10} \draw (\x,0.1)--(\x,-0.1) node[edgelabel,below]{\x};
+  \draw[line width=4pt,teal] (0,0.7)--(3,0.7) node[edgelabel,midway,above]{[0,3]};
+  \draw[line width=4pt,orange] (2,1.4)--(6,1.4) node[edgelabel,midway,above]{[2,6]};
+  \draw[line width=4pt,navy] (7,0.7)--(10,0.7) node[edgelabel,midway,above]{[7,10]};
+  \node[text=orange] at (2.5,2.1) {both use time 2 to 3};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+sort intervals by start time
+for i from 1 to n-1:
+    if intervals[i].start < intervals[i-1].end:
+        return false
+return true
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Meeting Rooms}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    bool canAttendMeetings(vector<vector<int>>& intervals) {
+        sort(intervals.begin(), intervals.end());
+        for (int i = 1; i < static_cast<int>(intervals.size()); ++i) {
+            if (intervals[i][0] < intervals[i - 1][1]) return false;
+        }
+        return true;
+    }
+};
+\end{lstlisting}
+
+\subsection{Complexity and Boundary Rule}
+Sorting costs \(O(n\log n)\); the scan is \(O(n)\). Adjacent meetings such as
+\([1,2]\) and \([2,3]\) do not overlap, so the comparison is strict
+\texttt{<}, not \texttt{<=}.
+
+\lessonexpansion
+  {Sort \texttt{[[7,10],[2,4],[1,3]]} into
+   \texttt{[[1,3],[2,4],[7,10]]}. The second meeting starts at 2 before the
+   previous meeting ends at 3, so the schedule immediately fails.}
+  {After sorting by start time, if any overlap exists, one also exists between
+   two adjacent intervals in that order. Checking each interval against the
+   preceding end is enough.}
+  {Check no meetings, one meeting, touching endpoints, identical intervals,
+   nested intervals, and input already sorted in reverse order.}
+  {I sort by start time so conflicts become adjacent. I then compare each
+   start with the preceding end; a strict earlier start means overlap.}
+
+\chaptercheckpoint
+  {Determine whether any time intervals overlap.}
+  {Intervals sorted by start time and the previous end.}
+  {Treating a meeting that starts exactly at the prior end as a conflict.}
+  {$O(n\log n)$ time.}
+
+
+\patternintoc{Greedy Reachability}
+\problemstart{Jump Game}{55}{Medium}{Greedy reachability}{Array}
+
+\subsection{The Problem}
+Each array value is the maximum jump length from that position. Return whether
+the final index is reachable from index zero.
+
+\subsection{Keep the Reachable Frontier}
+If index \(i\) is within the farthest reachable position, then every landing
+position up to \(i+\texttt{nums[i]}\) also becomes reachable. If the scan ever
+passes the frontier, no future position can be used.
+
+\begin{invariantbox}{every index through farthest is reachable}
+Before examining index \(i\), every position from zero through
+\texttt{farthest} can be reached. When \(i\le\texttt{farthest}\), processing
+its jump can only extend this consecutive reachable prefix.
+\end{invariantbox}
+
+\begin{visualbox}{Reach index 2, then extend the reach to index 4}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/2,1/3,2/1,3/1,4/4}{
+    \node[arraycell] (j\x) at (1.15*\x,0) {\v};
+    \node[below=1mm of j\x,font=\scriptsize]{\x};
+  }
+  \draw[->,very thick,teal] ([yshift=9mm]j0.north)--node[edgelabel,above]{from 0, reach 2} ([yshift=9mm]j2.north);
+  \draw[->,very thick,orange] ([yshift=16mm]j1.north)--node[edgelabel,above]{from 1, reach 4} ([yshift=16mm]j4.north);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+farthest = 0
+for i from 0 to n-1:
+    if i > farthest: return false
+    farthest = max(farthest, i + nums[i])
+    if farthest >= n - 1: return true
+return true
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Jump Game}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int farthest = 0;
+        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {
+            if (i > farthest) return false;
+            farthest = max(farthest, i + nums[i]);
+            if (farthest >= static_cast<int>(nums.size()) - 1) return true;
+        }
+        return true;
+    }
+};
+\end{lstlisting}
+
+\subsection{Complexity and Mistakes}
+The scan is \(O(n)\) time and \(O(1)\) space. The state is reachability, not
+the exact path or the minimum number of jumps. A zero is harmless if the
+frontier already extends beyond it, but fatal when it blocks the frontier.
+
+\lessonexpansion
+  {For \texttt{[3,2,1,0,4]}, indices 0 through 3 are reachable, but none can
+   extend the frontier beyond 3. When the scan reaches index 4, \(4>3\), so
+   the destination is unreachable. For \texttt{[2,3,1,1,4]}, index 1 extends
+   the frontier directly to 4.}
+  {The reachable indices always form a prefix. Processing every index inside
+   that prefix records the farthest next endpoint; seeing an index
+   beyond it proves no earlier jump can reach that position or anything after
+   it.}
+  {Test one element, a leading zero, zeros already covered by the frontier,
+   an exact jump to the end, and a frontier that stops one position short.}
+  {I do not choose an exact path. I scan the reachable prefix and keep its
+   farthest extension. If the scan ever moves beyond that frontier the answer
+   is false; reaching the last index makes it true.}
+
+\chaptercheckpoint
+  {Each position supplies a maximum forward reach.}
+  {The farthest reachable index.}
+  {Assuming every zero is automatically impossible.}
+  {$O(n)$ time and $O(1)$ space.}
+
+
+\patternintoc{BSTs and Tree Depth}
+\problemstart{Maximum Depth of Binary Tree}{104}{Easy}{Recursive DFS}{Binary tree}
+
+\subsection{The Problem}
+Return the number of nodes on the longest path from the root to a leaf. An
+empty tree has depth zero.
+
+\subsection{Recursive Definition}
+The maximum depth of a non-null node is one plus the larger depth of its two
+subtrees. This definition translates directly into postorder recursion.
+
+\begin{invariantbox}{each call returns the exact depth of its subtree}
+After both child calls return, their depths are correct by the recursive
+hypothesis. Adding one for the current node produces the correct
+longest root-to-leaf node count for the current subtree.
+\end{invariantbox}
+
+\begin{visualbox}{The deepest root-to-leaf path contains three nodes}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (r) {3};
+  \node[trienode,below left=12mm and 18mm of r] (a) {9};
+  \node[trienode,below right=12mm and 18mm of r] (b) {20};
+  \node[trienode,visited,below left=12mm and 8mm of b] (c) {15};
+  \node[trienode,below right=12mm and 8mm of b] (d) {7};
+  \draw[-,thick,navy] (r)--(a); \draw[-,very thick,orange] (r)--(b);
+  \draw[-,very thick,orange] (b)--(c); \draw[-,thick,navy] (b)--(d);
+  \node[right=25mm of r,align=left] (steps)
+    {15 has depth 1\\20 has depth 2\\3 has depth 3};
+  \node[below=6mm of c,text=orange,font=\bfseries]{deepest path};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+depth(node):
+    if node is null: return 0
+    leftDepth = depth(node.left)
+    rightDepth = depth(node.right)
+    return 1 + max(leftDepth, rightDepth)
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Maximum Depth of Binary Tree}]
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        if (root == nullptr) return 0;
+        return 1 + max(maxDepth(root->left), maxDepth(root->right));
+    }
+};
+\end{lstlisting}
+
+\subsection{Time, Space, and Edge Cases}
+Every node is visited once: \(O(n)\) time. The recursion stack is \(O(h)\),
+which is \(O(n)\) for a skewed tree and \(O(\log n)\) for a balanced tree.
+
+\lessonexpansion
+  {In the tree \texttt{[3,9,20,null,null,15,7]}, both children of 20 return
+   depth 1, so node 20 returns 2. Node 9 returns 1, and the root returns
+   \(1+\max(1,2)=3\).}
+  {The empty subtree has depth zero. Assuming both child calls return correct
+   depths, adding one to their maximum gives exactly the longest root-to-leaf
+   node count, which proves the update rule by working upward from the leaves.}
+  {Check a null root, one node, a left-only chain, a right-only chain, and a
+   balanced tree whose deepest leaves occur on both sides.}
+  {I ask each child for its subtree depth and return one plus the larger
+   result. Every node is visited once, while extra space equals the tree
+   height because of recursion.}
+
+\chaptercheckpoint
+  {A parent answer depends on the deeper child subtree.}
+  {Recursive subtree depths.}
+  {Counting edges when the requested depth counts nodes.}
+  {$O(n)$ time and $O(h)$ stack space.}
+
+
+\problemstart{Kth Smallest Element in a BST}{230}{Medium}{Inorder traversal}{BST and stack}
+
+\subsection{The Problem}
+Given a binary search tree and \(k\), return its \(k\)-th smallest value.
+
+\subsection{Use the BST Ordering}
+An inorder traversal of a BST visits values in ascending order. An explicit
+stack pauses the walk while descending left, then emits one node at a time.
+The \(k\)-th popped node is the answer.
+
+\begin{invariantbox}{the next popped node is the smallest unvisited value}
+The stack stores the path to the next inorder node. All values already popped
+are smaller, and every unvisited value in a right subtree is processed only
+after its parent.
+\end{invariantbox}
+
+\begin{visualbox}{Inorder turns the BST into sorted output}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode] (r) {3}; \node[trienode,below left=11mm and 15mm of r] (a) {1};
+  \node[trienode,below right=11mm and 15mm of r] (b) {4};
+  \node[trienode,below right=10mm and 6mm of a] (c) {2};
+  \draw[flowarrow] (r)--(a); \draw[flowarrow] (r)--(b); \draw[flowarrow] (a)--(c);
+  \node[dsnode,right=28mm of r,align=left] {inorder: \(1,2,3,4\)\\\(k=2\Rightarrow2\)};
+  \node[draw=orange,very thick,fit=(c),inner sep=1mm] {};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+stack = empty; current = root
+while current exists or stack is not empty:
+    while current exists:
+        push current; current = current.left
+    current = pop stack
+    decrement k; if k is zero: return current.value
+    current = current.right
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Kth Smallest in a BST}]
+#include <stack>
+
+using namespace std;
+
+class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        stack<TreeNode*> path;
+        TreeNode* current = root;
+        while (current != nullptr || !path.empty()) {
+            while (current != nullptr) {
+                path.push(current);
+                current = current->left;
+            }
+            current = path.top();
+            path.pop();
+            if (--k == 0) return current->val;
+            current = current->right;
+        }
+        return -1;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+The traversal stops after reaching the answer. Worst-case time is \(O(n)\),
+and stack space is \(O(h)\). The problem guarantees a valid \(k\), so the
+fallback return is unreachable for valid input.
+
+\lessonexpansion
+  {For the BST \texttt{[3,1,4,null,2]} with \(k=2\), push 3 and 1 while
+   descending left. Pop 1 as rank one, move to its right child 2, then pop 2
+   as rank two and return it.}
+  {Inorder traversal emits BST values in sorted order. The stack stores the
+   unprocessed ancestors needed to resume that order, so the \(k\)-th pop is
+   exactly the \(k\)-th smallest value.}
+  {Check \(k=1\), \(k=n\), a skewed tree, a balanced tree, and a target found
+   after entering a right subtree.}
+  {I perform iterative inorder traversal and decrement \(k\) whenever a node
+   is popped. Since inorder is sorted for a BST, the node that reduces
+   \(k\) to zero is the answer.}
+
+\chaptercheckpoint
+  {A rank is requested from a binary search tree.}
+  {An inorder path stack and a remaining rank counter.}
+  {Using preorder, which does not emit sorted values.}
+  {$O(n)$ worst-case time and $O(h)$ space.}
+
+
+\problemstart{Lowest Common Ancestor of a BST}{235}{Medium}{Ordered tree search}{BST}
+
+\subsection{The Problem}
+Return the lowest node in a BST that is an ancestor of both given nodes. A
+node may be an ancestor of itself.
+
+\subsection{Follow the Shared Direction}
+If both target values are smaller than the current value, their ancestor lies
+left. If both are larger, it lies right. Otherwise the paths split at the
+current node, which is their lowest common ancestor.
+
+\begin{invariantbox}{both targets remain inside the current subtree}
+Every move selects the only child subtree that can contain both values under
+the BST ordering. The first node where the targets no longer share a strict
+direction is the deepest node whose subtree contains them both.
+\end{invariantbox}
+
+\begin{visualbox}{The first path split is the answer}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (r) {6};
+  \node[trienode,visited,below left=12mm and 20mm of r] (a) {2};
+  \node[trienode,visited,below right=12mm and 20mm of r] (b) {8};
+  \node[trienode,below left=11mm and 8mm of a] (c) {0};
+  \node[trienode,below right=11mm and 8mm of a] (d) {4};
+  \draw[flowarrow] (r)--(a); \draw[flowarrow] (r)--(b);
+  \draw[flowarrow] (a)--(c); \draw[flowarrow] (a)--(d);
+  \node[above=5mm of r,text=orange]{LCA of 2 and 8};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+current = root
+while current exists:
+    if p and q are both smaller: current = current.left
+    else if p and q are both larger: current = current.right
+    else: return current
+return null
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: LCA of a BST}]
+using namespace std;
+
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root,
+                                   TreeNode* p, TreeNode* q) {
+        TreeNode* current = root;
+        while (current != nullptr) {
+            if (p->val < current->val && q->val < current->val) {
+                current = current->left;
+            } else if (p->val > current->val && q->val > current->val) {
+                current = current->right;
+            } else {
+                return current;
+            }
+        }
+        return nullptr;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Only one root-to-node path is followed: \(O(h)\) time and \(O(1)\) space.
+Unlike the general binary-tree version, no parent map or full traversal is
+needed because ordering tells which subtree can contain each value.
+
+\lessonexpansion
+  {In the BST rooted at 6, targets 2 and 4 are both smaller than 6, so move to
+   node 2. At node 2, one target equals the current value while the other lies
+   to the right; their paths split here, making node 2 the LCA.}
+  {BST ordering proves that when both targets are smaller or both are larger,
+   only one child subtree can still contain both. The first node where neither
+   shared direction applies is their deepest common ancestor.}
+  {Check targets on opposite sides of the root, one target equal to the LCA,
+   adjacent nodes, and both targets deep in the same subtree.}
+  {I follow the one direction shared by both target values. When they split,
+   or when the current node equals one target, the current node is the lowest
+   common ancestor.}
+
+\chaptercheckpoint
+  {Find a shared ancestor in an ordered binary tree.}
+  {The current root and the two target values.}
+  {Ignoring the case where the current node equals one target.}
+  {$O(h)$ time and $O(1)$ space.}
+
+
+\patternintoc{Heaps and Scheduling}
+\problemstart{Meeting Rooms II}{253}{Medium}{Minimum end-time heap}{Intervals and min heap}
+
+\subsection{The Problem}
+Return the minimum number of rooms needed to hold all meetings without
+overlap.
+
+\subsection{Track Rooms by Their End Times}
+Sort meetings by start. A min heap stores the ending time of every room
+currently in use. Before assigning a meeting, release every room whose meeting
+has ended; then push the new end. The maximum heap size is the answer.
+
+\begin{invariantbox}{the heap contains exactly the occupied rooms}
+After expired end times are removed for a start time, each remaining heap
+entry belongs to a meeting overlapping the new one. Pushing the current end
+makes the heap size equal to the rooms simultaneously occupied.
+\end{invariantbox}
+
+\begin{visualbox}{The earliest ending room is released first}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,active] (m) {new meeting\\starts at 5};
+  \node[trienode,visited,right=25mm of m] (h0) {4};
+  \node[trienode,below left=10mm and 8mm of h0] (h1) {8};
+  \node[trienode,below right=10mm and 8mm of h0] (h2) {10};
+  \draw[-,thick,navy] (h0)--(h1); \draw[-,thick,navy] (h0)--(h2);
+  \draw[flowarrow,teal] (m)--node[edgelabel,above]{\(5\ge4\)} (h0);
+  \node[dsnode,fill=softteal,below=8mm of m] (free) {pop 4\\reuse its room};
+  \draw[flowarrow,teal] (m)--node[edgelabel,left,font=\scriptsize]{then} (free);
+  \node[above=6mm of h0]{min-heap of room end times};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+sort meetings by start time
+minHeap = empty; answer = 0
+for each meeting:
+    while heap top <= meeting.start: pop heap
+    push meeting.end
+    answer = max(answer, heap size)
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Meeting Rooms II}]
+#include <algorithm>
+#include <functional>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int minMeetingRooms(vector<vector<int>>& intervals) {
+        sort(intervals.begin(), intervals.end());
+        priority_queue<int, vector<int>, greater<int>> ends;
+        int answer = 0;
+        for (const auto& meeting : intervals) {
+            while (!ends.empty() && ends.top() <= meeting[0]) ends.pop();
+            ends.push(meeting[1]);
+            answer = max(answer, static_cast<int>(ends.size()));
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Sorting and heap operations cost \(O(n\log n)\) time. The heap uses \(O(n)\)
+space in the worst case. Removing all expired rooms keeps the key rule exact;
+removing only one is enough for some variants but less directly models
+the current occupancy.
+
+\lessonexpansion
+  {For \texttt{[[0,30],[5,10],[15,20]]}, push 30 for the first room. At start
+   5, room 30 is still occupied, so push 10 and the heap size becomes two. At
+   start 15, pop 10 because it has ended, then push 20. The maximum heap size
+   is two rooms.}
+  {After expired end times are removed, every heap entry corresponds to a
+   meeting that overlaps the new start. So the heap size is exactly
+   the current room demand, and its maximum is the minimum number of rooms
+   that can schedule all meetings.}
+  {Check no meetings, one meeting, touching meetings, completely nested
+   meetings, identical intervals, and many meetings ending at the same time.}
+  {I sort by start time and keep active end times in a min heap. The earliest
+   ending rooms are released before each insertion. The maximum number of
+   active end times is the required room count.}
+
+\chaptercheckpoint
+  {Return maximum simultaneous interval occupancy.}
+  {Meetings sorted by start and a min heap of active end times.}
+  {Using a max heap, which hides the room that becomes free first.}
+  {$O(n\log n)$ time and $O(n)$ space.}

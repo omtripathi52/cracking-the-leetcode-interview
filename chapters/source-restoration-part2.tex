@@ -1,0 +1,343 @@
+% Additional explanations for the middle group of lessons.
+
+\expandafter\def\csname sourcewalkthrough@26\endcsname{%
+A useful way to begin is to ask: what does the current sum
+mean at one exact index? It is not the best sum anywhere in the array. It is
+the best sum of a subarray that must end at the current value. This difference
+is what makes one pass possible. If the old running sum is negative, carrying
+it forward only makes the next choice worse, so the scan starts again. If it
+is positive, adding the new value may continue a useful block.
+
+For \texttt{[-2,1,-3,4,-1,2,1,-5,4]}, the running value is first \(-2\).
+At 1, starting again is better than extending \(-2\), so the running value
+becomes 1. The same decision happens again at 4 because the sum before it is
+negative. From 4 onward, the values \(-1,2,1\) still leave a positive running
+sum, so that block is kept. A separate variable stores the best running value
+ever seen. Initializing both variables from the first element, rather than
+zero, is important when every array value is negative.}
+
+\expandafter\def\csname sourcewalkthrough@27\endcsname{%
+Products need one more piece of state than sums. A very small negative product
+can become a very large positive product after another negative number. For
+that reason, the scan keeps both the largest and smallest product ending at
+the current position. Neither one can be discarded early.
+
+At every value there are three choices: start a new subarray with this value,
+multiply it by the previous maximum, or multiply it by the previous minimum.
+The largest candidate becomes the new maximum and the smallest becomes the
+new minimum. With \texttt{[-2,3,-4]}, the states after 3 are maximum 3 and
+minimum \(-6\). When \(-4\) arrives, \((-6)(-4)=24\), so the old minimum
+creates the new maximum. Zero also works naturally: it can end the old block
+and start a new one. Both old states must be saved before either is updated,
+otherwise the second calculation may use a value from the current step.}
+
+\expandafter\def\csname sourcewalkthrough@28\endcsname{%
+The window does not need every character to match already. It only needs to
+be repairable with at most \(k\) replacements. Inside a window of length
+\(L\), keep the character that appears most often and replace the other
+\(L-f\) positions. The window is allowed exactly when \(L-f\le k\).
+
+As the right edge moves, update the count for the new character and the
+largest frequency seen. If the replacement cost is too large, move the left
+edge and remove those characters from the active counts. The stored maximum
+frequency is allowed to be slightly old. It may delay a shrink, but it cannot
+produce a better answer that was never possible earlier. For
+\texttt{AABABBA} with \(k=1\), \texttt{AABA} is valid because three of its
+four positions are A. Extending farther breaks the budget, so the left edge
+moves. Each edge moves only forward, which is why the work is linear.}
+
+\expandafter\def\csname sourcewalkthrough@29\endcsname{%
+A palindrome grows from its middle. An odd-length palindrome has one middle
+character, while an even-length palindrome has a gap between two characters.
+Those are the only two kinds of centers, so testing both at every position
+finds every possible palindrome.
+
+For each center, place one pointer on the left and one on the right. While the
+indexes are valid and the characters match, record the current length and
+move both pointers outward. In \texttt{babad}, the center at the first
+\texttt{a} expands to \texttt{bab}; the next center can produce
+\texttt{aba}. Either length-three answer is valid. The important boundary
+detail is that the pointers move one step beyond the palindrome before the
+loop stops, so the found substring begins at \texttt{left+1} and has length
+\texttt{right-left-1}. Empty input and a two-character even palindrome are
+good checks for the index arithmetic.}
+
+\expandafter\def\csname sourcewalkthrough@30\endcsname{%
+The active substring must contain no repeated character. A direct solution
+can restart from every index, but it repeatedly examines the same characters.
+The sliding window keeps the longest useful suffix instead. A table records
+the most recent position of each character.
+
+When the right pointer sees a character that already appears inside the
+window, the left pointer jumps to one position after that old occurrence. It
+must never move backward, so the update uses the larger of the current left
+edge and the stored position plus one. In \texttt{abba}, seeing the second
+\texttt{b} moves left past the first b. When the final a is read, its old
+position lies outside the current window, so left stays where it is. This is
+the case that breaks solutions that assign \texttt{left=last[a]+1} without a
+maximum. The answer is updated after the window is valid.}
+
+\expandafter\def\csname sourcewalkthrough@31\endcsname{%
+This problem asks for a count rather than one longest answer. Every single
+character is already a palindrome, and larger palindromes are formed by
+matching equal ends around a smaller palindrome. A two-dimensional table can
+store whether each substring \([i,j]\) is palindromic.
+
+The ends match when \texttt{s[i]==s[j]}. The inside is automatically valid
+for substrings of length one or two; for longer substrings, the table entry
+\([i+1,j-1]\) must already be true. That dependency tells us to fill shorter
+lengths before longer ones. Each true entry adds one to the answer. For
+\texttt{aaa}, the three single letters, two length-two substrings, and the
+whole string give six. Expanding around centers is another valid approach and
+uses constant extra space, but the table makes the exact recurrence visible
+and connects naturally to later interval dynamic-programming problems.}
+
+\expandafter\def\csname sourcewalkthrough@32\endcsname{%
+Only one question matters after sorting: does the next meeting begin before
+the current one ends? If it does, one room cannot hold both meetings. If it
+does not, the current room becomes free in time.
+
+Sorting by start time puts the meetings in the order in which they must be
+considered. For \texttt{[[0,30],[5,10],[15,20]]}, the meeting beginning at 5
+overlaps the one ending at 30, so the answer is false. For
+\texttt{[[7,10],[2,4]]}, sorting gives \([2,4]\) then \([7,10]\), and there
+is no overlap. Touching endpoints such as \([1,3]\) and \([3,5]\) are
+allowed because one meeting ends exactly when the next begins. The sort costs
+\(O(n\log n)\); after that, the scan only compares neighboring intervals.}
+
+\expandafter\def\csname sourcewalkthrough@33\endcsname{%
+Treat each position as a statement about future reach. From the
+current index, \texttt{i+nums[i]} is the farthest place reachable with one
+more jump. The algorithm keeps the farthest position reachable from any index
+seen so far.
+
+Before using an index, first check that it is not beyond the current reach. If
+\texttt{i>farthest}, there is a gap that no earlier jump can cross, so the
+answer is false. Otherwise, enlarge \texttt{farthest} with the current jump.
+For \texttt{[2,3,1,1,4]}, index 0 reaches 2, and index 1 extends the reach to
+4, which is the final index. For \texttt{[3,2,1,0,4]}, the reach stops at 3;
+index 4 cannot be processed. The algorithm does not need to construct the
+actual jump sequence because the question asks only whether a path exists.}
+
+\expandafter\def\csname sourcewalkthrough@34\endcsname{%
+The depth of a node is one plus the larger depth of its two children. This
+definition leads directly to a recursive solution. A null child contributes
+zero, and a leaf therefore returns one.
+
+The calls first move down until they reach null pointers. As recursion returns,
+each node receives the completed depths of its left and right subtrees and
+adds one for itself. In a tree whose root has a shallow left child and a
+deeper right chain, the maximum follows the right side even though both sides
+are still evaluated. Every node is visited once, so the work is linear. The
+extra space comes from the call stack and equals the tree height: logarithmic
+for a balanced tree and linear for a completely skewed tree. A breadth-first
+solution can also count levels, but recursion matches the mathematical
+definition with less bookkeeping.}
+
+\expandafter\def\csname sourcewalkthrough@35\endcsname{%
+Inorder traversal of a binary search tree visits values in sorted order. The
+\(k\)-th value produced by that traversal is therefore the \(k\)-th smallest
+value in the tree. An explicit stack lets the method stop as soon as that
+value is reached.
+
+Starting at the root, push every node on the path to the leftmost child. Pop
+one node, count it, and then repeat the same left-path process from its right
+child. The stack contains ancestors whose own visit or right subtree is still
+waiting. Decrement \(k\) on each pop, not on each push. When it reaches zero,
+return that node's value. In a balanced tree the stack holds at most the tree
+height. The worst case is a skewed tree, but early stopping often avoids
+visiting every node.}
+
+\expandafter\def\csname sourcewalkthrough@36\endcsname{%
+The search can use the ordering of the BST rather than building parent links.
+At each node, compare both target values with the current value. If both are
+smaller, both targets must lie in the left subtree. If both are larger, both
+must lie in the right subtree.
+
+The first time the targets do not share one strict direction, the paths have
+split. The current node is then their lowest common ancestor. Equality also
+stops the search because a node is allowed to be an ancestor of itself. For a
+tree rooted at 6 with targets 2 and 4, both values first send the search left.
+At node 2, one target equals the current value and the other lies to the right,
+so node 2 is the answer. Only one root-to-node path is followed, giving
+\(O(h)\) time and constant extra space.}
+
+\expandafter\def\csname sourcewalkthrough@37\endcsname{%
+Meeting Rooms II asks for the largest number of meetings active at the same
+time. Sort the meetings by start time and keep the end time of each occupied
+room in a min heap. The smallest end is the room that becomes available first.
+
+Before placing a meeting, remove every end time that is less than or equal to
+its start. Those rooms are free. Push the new end, then record the largest heap
+size. With \texttt{[[0,30],[5,10],[15,20]]}, the heap becomes \([30]\), then
+contains 10 and 30, so two rooms are needed. At start 15, the end 10 is
+removed before 20 is inserted. Keeping only the earliest end at the top is
+what makes each reuse decision efficient. A max heap would expose the wrong
+room. Sorting and heap operations give \(O(n\log n)\) time.}
+
+\expandafter\def\csname sourcewalkthrough@38\endcsname{%
+The greedy choice is to keep the interval that ends first. A shorter finishing
+time leaves at least as much room for every later interval. Sort by end, keep
+the first interval, and compare every next start with the last kept end.
+
+If the next interval begins too early, count one removal and keep the earlier
+end already chosen. If it begins at or after that end, it is compatible and
+becomes the new last interval. For \texttt{[[1,2],[2,3],[3,4],[1,3]]}, the
+first three short intervals can all remain, while \([1,3]\) must be removed.
+An exchange argument explains the choice: whenever another solution keeps a
+later-finishing interval, replacing it with the greedy interval cannot make a
+future compatible interval invalid. The scan therefore keeps as many
+intervals as possible, and removals equal total intervals minus kept ones.}
+
+\expandafter\def\csname sourcewalkthrough@39\endcsname{%
+Sorting by start time turns many separate overlap checks into one comparison
+with the active merged interval. The output is built from left to right. Its
+last interval is the only one that can still grow.
+
+If the next start is greater than the last output end, there is a gap, so the
+next interval is appended. Otherwise the intervals overlap and the last end
+becomes the larger of the two ends. For \texttt{[[1,3],[2,6],[8,10],[15,18]]},
+the first two ranges become \([1,6]\). The next start, 8, lies beyond 6, so a
+new block begins. Contained intervals need no special case: taking the maximum
+end keeps the larger range. Equal endpoints merge because they share a point.
+After sorting, no interval earlier than the last output block can overlap a
+future interval.}
+
+\expandafter\def\csname sourcewalkthrough@40\endcsname{%
+Because the original intervals are already sorted and non-overlapping, they
+must fall into three consecutive regions around the inserted interval. First
+come intervals completely before it, then intervals touching or overlapping
+it, and finally intervals completely after it.
+
+Copy the first region unchanged. In the overlap region, repeatedly lower the
+new start and raise the new end. When that loop stops, append the fully merged
+new interval once, then copy the remaining suffix. Inserting \([4,8]\) into
+\texttt{[[1,2],[3,5],[6,7],[9,12]]} first copies \([1,2]\), then expands the
+new range to \([3,8]\), and finally copies \([9,12]\). The comparisons are
+deliberately strict before the range and non-strict during merging so touching
+endpoints are handled as overlaps. Each original interval is examined once.}
+
+\expandafter\def\csname sourcewalkthrough@41\endcsname{%
+The outer grid scan finds the first cell of each island. Once land is found,
+DFS marks every land cell connected to it in the four allowed directions.
+Changing visited land to water lets the input grid serve as the visited set.
+
+The DFS stops at a boundary, at water, or at a cell that was already erased.
+Only the outer scan increases the island count; recursive calls only finish
+the current component. This separation prevents one island from being counted
+many times. A diagonal land cell is not reached because the recursive calls
+use only up, down, left, and right. Every cell is checked a constant number of
+times, so time is \(O(mn)\). The recursion stack can hold \(O(mn)\) cells for
+one large winding island; an explicit stack can be used when recursion depth
+is a concern.}
+
+\expandafter\def\csname sourcewalkthrough@42\endcsname{%
+The graph may arrive as an edge list, but DFS needs to know the neighbors of
+one vertex quickly. First build an adjacency list by adding each undirected
+edge in both directions. Then scan all vertex numbers.
+
+When an unvisited vertex appears, it starts one new connected component.
+Increase the answer and run DFS or BFS to mark every vertex reachable from it.
+Later vertices from that same component will already be marked and will not
+increase the count. Isolated vertices still count because they appear in the
+outer scan even though their neighbor list is empty. With \(n\) vertices and
+\(e\) edges, adjacency construction and traversal take \(O(n+e)\) time. The
+visited array prevents cycles from causing repeated recursion.}
+
+\expandafter\def\csname sourcewalkthrough@43\endcsname{%
+The hash set gives fast membership tests, but starting a count from every value
+would still repeat work. A value begins a consecutive sequence only when its
+predecessor is absent. That one test identifies the left edge of each run.
+
+For every start, test \(x+1,x+2\), and so on until a number is missing. Record
+the longest length. In \texttt{[100,4,200,1,3,2]}, values 2, 3, and 4 do not
+start scans because their predecessors exist. Only 1 grows through the run
+\(1,2,3,4\). Although there is a loop inside another loop, each number belongs
+to only one forward scan, so the total expected work is linear. Duplicates
+disappear naturally in the set. Sorting would also work, but it costs
+\(O(n\log n)\) and changes the recognition pattern.}
+
+\expandafter\def\csname sourcewalkthrough@44\endcsname{%
+The dummy node removes the special case for the first output node. A tail
+pointer always marks the final node in the merged list. Compare the two current
+values, connect the smaller node after the tail, and advance only the list
+that supplied it.
+
+No new data nodes are required; the method reuses the existing links. When one
+list ends, its competitor is already sorted, so the complete remaining suffix
+can be attached in one step. For \texttt{1->2->4} and \texttt{1->3->4}, the
+tail follows values 1, 1, 2, 3, 4, 4. Saving the next choice before changing
+links is useful when drawing the process. Time is linear in the total number
+of nodes, and apart from the dummy node the algorithm uses constant extra
+space.}
+
+\expandafter\def\csname sourcewalkthrough@45\endcsname{%
+At any moment, the next output node must be the smallest current head among
+all lists. A min heap stores exactly those candidates. Push every non-null
+head, pop the smallest node, attach it to the result, and push that node's next
+pointer if it exists.
+
+The heap never needs every node at once; it holds at most one candidate from
+each list. With \(k\) lists, each push and pop costs \(O(\log k)\). Across
+\(N\) total nodes, the running time is \(O(N\log k)\), and heap space is
+\(O(k)\). The comparator must order node values in the min-heap direction.
+As in merging two lists, a dummy head simplifies construction and the
+original nodes can be relinked instead of copied. Empty lists are skipped when
+the heap is initialized.}
+
+\expandafter\def\csname sourcewalkthrough@46\endcsname{%
+The table state \(dp[i][j]\) means the LCS length between suffixes beginning at
+positions \(i\) and \(j\). If the two current characters match, that character
+can be used and the answer is one plus the diagonal state. If they do not
+match, one of the two current characters must be skipped.
+
+This gives the recurrence
+\(dp[i][j]=1+dp[i+1][j+1]\) for a match, otherwise the maximum of
+\(dp[i+1][j]\) and \(dp[i][j+1]\). Fill the table from the bottom right so
+all three needed states already exist. For \texttt{abcde} and \texttt{ace},
+the matching choices a, c, and e produce length three without needing to be
+adjacent. Confusing a subsequence with a substring is the main conceptual
+mistake. The full table costs \(O(mn)\) time and space, and rows can be rolled
+when only the length is required.}
+
+\expandafter\def\csname sourcewalkthrough@47\endcsname{%
+The window is valid when it contains every required occurrence from the target,
+including duplicates. A count table begins with the target requirements, and
+\texttt{missing} stores how many required character occurrences are still
+absent.
+
+When the right edge adds a character whose remaining count is positive,
+\texttt{missing} decreases. Every added character then lowers its count; extra
+copies make the count negative. Once \texttt{missing} reaches zero, move the
+left edge while the window stays valid, recording shorter answers. Removing a
+character raises its count, and if it becomes positive, a required occurrence
+has been lost. For \texttt{ADOBECODEBANC} and \texttt{ABC}, this process first
+finds \texttt{ADOBEC} and later contracts to \texttt{BANC}. Both pointers move
+only forward, so the scan is linear.}
+
+\expandafter\def\csname sourcewalkthrough@48\endcsname{%
+The expected values are \(0,1,\ldots,n\), while the array contains every one
+except the missing value. XOR combines the expected values with the actual
+values. Every number that appears in both groups cancels because
+\(x\mathbin{\char94}x=0\), and zero does not change another value.
+
+Start the answer at \(n\), because loop indexes supply only 0 through
+\(n-1\). At each index, XOR both the index and the array value. For
+\texttt{[3,0,1]}, the combined expression contains 0, 1, and 3 twice, leaving
+only 2. XOR is associative and commutative, so the order does not matter.
+This avoids the overflow risk of a sum formula and uses constant extra space.
+The important tests are a missing zero and a missing \(n\), since they expose
+incorrect initialization.}
+
+\expandafter\def\csname sourcewalkthrough@49\endcsname{%
+Subtracting one from a nonzero binary number changes its lowest 1 bit to 0 and
+changes all lower 0 bits to 1. ANDing that result with the original number
+therefore clears exactly the lowest set bit and leaves every higher bit alone.
+
+Repeat \texttt{n \&= n-1} and count the iterations. Binary
+\texttt{1011000} becomes \texttt{1010000}, then \texttt{1000000}, then zero,
+so it contains three 1 bits. The loop runs once per set bit rather than once
+per bit position. For a fixed 32-bit value, both descriptions are constant
+time, but the bit-clearing form shows the useful operation directly. The input
+must be unsigned so shifts or arithmetic around the high bit do not introduce
+signed-number behavior. Zero correctly skips the loop and returns zero.}

@@ -1,0 +1,1067 @@
+% Lessons 63--75: DP, validation, tries, search, and the final Blind 75 topics.
+
+\patternintoc{Grid DP}
+\problemstart{Unique Paths}{62}{Medium}{Grid dynamic programming}{One-dimensional DP}
+
+\subsection{The Problem}
+Count paths from the top-left to bottom-right of an \(m\times n\) grid when
+each move goes only right or down.
+
+\subsection{Each Cell Receives Paths from Two Directions}
+The number of ways into a cell is the sum of ways into the cell above and the
+cell to the left. A one-dimensional row stores both: before updating
+\texttt{dp[c]} is the value from above, while \texttt{dp[c-1]} is from left.
+
+\begin{invariantbox}{dp[c] is the path count for the current processed row}
+After column \(c\) is updated, \texttt{dp[c]} contains all paths to the current
+cell. Entries to its right still represent the previous row.
+\end{invariantbox}
+
+\begin{visualbox}{Paths flow from above and left}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \matrix[matrix of nodes,nodes={arraycell},row sep=-\pgflinewidth,column sep=-\pgflinewidth] (m) {1&1&1\\1&2&3\\1&3&6\\};
+  \node[draw=teal,very thick,fit=(m-2-3),inner sep=1mm] {};
+  \node[draw=orange,very thick,fit=(m-3-2),inner sep=1mm] {};
+  \node[draw=navy,very thick,fit=(m-3-3),inner sep=1mm] {};
+  \node[right=10mm of m-2-3,align=left]
+    {from above: 3\\from left: 3\\new value: $3+3=6$};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dp[0...n-1] = 1
+repeat for each remaining row:
+    for column from 1 to n-1:
+        dp[column] += dp[column - 1]
+return dp[n - 1]
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Unique Paths}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        vector<int> dp(n, 1);
+        for (int r = 1; r < m; ++r)
+            for (int c = 1; c < n; ++c) dp[c] += dp[c - 1];
+        return dp[n - 1];
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(mn)\), space is \(O(n)\). The first row and first column contain
+one path each, which explains the initialization to one.
+
+\lessonexpansion
+  {For a \(3\times3\) grid, start \([1,1,1]\). The second row updates to
+   \([1,2,3]\), and the third row becomes \([1,3,6]\). The final entry shows
+   six ways to reach the lower-right corner.}
+  {Every cell can be entered only from above or from the left. During a
+   left-to-right update, \texttt{dp[c]} still stores the count from above and
+   \texttt{dp[c-1]} stores the updated count from the left, so their sum is
+   exactly the new state.}
+  {Check \(1\times1\), one row, one column, a square grid, and highly
+   rectangular grids.}
+  {I compress the two-dimensional update rule into one row. Each entry adds
+   the ways from above and left, giving \(O(mn)\) time and \(O(n)\) space.}
+
+\chaptercheckpoint{Count monotone paths through a rectangular grid.}
+  {One DP row updated from above and left.}
+  {Initializing the starting boundary to zero.}{$O(mn)$ time and $O(n)$ space.}
+
+
+\patternintoc{String Scanning and Stacks}
+\problemstart{Valid Anagram}{242}{Easy}{Character-frequency equality}{Count array}
+
+\subsection{The Problem}
+Return whether two strings contain exactly the same characters with the same
+multiplicities.
+
+\begin{invariantbox}{the count array stores the remaining character imbalance}
+Incrementing for the first string and decrementing for the second leaves all
+zeros exactly when their multisets are identical.
+\end{invariantbox}
+
+\begin{visualbox}{Matching letters cancel in the frequency table}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[dsnode] (a) {\texttt{anagram}\\add counts};
+  \node[dsnode,below=9mm of a] (b) {\texttt{nagaram}\\subtract counts};
+  \node[dsnode,active,right=25mm of a,yshift=-5mm] (z) {all 26\\entries zero};
+  \draw[flowarrow] (a)--(z); \draw[flowarrow,teal] (b)--(z);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+if lengths differ: return false
+counts = 26 zeroes
+for i from 0 to n-1:
+    increment counts[s[i]]
+    decrement counts[t[i]]
+return every count is zero
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Valid Anagram}]
+#include <array>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        if (s.size() != t.size()) return false;
+        array<int,26> count{};
+        for (int i=0;i<(int)s.size();++i){++count[s[i]-'a'];--count[t[i]-'a'];}
+        for(int value:count) if(value!=0) return false;
+        return true;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(n)\), alphabet space is \(O(1)\). Length mismatch can be rejected
+immediately.
+
+\lessonexpansion
+  {For \texttt{anagram} and \texttt{nagaram}, incrementing counts from the
+   first word and decrementing them with the second returns every letter count
+   to zero. For \texttt{rat} and \texttt{car}, the \texttt{t} and
+   \texttt{c} entries remain nonzero.}
+  {Equal-length lowercase strings are anagrams exactly when every character
+   occurs the same number of times. The combined increment/decrement array
+   measures those frequency differences directly.}
+  {Check empty strings, one character, repeated letters, a length mismatch,
+   and strings differing by only one occurrence.}
+  {I compare character multisets with one fixed-size count array. Matching
+   additions and removals cancel; all zeroes at the end prove an anagram.}
+
+\chaptercheckpoint{Compare two lowercase-character multisets.}
+  {A fixed frequency-difference array.}
+  {Using a set and losing duplicate counts.}{$O(n)$ time and $O(1)$ space.}
+
+
+\problemstart{Valid Palindrome}{125}{Easy}{Filtered two pointers}{String}
+
+\subsection{The Problem}
+Ignoring non-alphanumeric characters and letter case, determine whether a
+string is a palindrome.
+
+\begin{invariantbox}{all characters outside the pointers already match}
+Each pointer skips irrelevant characters. When both point to alphanumeric
+characters, their lowercase forms must match before the search moves inward.
+\end{invariantbox}
+
+\begin{visualbox}{Pointers ignore punctuation and compare useful characters}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[draw=navy,fill=softblue,rounded corners,inner sep=3mm] (s)
+    {\texttt{A man, a plan, a canal: Panama}};
+  \node[dsnode,fill=softteal,below=7mm of s] (clean)
+    {keep lowercase\\alphanumeric characters};
+  \draw[flowarrow,teal] (s)--(clean);
+
+  \coordinate (rowcenter) at ([yshift=-12mm]clean.south);
+  \foreach \ch [count=\i from 0] in
+    {a,m,a,n,a,p,l,a,n,a,c,a,n,a,l,p,a,n,a,m,a} {
+      \node[arraycell,minimum width=5mm,minimum height=7mm,
+        inner sep=1pt,font=\scriptsize] (c\i)
+        at ([xshift={(-50+5*\i)*1mm}]rowcenter) {\ch};
+  }
+  \node[draw=teal,line width=1pt,fit=(c0),inner sep=0.5pt] {};
+  \node[draw=orange,line width=1pt,fit=(c20),inner sep=0.5pt] {};
+
+  \node[below=9mm of c0,text=teal,font=\bfseries] (left) {left};
+  \node[below=9mm of c20,text=orange,font=\bfseries] (right) {right};
+  \draw[flowarrow,teal] (left.north)--(c0.south);
+  \draw[flowarrow,orange] (right.north)--(c20.south);
+  \node[below=25mm of rowcenter,text=navy]
+    {the end characters match: \texttt{a} = \texttt{a}; move both pointers inward};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+left = 0; right = n - 1
+while left < right:
+    skip non-alphanumeric characters on both sides
+    if lowercase characters differ: return false
+    move both boundaries inward
+return true
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Valid Palindrome}]
+#include <cctype>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    bool isPalindrome(string s) {
+        int left=0,right=(int)s.size()-1;
+        while(left<right){
+            while(left<right && !isalnum((unsigned char)s[left])) ++left;
+            while(left<right && !isalnum((unsigned char)s[right])) --right;
+            if(tolower((unsigned char)s[left])!=tolower((unsigned char)s[right])) return false;
+            ++left;--right;
+        }
+        return true;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Each pointer moves inward once: \(O(n)\) time and \(O(1)\) space. Casting to
+unsigned char makes the classification functions safe.
+
+\lessonexpansion
+  {For \texttt{"A man, a plan, a canal: Panama"}, the pointers skip spaces
+   and punctuation, compare \texttt{a} with \texttt{a}, then continue inward
+   case-insensitively until they cross.}
+  {Skipping non-alphanumeric characters makes the two pointers identify the
+   next pair in the filtered string. If every mirrored pair matches after case
+   normalization, that filtered string equals its reverse.}
+  {Check empty text, punctuation only, mixed case, digits, an early mismatch,
+   and a mismatch near the center.}
+  {I scan inward from both ends, ignoring characters outside the problem's
+   alphabet and comparing the remaining characters without case.}
+
+\chaptercheckpoint{Compare text after ignoring punctuation and case.}
+  {Two inward pointers.}
+  {Passing negative signed chars directly to cctype functions.}{$O(n)$ time.}
+
+
+\problemstart{Valid Parentheses}{20}{Easy}{Delimiter matching}{Stack}
+
+\subsection{The Problem}
+Return whether every opening bracket is closed by the correct type in the
+correct order.
+
+\begin{invariantbox}{the stack contains exactly the unmatched openings}
+An opening bracket is pushed. A closing bracket must match the stack top,
+because that is the most recent still-unclosed delimiter.
+\end{invariantbox}
+
+\begin{visualbox}{Nested delimiters close in LIFO order}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[draw=navy,fill=softblue,minimum width=25mm] (a) {(};
+  \node[draw=navy,fill=softblue,minimum width=25mm,above=0mm of a] (b) {[};
+  \node[draw=orange,fill=softorange,minimum width=25mm,above=0mm of b] (c) {\{};
+  \node[right=12mm of c,text=orange]{next \texttt{\}} pops top};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+stack = empty
+for character in string:
+    if opening delimiter: push it
+    else if stack empty or top is not its partner: return false
+    else pop stack
+return stack is empty
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Valid Parentheses}]
+#include <stack>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    bool isValid(string s) {
+        stack<char> openings;
+        for(char ch:s){
+            if(ch=='('||ch=='['||ch=='{') openings.push(ch);
+            else {
+                if(openings.empty()) return false;
+                char open=openings.top(); openings.pop();
+                if((ch==')'&&open!='(')||(ch==']'&&open!='[')||(ch=='}'&&open!='{')) return false;
+            }
+        }
+        return openings.empty();
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(n)\), stack space \(O(n)\). An empty stack before a closing bracket
+and leftover openings after the scan are both invalid.
+
+\lessonexpansion
+  {For \texttt{([\{\}])}, push each opening delimiter. The closing brace pops
+   \texttt{\{}, the closing bracket pops \texttt{[}, and the closing
+   parenthesis pops \texttt{(}. For \texttt{([)]}, the first closing
+   parenthesis conflicts with the stack top \texttt{[}.}
+  {Nested delimiters must close in reverse opening order, exactly the order
+   supplied by a stack. Every closing delimiter is validated against the only
+   opening delimiter it could legally match.}
+  {Check an empty string, one unmatched delimiter, adjacent pairs, deep
+   nesting, crossed types, and leftover opening delimiters.}
+  {I push opening delimiters and require every closing delimiter to match the
+   stack top. The stack must also be empty after the complete scan.}
+
+\chaptercheckpoint{Nested pairs must close in reverse opening order.}
+  {A stack of unmatched opening brackets.}
+  {Checking only total bracket counts.}{$O(n)$ time and $O(n)$ space.}
+
+
+\patternintoc{Trees and Word Segmentation}
+\problemstart{Validate Binary Search Tree}{98}{Medium}{Recursive value bounds}{Binary tree}
+
+\subsection{The Problem}
+Return whether every node satisfies the global binary-search-tree ordering.
+
+\subsection{Carry Ancestor Bounds}
+Local child comparisons are inenough. Each recursive call receives the
+strict lower and upper bounds imposed by all ancestors.
+
+\begin{invariantbox}{every node in the current subtree must lie inside its bounds}
+The left call tightens the upper bound to the current value; the right call
+tightens the lower bound. Strict inequalities reject duplicates.
+\end{invariantbox}
+
+\begin{visualbox}{Ancestor bounds reach deeper than the parent}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[trienode] (r) {5}; \node[trienode,below left=11mm and 15mm of r] (a) {1};
+  \node[trienode,below right=11mm and 15mm of r] (b) {7};
+  \node[trienode,active,below left=10mm and 7mm of b] (c) {4};
+  \draw[-,navy] (r)--(a) (r)--(b) (b)--(c);
+  \node[right=8mm of c,text=orange]{invalid: right subtree must be $>5$};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+valid(node, lower, upper):
+    if node is null: return true
+    if node.value <= lower or node.value >= upper: return false
+    return valid(node.left, lower, node.value)
+           AND valid(node.right, node.value, upper)
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Validate BST}]
+#include <limits>
+
+using namespace std;
+
+class Solution {
+    bool valid(TreeNode* node,long long low,long long high){
+        if(node==nullptr) return true;
+        if(node->val<=low||node->val>=high) return false;
+        return valid(node->left,low,node->val)&&valid(node->right,node->val,high);
+    }
+public:
+    bool isValidBST(TreeNode* root){return valid(root,numeric_limits<long long>::lowest(),numeric_limits<long long>::max());}
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Every node is checked once: \(O(n)\) time, \(O(h)\) stack space. Wide bounds
+avoid collisions with valid \texttt{int} endpoints.
+
+\lessonexpansion
+  {In \texttt{[5,1,4,null,null,3,6]}, node 3 is locally smaller than parent 4
+   but lies in the root's right subtree, where every value must exceed 5.
+   Passing the inherited lower bound 5 exposes the violation.}
+  {Each recursive call carries the complete range allowed by all ancestors.
+   Restricting the upper bound on a left edge and the lower bound on a right
+   edge makes every accepted node satisfy the global BST definition.}
+  {Check valid integer endpoints, duplicate values, a deep ancestor violation,
+   a skewed valid BST, and an empty tree.}
+  {I validate each node against inherited lower and upper bounds rather than
+   only its parent. Child calls tighten exactly one side of that range.}
+
+\chaptercheckpoint{BST the valid condition depends on all ancestors, not only parents.}
+  {Strict lower and upper bounds.}
+  {Accepting a deep value that violates an ancestor.}{$O(n)$ time and $O(h)$ space.}
+
+
+\problemstart{Word Break}{139}{Medium}{Prefix segmentation DP}{String and hash set}
+
+\subsection{The Problem}
+Return whether a string can be split into one or more dictionary words. Words
+may be reused.
+
+\begin{invariantbox}{dp[i] means the prefix ending before i is segmentable}
+For every true \texttt{dp[i]}, trying dictionary words tests whether one legal
+word can extend that already valid prefix. So every true state corresponds
+to a complete segmentation.
+\end{invariantbox}
+
+\begin{visualbox}{True prefix states jump across dictionary words}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/T,1/F,2/F,3/F,4/T,5/F,6/F,7/F,8/T}{\node[arraycell] (d\x) at (0.8*\x,0) {\v};}
+  \draw[->,very thick,teal] (d0.north) to[bend left] node[edgelabel,above]{\texttt{leet}} (d4.north);
+  \draw[->,very thick,orange] (d4.north) to[bend left] node[edgelabel,above]{\texttt{code}} (d8.north);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dp[0] = true
+for end from 1 to n:
+    for start from 0 to end-1:
+        if dp[start] and s[start...end) is in dictionary:
+            dp[end] = true; break
+return dp[n]
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Word Break}]
+#include <string>
+#include <unordered_set>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    bool wordBreak(string s,vector<string>& words){
+        unordered_set<string> dict(words.begin(),words.end());
+        vector<bool> dp(s.size()+1,false); dp[0]=true;
+        for(int end=1;end<=(int)s.size();++end)
+            for(int start=0;start<end;++start)
+                if(dp[start]&&dict.count(s.substr(start,end-start))){dp[end]=true;break;}
+        return dp[s.size()];
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+The direct prefix DP uses \(O(n^2)\) transitions plus substring construction
+cost; space is \(O(n+D)\). Limiting starts by maximum word length improves the
+constant factors.
+
+\lessonexpansion
+  {For \texttt{leetcode} with dictionary \texttt{[leet,code]}, begin with
+   \(dp[0]=true\). The word \texttt{leet} makes \(dp[4]\) true. From that
+   reachable boundary, \texttt{code} makes \(dp[8]\) true, proving the full
+   string can be segmented.}
+  {A true \(dp[end]\) is created only by a true earlier boundary followed by a
+   dictionary word, so every true state has a valid segmentation. The reverse is also true:,
+   the final word of any valid segmentation begins at some true earlier
+   boundary, so the transition discovers every possible solution.}
+  {Check an empty prefix, one dictionary word, repeated word use, overlapping
+   choices such as \texttt{cars}, a long almost-valid suffix, and an input
+   with no valid first word.}
+  {I use prefix dynamic programming because a locally valid word choice may
+   block the suffix. Each true index records that the entire prefix is valid,
+   allowing all later dictionary endings to build on it.}
+
+\chaptercheckpoint{A string must be partitioned into reusable dictionary words.}
+  {Boolean states for segmentable prefixes.}
+  {Greedily taking the first matching word.}{$O(n^2)$ DP transitions.}
+
+
+\patternintoc{Trie-Guided Grid Search}
+\problemstart{Word Search II}{212}{Hard}{Trie-pruned backtracking}{Trie and grid}
+
+\subsection{The Problem}
+Find all dictionary words that can be formed by adjacent grid cells without
+reusing a cell within one word.
+
+\subsection{Share Prefix Work with a Trie}
+Insert all words into a Trie. DFS from each cell follows only Trie edges that
+exist; impossible prefixes stop immediately. Store a complete word at terminal
+nodes and clear it after reporting to avoid duplicates.
+
+\begin{invariantbox}{the DFS path equals the Trie prefix at its node}
+Every active board path uses distinct marked cells and spells exactly the
+characters from the Trie root to the current Trie node. Missing edges safely
+prune every dictionary word sharing that impossible prefix.
+\end{invariantbox}
+
+\begin{visualbox}{Board paths and Trie prefixes advance together}
+\centering
+\begin{tikzpicture}[font=\small]
+  \matrix[matrix of nodes,nodes={arraycell},row sep=-\pgflinewidth,
+    column sep=-\pgflinewidth] (b) {
+    |[fill=softorange,draw=orange,line width=1pt]| o &
+    |[fill=softorange,draw=orange,line width=1pt]| a & a & n\\
+    e & |[fill=softorange,draw=orange,line width=1pt]| t & a & e\\
+    i & |[fill=softorange,draw=orange,line width=1pt]| h & k & r\\
+    i & f & l & v\\};
+  \node[right=20mm of b,dsnode] {board path: \texttt{oath}\\
+    same Trie prefix: \(o-a-t-h\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+insert every word into a trie
+for every board cell:
+    DFS(cell, trie root)
+DFS(cell, trie node):
+    stop if outside, visited, or character edge is absent
+    move to child; report and clear any completed word
+    mark cell, explore four neighbors, then restore cell
+return reported words
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Word Search II}]
+#include <array>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    struct Trie { array<Trie*,26> next{}; string word; };
+    void search(vector<vector<char>>& b,int r,int c,Trie* node,vector<string>& out){
+        if(r<0||c<0||r==(int)b.size()||c==(int)b[0].size()||b[r][c]=='#') return;
+        char ch=b[r][c]; Trie* child=node->next[ch-'a']; if(child==nullptr) return;
+        if(!child->word.empty()){out.push_back(child->word);child->word.clear();}
+        b[r][c]='#'; search(b,r+1,c,child,out);search(b,r-1,c,child,out);
+        search(b,r,c+1,child,out);search(b,r,c-1,child,out); b[r][c]=ch;
+    }
+public:
+    vector<string> findWords(vector<vector<char>>& board,vector<string>& words){
+        Trie* root=new Trie();
+        for(const auto& word:words){Trie* p=root;for(char ch:word){if(!p->next[ch-'a'])p->next[ch-'a']=new Trie();p=p->next[ch-'a'];}p->word=word;}
+        vector<string> out; for(int r=0;r<(int)board.size();++r)for(int c=0;c<(int)board[0].size();++c)search(board,r,c,root,out); return out;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time, Space, and Safety}
+Trie construction is \(O(W)\) for total dictionary characters. Search is
+bounded by board starts and valid prefix branches; the loose worst case is
+\(O(mn\,4^L)\). Backtracking restores each cell. Production code should own
+Trie nodes with smart pointers or a node pool.
+
+\lessonexpansion
+  {On the standard board, DFS beginning at \texttt{o} follows Trie edges
+   \texttt{o->a->t->h} and reports \texttt{oath}. A neighboring character with
+   no Trie edge stops immediately. Clearing the terminal word prevents another
+   board path from returning the same dictionary word twice.}
+  {The active board path and Trie path always spell the same prefix. So
+   a missing Trie child proves that no dictionary word can extend that board
+   path. Every reported terminal node corresponds to a valid non-reusing path,
+   and every valid dictionary path is explored from its first cell.}
+  {Check duplicate dictionary entries, words sharing long prefixes, a one-cell
+   board, a word longer than the number of cells, repeated board letters, and
+   several board paths spelling the same word.}
+  {I build one Trie for all words so their shared prefixes are explored once.
+   DFS advances through both the board and Trie, marks the current cell, and
+   restores it during backtracking. Missing Trie edges provide the crucial
+   pruning.}
+
+\chaptercheckpoint{Search many words that share prefixes on one board.}
+  {A Trie node synchronized with a marked board path.}
+  {Running a completely separate unpruned DFS for every word.}{Trie build $O(W)$; search is prefix-pruned.}
+
+
+\problemstart{Word Search}{79}{Medium}{Grid backtracking}{Matrix and recursion}
+
+\subsection{The Problem}
+Return whether one word can be formed from adjacent cells without reusing a
+cell in the same path.
+
+\begin{invariantbox}{the marked path spells the matched word prefix}
+At recursion index \(i\), all earlier characters have been matched by distinct
+adjacent cells. The current cell must equal character \(i\), after which it is
+temporarily marked during all four choices.
+\end{invariantbox}
+
+\begin{visualbox}{Backtracking explores and restores a board path}
+\centering
+\begin{tikzpicture}[font=\small]
+  \matrix[matrix of nodes,nodes={arraycell},row sep=-\pgflinewidth,
+    column sep=-\pgflinewidth] (m) {
+    |[fill=softorange,draw=orange,line width=1pt]| A &
+    |[fill=softorange,draw=orange,line width=1pt]| B &
+    |[fill=softorange,draw=orange,line width=1pt]| C & E\\
+    S & F & |[fill=softorange,draw=orange,line width=1pt]| C & S\\
+    A & |[fill=softorange,draw=orange,line width=1pt]| D &
+    |[fill=softorange,draw=orange,line width=1pt]| E & E\\};
+  \node[right=10mm of m-2-4,align=left]
+    {matched path: \texttt{ABCCED}\\
+     moves: right, right, down, down, left\\
+     restore every cell when returning};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+for every board cell:
+    if DFS(cell, word index 0): return true
+DFS(cell, index):
+    if index equals word length: return true
+    reject invalid, visited, or mismatching cells
+    mark cell; search four neighbors for index + 1
+    restore cell and return whether any branch succeeded
+return false
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Word Search}]
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    bool dfs(vector<vector<char>>& b,const string& w,int i,int r,int c){
+        if(i==(int)w.size()) return true;
+        if(r<0||c<0||r==(int)b.size()||c==(int)b[0].size()||b[r][c]!=w[i]) return false;
+        char ch=b[r][c]; b[r][c]='#';
+        bool ok=dfs(b,w,i+1,r+1,c)||dfs(b,w,i+1,r-1,c)||dfs(b,w,i+1,r,c+1)||dfs(b,w,i+1,r,c-1);
+        b[r][c]=ch; return ok;
+    }
+public:
+    bool exist(vector<vector<char>>& board,string word){
+        for(int r=0;r<(int)board.size();++r)for(int c=0;c<(int)board[0].size();++c)if(dfs(board,word,0,r,c))return true; return false;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Worst-case time is \(O(mn\,4^L)\), with \(O(L)\) recursion space. Restoring
+the character is required even when a branch fails.
+
+\lessonexpansion
+  {To find \texttt{ABCCED}, start at the matching \texttt{A}, mark it, and
+   recursively follow adjacent \texttt{B}, \texttt{C}, \texttt{C},
+   \texttt{E}, and \texttt{D}. A failed branch restores every marked cell so
+   another route may use it.}
+  {The DFS state records a board position and the next word index. It explores
+   every legal non-reusing path with that prefix; marking prevents cycles and
+   restoration keeps the board for sibling search branches.}
+  {Check a one-letter word, a word longer than the board, repeated letters,
+   paths requiring turns, a tempting path that reuses a cell, and no match.}
+  {I start backtracking from every possible first character. Each recursive
+   step matches one letter, temporarily marks the cell, explores four
+   neighbors, and restores the cell afterward.}
+
+\chaptercheckpoint{Match one word along a non-reusing grid path.}
+  {A word index and temporarily marked board cells.}
+  {Leaving failed-path cells marked.}{$O(mn\,4^L)$ worst-case time.}
+
+
+\patternintoc{Binary Search and Subsequences}
+\problemstart{Search in Rotated Sorted Array}{33}{Medium}{Modified binary search}{Array}
+
+\subsection{The Problem}
+Find a target in a rotated sorted array of distinct values and return its
+index, or \(-1\).
+
+\subsection{One Half Is Always Sorted}
+At each midpoint, at least one side is normally ordered. Check whether the
+target lies inside that sorted value range; keep that half if it does,
+otherwise discard it.
+
+\begin{invariantbox}{the target, if present, remains inside the boundaries}
+The sorted-half range test identifies a half that cannot contain the target.
+Discarding only that half keeps every possible target index.
+\end{invariantbox}
+
+\begin{visualbox}{Use the sorted half to choose safely}
+\centering
+\begin{tikzpicture}[font=\small]
+  \foreach \x/\v in {0/4,1/5,2/6,3/7,4/0,5/1,6/2}{\node[arraycell] (a\x) at (1.0*\x,0) {\v};}
+  \node[above=7mm of a3,text=orange]{mid};
+  \node[draw=teal,very thick,fit=(a0)(a1)(a2)(a3),inner sep=1mm] {};
+  \node[below=7mm of a1]{left half sorted};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+left = 0; right = n - 1
+while left <= right:
+    middle = midpoint
+    if nums[middle] is target: return middle
+    identify the sorted half
+    if target lies inside that half: keep it
+    else: keep the other half
+return -1
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Search in Rotated Sorted Array}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int search(vector<int>& nums,int target){
+        int left=0,right=(int)nums.size()-1;
+        while(left<=right){int mid=left+(right-left)/2;if(nums[mid]==target)return mid;
+            if(nums[left]<=nums[mid]){
+                if(nums[left]<=target&&target<nums[mid])right=mid-1;else left=mid+1;
+            }else{
+                if(nums[mid]<target&&target<=nums[right])left=mid+1;else right=mid-1;
+            }
+        } return -1;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Each comparison removes half the range: \(O(\log n)\) time and \(O(1)\)
+space. The distinct-value condition avoids ambiguous equal boundaries.
+
+\lessonexpansion
+  {For \texttt{[4,5,6,7,0,1,2]} and target 0, the first midpoint is value 7.
+   The left half is sorted, but 0 is not in \([4,7)\), so discard it. In the
+   remaining range, binary search reaches value 0 at index 4.}
+  {At least one half around the midpoint is sorted. If the target lies inside
+   that half's inclusive/exclusive value bounds, the opposite half cannot
+   contain it; otherwise the sorted half can be discarded. So the target is
+   keepd whenever it exists.}
+  {Check no rotation, rotation by one position, target at either boundary,
+   target at the pivot, two elements, one element, and a missing target.}
+  {I first identify the sorted half, then use ordinary value-range reasoning
+   to decide whether the target belongs there. This retains binary search's
+   logarithmic elimination despite the rotation.}
+
+\chaptercheckpoint{Binary search an array with one rotation break.}
+  {Two boundaries and identification of the sorted half.}
+  {Testing target indexes instead of sorted value ranges.}{$O(\log n)$ time.}
+
+
+\problemstart{Longest Increasing Subsequence}{300}{Medium}{Subsequence DP}{Array}
+
+\subsection{The Problem}
+Return the length of the longest strictly increasing subsequence. Chosen
+positions retain order but need not be adjacent.
+
+\begin{invariantbox}{dp[i] is the best increasing subsequence ending at i}
+Every previous \(j<i\) with \(nums[j]<nums[i]\) can extend its best
+subsequence by the current value. Taking the maximum considers every possible
+penultimate element.
+\end{invariantbox}
+
+\begin{visualbox}{A current value extends compatible earlier endings}
+\centering
+\begin{tikzpicture}[font=\small]
+  \foreach \x/\v in {0/10,1/9,2/2,3/5,4/3,5/7,6/101,7/18}{
+    \node[arraycell] (a\x) at (0.9*\x,0) {\v};
+  }
+  \foreach \x in {2,4,5,7}{
+    \node[draw=teal,very thick,fit=(a\x),inner sep=-0.3pt] {};
+  }
+  \node[below=7mm of a4,text=teal,font=\bfseries]
+    {read highlighted positions left to right: \(2<3<7<18\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dp[i] = 1 for every position
+for i from 0 to n-1:
+    for j from 0 to i-1:
+        if nums[j] < nums[i]:
+            dp[i] = max(dp[i], dp[j] + 1)
+return maximum dp value
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Longest Increasing Subsequence}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums){
+        vector<int> dp(nums.size(),1); int answer=1;
+        for(int i=0;i<(int)nums.size();++i){
+            for(int j=0;j<i;++j) if(nums[j]<nums[i]) dp[i]=max(dp[i],dp[j]+1);
+            answer=max(answer,dp[i]);
+        } return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+The direct update rule uses \(O(n^2)\) time and \(O(n)\) space. A patience
+sorting method improves time to \(O(n\log n)\), but this table most directly
+shows the subsequence state.
+
+\lessonexpansion
+  {For \texttt{[10,9,2,5,3,7,101,18]}, every state begins at one. Value 5
+   extends the subsequence ending at 2 to length two; value 7 extends either
+   \(2,5\) or \(2,3\) to length three; value 18 extends a length-three state
+   to the final answer four.}
+  {Every increasing subsequence ending at index \(i\) has some penultimate
+   index \(j<i\) with a smaller value, unless its length is one. Testing all
+   such \(j\) includes the previous position in a best subsequence,
+   making \(dp[i]\) correct.}
+  {Check a decreasing array, an increasing array, all equal values, one value,
+   repeated values mixed with growth, negative values, and a best subsequence
+   that does not include the final element.}
+  {I define \(dp[i]\) as the best increasing subsequence ending exactly at
+   \(i\). Every smaller earlier value is a legal previous. The maximum over
+   all ending positions is the answer.}
+
+\chaptercheckpoint{Positions may be skipped while values strictly increase.}
+  {The best subsequence length ending at each index.}
+  {Using non-strict comparison and accepting equal values.}{$O(n^2)$ time and $O(n)$ space.}
+
+
+\patternintoc{DP, Trees, and Reachability}
+\problemstart{Climbing Stairs}{70}{Easy}{Fibonacci-style DP}{Rolling states}
+
+\subsection{The Problem}
+Count distinct ways to reach step \(n\) using moves of one or two steps.
+
+\begin{invariantbox}{the two rolling values solve the previous two steps}
+Every route to step \(i\) arrives from \(i-1\) or \(i-2\), and these cases are
+separate, so their counts add.
+\end{invariantbox}
+
+\begin{visualbox}{Each step receives ways from the previous two steps}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,visited] (s2) {step 2\\2 ways};
+  \node[dsnode,active,below=10mm of s2] (s3) {step 3\\3 ways};
+  \node[dsnode,right=35mm of $(s2)!0.5!(s3)$] (s4) {step 4\\5 ways};
+  \draw[flowarrow,teal] (s2.east)--node[edgelabel,above]{take a 2-step move} (s4.west);
+  \draw[flowarrow,orange] (s3.east)--node[edgelabel,below]{take a 1-step move} (s4.west);
+  \node[right=7mm of s4,font=\bfseries] {\(2+3=5\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+if n <= 2: return n
+oneBack = 2; twoBack = 1
+for step from 3 to n:
+    current = oneBack + twoBack
+    twoBack = oneBack; oneBack = current
+return oneBack
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Climbing Stairs}]
+using namespace std;
+
+class Solution {
+public:
+    int climbStairs(int n){
+        int twoBack=1,oneBack=1;
+        for(int step=2;step<=n;++step){int current=oneBack+twoBack;twoBack=oneBack;oneBack=current;}
+        return oneBack;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(n)\), space is \(O(1)\). The conceptual count for step zero is one
+empty way, which makes the update rule work at the boundary.
+
+\lessonexpansion
+  {The counts for steps 0 through 5 are \(1,1,2,3,5,8\). For step 5, every
+   valid climb ends with either a one-step move from step 4 or a two-step move
+   from step 3, so the two preceding counts add to eight.}
+  {The final move splits all valid climbs into two separate groups: those
+   arriving from \(n-1\) and those arriving from \(n-2\). Their counts sum,
+   and only the two previous states are required.}
+  {Check \(n=1\), \(n=2\), the smallest allowed input, and larger values near
+   the return-type limit.}
+  {This is Fibonacci-style dynamic programming. I keep only the previous two
+   counts because each new state depends exclusively on them.}
+
+\chaptercheckpoint{Every state can be reached by one of two final moves.}
+  {Counts for the previous two steps.}
+  {Setting the zero-step base count to zero.}{$O(n)$ time and $O(1)$ space.}
+
+
+\problemstart{Invert Binary Tree}{226}{Easy}{Recursive child swap}{Binary tree}
+
+\subsection{The Problem}
+Mirror a binary tree by exchanging the left and right child of every node.
+
+\begin{invariantbox}{a completed call returns a fully mirrored subtree}
+The current node swaps its child pointers, then recursively mirrors both
+subtrees. Every edge below the node is reversed horizontally once.
+\end{invariantbox}
+
+\begin{visualbox}{Every left and right edge changes sides}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode] (r1) {4}; \node[trienode,below left=10mm and 12mm of r1] (a1) {2};
+  \node[trienode,below right=10mm and 12mm of r1] (b1) {7};
+  \draw[-,thick,navy] (r1)--(a1) (r1)--(b1);
+  \node[below=5mm of a1,xshift=12mm]{before};
+  \node[trienode,right=52mm of r1] (r2) {4};
+  \node[trienode,below left=10mm and 12mm of r2] (b2) {7};
+  \node[trienode,below right=10mm and 12mm of r2] (a2) {2};
+  \draw[-,thick,navy] (r2)--(b2) (r2)--(a2);
+  \draw[flowarrow,orange] (r1.east)--node[edgelabel,above,fill=white]{swap children}(r2.west);
+  \node[below=5mm of b2,xshift=12mm,text=teal,font=\bfseries]{after};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+invert(node):
+    if node is null: return null
+    swap node.left and node.right
+    invert(node.left)
+    invert(node.right)
+    return node
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Invert Binary Tree}]
+#include <utility>
+
+using namespace std;
+
+class Solution {
+public:
+    TreeNode* invertTree(TreeNode* root){
+        if(root==nullptr) return nullptr;
+        swap(root->left,root->right);
+        invertTree(root->left); invertTree(root->right); return root;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Every node is visited once: \(O(n)\) time and \(O(h)\) recursion space.
+
+\lessonexpansion
+  {For root 4 with children 2 and 7, swap them first. Recursively swap the
+   children below 7 and below 2 as well. Applying the same operation a second
+   time restores the original tree.}
+  {A tree is mirrored exactly when every node exchanges its left and right
+   subtrees and both exchanged subtrees are themselves mirrored. The recursive
+   procedure performs this definition at every node.}
+  {Check a null tree, one node, a skewed tree, an asymmetric tree, and verify
+   that double inversion returns the original structure.}
+  {I swap each node's child pointers and recursively invert both resulting
+   subtrees. Every node is processed once, with stack depth equal to height.}
+
+\chaptercheckpoint{Mirror every parent-child relationship.}
+  {A subtree root whose children are swapped recursively.}
+  {Swapping only the root's immediate children.}{$O(n)$ time and $O(h)$ space.}
+
+
+\problemstart{Pacific Atlantic Water Flow}{417}{Medium}{Reverse multi-source DFS}{Grid and two reachability sets}
+
+\subsection{The Problem}
+Return cells from which water can flow to both oceans. Water moves to adjacent
+cells of equal or lower height; the Pacific touches top and left edges, and
+the Atlantic touches bottom and right edges.
+
+\subsection{Search Backward from the Oceans}
+Forward search from every cell repeats work. Reverse the edges: start from
+each ocean boundary and move to neighbors of equal or greater height. Cells
+reached by both reverse searches can flow to both oceans in the original
+direction.
+
+\begin{invariantbox}{reverse-reached cells can flow to the starting ocean}
+Every reverse step climbs from a cell to a neighbor at least as high. Reversing
+that step gives a legal downhill or level flow back to the ocean.
+\end{invariantbox}
+
+\begin{visualbox}{Two ocean floods climb inward and overlap}
+\centering
+\begin{tikzpicture}[font=\small]
+  \matrix[matrix of nodes,nodes={arraycell,minimum width=9mm},
+    row sep=-\pgflinewidth,column sep=-\pgflinewidth] (m) {
+    |[fill=softteal,draw=teal]|1 & |[fill=softteal,draw=teal]|2 &
+    |[fill=softteal,draw=teal]|2 & |[fill=softblue,draw=navy,line width=1.1pt,double]|3\\
+    |[fill=softteal,draw=teal]|3 & |[fill=softteal,draw=teal]|2 &
+    |[fill=softteal,draw=teal]|3 & |[fill=softblue,draw=navy,line width=1.1pt,double]|4\\
+    |[fill=softteal,draw=teal]|2 & |[fill=softteal,draw=teal]|4 &
+    |[fill=softblue,draw=navy,line width=1.1pt,double]|5 & |[fill=softorange,draw=orange]|3\\
+    |[fill=softblue,draw=navy,line width=1.1pt,double]|6 &
+    |[fill=softblue,draw=navy,line width=1.1pt,double]|7 &
+    |[fill=softorange,draw=orange]|1 & |[fill=softorange,draw=orange]|4\\};
+  \draw[very thick,teal] (m-1-1.north west)--(m-1-4.north east);
+  \draw[very thick,teal] (m-1-1.north west)--(m-4-1.south west);
+  \draw[very thick,orange] (m-4-1.south west)--(m-4-4.south east);
+  \draw[very thick,orange] (m-1-4.north east)--(m-4-4.south east);
+  \node[above=6mm of m-1-2,text=teal,font=\bfseries]{Pacific};
+  \node[below=6mm of m-4-3,text=orange,font=\bfseries]{Atlantic};
+  \node[right=11mm of m-2-4,align=left] {
+    \textcolor{teal}{teal: Pacific only}\\
+    \textcolor{orange}{orange: Atlantic only}\\
+    \textcolor{navy}{double navy: both oceans}};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+run reverse DFS from all Pacific border cells
+run reverse DFS from all Atlantic border cells
+reverse DFS may move to an equal-or-higher neighbor
+answer = every cell reached by both traversals
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Pacific Atlantic Water Flow}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    void flow(const vector<vector<int>>& h,int r,int c,vector<vector<bool>>& seen){
+        if(seen[r][c]) return; seen[r][c]=true;
+        static const int d[5]={1,0,-1,0,1};
+        for(int k=0;k<4;++k){int nr=r+d[k],nc=c+d[k+1];
+            if(nr>=0&&nc>=0&&nr<(int)h.size()&&nc<(int)h[0].size()&&!seen[nr][nc]&&h[nr][nc]>=h[r][c]) flow(h,nr,nc,seen);
+        }
+    }
+public:
+    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights){
+        int m=heights.size(),n=heights[0].size();
+        vector<vector<bool>> pac(m,vector<bool>(n)),atl=pac;
+        for(int r=0;r<m;++r){flow(heights,r,0,pac);flow(heights,r,n-1,atl);}
+        for(int c=0;c<n;++c){flow(heights,0,c,pac);flow(heights,m-1,c,atl);}
+        vector<vector<int>> out;
+        for(int r=0;r<m;++r)for(int c=0;c<n;++c)if(pac[r][c]&&atl[r][c])out.push_back({r,c});
+        return out;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works and Complexity}
+Each ocean traversal visits each cell at most once, so time and reachability
+space are \(O(mn)\); recursion can also reach \(O(mn)\). Intersecting the two
+visited grids is needed: union would include cells reaching only one ocean.
+
+\lessonexpansion
+  {Seed the Pacific search from the top and left borders and the Atlantic
+   search from the bottom and right. From an ocean cell, move only to neighbors
+   of equal or greater height. A high interior cell reached by both searches
+   appears in both Boolean grids and is added to the result.}
+  {A reverse edge from height \(h\) to a neighbor of height at least \(h\)
+   corresponds to a legal forward water step back toward the ocean. So each
+   visited grid contains exactly the cells that can reach its ocean. Their
+   intersection is exactly the requested answer.}
+  {Check one cell, one row, one column, all equal heights, strictly increasing
+   terrain, strictly decreasing terrain, plateaus, and cells lying directly on
+   both ocean boundaries.}
+  {Instead of starting a repeated downhill search from every cell, I reverse
+   the graph and launch two multi-source traversals from the ocean borders.
+   Cells visited by both traversals can flow to both oceans.}
+
+\chaptercheckpoint{Many cells ask whether downhill paths reach two boundaries.}
+  {Two reverse reachability grids seeded from ocean edges.}
+  {Moving downhill during the reverse search or taking the union.}{$O(mn)$ time and space.}

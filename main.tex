@@ -1,0 +1,3894 @@
+\documentclass[12pt,twoside]{article}
+
+% -------------------------------------------------
+% Packages
+% -------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% Libertinus has a cleaner, more open shape than the previous Palatino-style
+% face and remains comfortable during long technical reading sessions.
+\usepackage{libertinus}
+% IBM Plex Sans gives navigation and display text a restrained technical look.
+\usepackage[semibold]{plex-sans}
+% A clear monospaced face keeps code distinct without looking heavy.
+\usepackage[scaled=0.92]{inconsolata}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage{tocloft}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{needspace}
+\usepackage{placeins}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric,matrix,decorations.pathreplacing}
+
+% -------------------------------------------------
+% Page Setup
+% -------------------------------------------------
+\geometry{
+    paperwidth=8.25in,
+    paperheight=11in,
+    top=0.78in,
+    bottom=0.82in,
+    inner=0.92in,
+    outer=0.70in,
+    bindingoffset=0.12in,
+    headsep=0.24in
+}
+
+% -------------------------------------------------
+% Color Palette and Page Style
+% -------------------------------------------------
+\definecolor{navy}{HTML}{17365D}
+\definecolor{teal}{HTML}{147D7E}
+\definecolor{orange}{HTML}{C46B18}
+\definecolor{softblue}{HTML}{EEF5FB}
+\definecolor{softteal}{HTML}{EAF7F5}
+\definecolor{softorange}{HTML}{FFF4E5}
+\definecolor{codebackground}{HTML}{F6F8FA}
+\definecolor{ink}{HTML}{243447}
+
+\color{ink}
+\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{1}
+\setlist[itemize]{leftmargin=1.6em,itemsep=0.25em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.25em}
+\linespread{1.025}
+\setlength{\parskip}{0.48\baselineskip}
+\setlength{\abovedisplayskip}{0.45em}
+\setlength{\belowdisplayskip}{0.45em}
+\setlength{\abovedisplayshortskip}{0.25em}
+\setlength{\belowdisplayshortskip}{0.25em}
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\predisplaypenalty=10000
+\setlength{\emergencystretch}{2em}
+\hbadness=10000
+% Keep any spare space at the bottom of a page instead of stretching the
+% vertical gaps between headings, paragraphs, diagrams, and code blocks.
+\raggedbottom
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\textcolor{navy}{\nouppercase{\rightmark}}}
+\fancyhead[RO]{\small\textcolor{navy}{Cracking the LeetCode Interview}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{15pt}
+\renewcommand{\subsectionmark}[1]{}
+
+% Traditional textbook contents: one readable column, strong topic divisions,
+% indented lesson entries, and a quiet typographic hierarchy.
+\renewcommand{\cftpartfont}{\large\plexsans\bfseries\color{navy}}
+\renewcommand{\cftpartpagefont}{\large\plexsans\bfseries\color{teal}}
+\renewcommand{\cftpartleader}{\hfill}
+\renewcommand{\cftsecfont}{\small\color{ink}}
+\renewcommand{\cftsecpagefont}{\small\plexsans\bfseries\color{navy}}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforepartskip}{0.9em}
+\setlength{\cftbeforesecskip}{0.14em}
+\setlength{\cftsecindent}{1.25em}
+\setlength{\cftsecnumwidth}{0pt}
+
+\makeatletter
+\newcommand{\printcontentsonly}{\@starttoc{toc}}
+% A code listing that needs its own page should begin at the top like a
+% textbook plate, rather than being vertically centered with empty space above.
+\setlength{\@fptop}{0pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+
+\titleformat{\section}
+  {\LARGE\bfseries\color{navy}\raggedright\hyphenpenalty=10000}
+  {\thesection}{0.75em}{}
+  [\vspace{0.2em}\color{teal}\titlerule]
+\titleformat{\subsection}
+  {\large\bfseries\color{navy}}
+  {}{0em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{teal}}
+  {}{0em}{}
+\titlespacing*{\section}{0pt}{0pt}{0.9em}
+\titlespacing*{\subsection}{0pt}{1.15em}{0.35em}
+\titlespacing*{\subsubsection}{0pt}{0.85em}{0.25em}
+% Keep every heading with a substantial portion of the material that follows.
+% The larger reservation also covers the opening rows of diagrams and tables,
+% preventing a title from being left at the bottom of the previous page.
+\pretocmd{\section}{\Needspace{24\baselineskip}}{}{}
+\pretocmd{\subsection}{\Needspace{20\baselineskip}}{}{}
+\pretocmd{\subsubsection}{\Needspace{12\baselineskip}}{}{}
+
+% The code caption already names a complete solution. Suppressing the repeated
+% "C++ Implementation" line prevents that line from being stranded when an
+% unbreakable code block moves to the next page. Other unusually tall sections
+% reserve only the amount of room their first table or paragraph needs.
+\let\standardbooksubsection\subsection
+\renewcommand{\subsection}[1]{%
+  \ifstrequal{#1}{C++ Implementation}{}{% 
+    \ifstrequal{#1}{Complete Implementation}{}{% 
+      \ifstrequal{#1}{Pseudocode}{\Needspace{14\baselineskip}}{}%
+      \ifstrequal{#1}{Common judge definitions}{\Needspace{30\baselineskip}}{}%
+      \ifstrequal{#1}{Detailed Table Walkthrough}{\Needspace{22\baselineskip}}{}%
+      \ifstrequal{#1}{Detailed Grouping Walkthrough}{\Needspace{22\baselineskip}}{}%
+      \standardbooksubsection{#1}}}}
+
+% -------------------------------------------------
+% Hyperlink Setup
+% -------------------------------------------------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=navy,
+    urlcolor=teal,
+    citecolor=teal,
+    pdftitle={Cracking the LeetCode Interview: 75 Programming Questions and Solutions},
+    pdfauthor={Om Tripathi},
+    pdfsubject={Visual C++ solutions for data structures and algorithms interview problems},
+    pdfkeywords={LeetCode, C++, algorithms, data structures, coding interviews}
+}
+
+% -------------------------------------------------
+% Code Listing Setup
+% -------------------------------------------------
+\lstset{
+    language=C++,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{navy}\bfseries,
+    commentstyle=\color{teal!75!black}\itshape,
+    stringstyle=\color{orange!85!black},
+    numbers=left,
+    numberstyle=\footnotesize\color{ink!55},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    breakindent=1.4em,
+    prebreak=\mbox{\textcolor{orange}{\tiny$\hookleftarrow$}},
+    postbreak=\mbox{\textcolor{orange}{\tiny$\hookrightarrow$}\space},
+    frame=leftline,
+    framerule=1.1pt,
+    rulecolor=\color{teal},
+    backgroundcolor=\color{codebackground},
+    tabsize=4,
+    columns=fullflexible,
+    keepspaces=true,
+    xleftmargin=1.2em,
+    framexleftmargin=0.6em,
+    aboveskip=0.65em,
+    belowskip=0.65em,
+    captionpos=t
+}
+
+\lstdefinestyle{pseudocode}{
+    language={},
+    basicstyle=\ttfamily\small,
+    numbers=none,
+    frame=leftline,
+    framerule=1.1pt,
+    rulecolor=\color{orange},
+    backgroundcolor=\color{softorange!55},
+    xleftmargin=1.2em,
+    framexleftmargin=0.6em,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false
+}
+
+% Use a plain book-friendly caption name. "Code" is clearer to new readers
+% than LaTeX's default word "Listing".
+\renewcommand{\lstlistingname}{Code}
+
+% Complete solutions use a clearly readable textbook code size while remaining
+% compact enough for the usual interview-length method to stay together.
+\lstdefinestyle{compactcode}{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\scriptsize\color{ink!55},
+    aboveskip=0.5em,
+    belowskip=0.5em
+}
+
+% A few complete classes are much longer than the usual LeetCode method.
+% They use this smaller style so the whole class can stay on one page.
+\lstdefinestyle{longcode}{
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,
+    numberstyle=\tiny\color{ink!55},
+    numbersep=5pt,
+    xleftmargin=0.9em,
+    framexleftmargin=0.45em,
+    aboveskip=0.4em,
+    belowskip=0.4em
+}
+
+% -------------------------------------------------
+% Custom Commands
+% -------------------------------------------------
+\newcommand{\Oof}[1]{O(#1)}
+\newcommand{\inlinecode}[1]{\texttt{#1}}
+% Add the final paperback ISBN here after it has been assigned. Until then,
+% the copyright page omits the ISBN line instead of printing a placeholder.
+\providecommand{\bookisbn}{}
+% The judge workflow is explained once in the introduction. Keeping this
+% compatibility command empty avoids repeating the same note after every
+% solution.
+\newcommand{\judgeclassnote}{}
+
+\newtcolorbox{conceptbox}[1]{
+    enhanced,
+    breakable,
+    colback=softblue,
+    colframe=navy,
+    boxrule=0.7pt,
+    arc=2mm,
+    title=\textbf{#1},
+    fonttitle=\color{white},
+    colbacktitle=navy,
+    attach boxed title to top left={xshift=4mm,yshift=-2mm},
+    boxed title style={arc=1.5mm}
+}
+
+\newtcolorbox{dryrunbox}[1]{
+    enhanced,
+    colback=softorange,
+    colframe=orange,
+    boxrule=0.7pt,
+    arc=2mm,
+    title=\textbf{#1},
+    fonttitle=\color{white},
+    colbacktitle=orange,
+    before skip=1.1em,
+    after skip=1.1em
+}
+
+\newtcolorbox{visualbox}[1]{
+    enhanced,
+    colback=white,
+    colframe=teal,
+    boxrule=0.9pt,
+    arc=2mm,
+    title=\textbf{#1},
+    fonttitle=\color{white},
+    colbacktitle=teal,
+    before skip=1.1em,
+    after skip=1.1em
+}
+
+\BeforeBeginEnvironment{visualbox}{\par\Needspace{8\baselineskip}}
+\BeforeBeginEnvironment{dryrunbox}{\par\Needspace{8\baselineskip}}
+\BeforeBeginEnvironment{conceptbox}{\par\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{invariantbox}{\par\Needspace{6\baselineskip}}
+\BeforeBeginEnvironment{revisionbox}{\par\Needspace{6\baselineskip}}
+% Short pseudocode blocks should stay with their heading without forcing a
+% large blank area. Complete solutions are floats, so they remain unbroken.
+\BeforeBeginEnvironment{lstlisting}{\par\Needspace{8\baselineskip}}
+
+\newtcolorbox{problemcard}[1]{
+    enhanced,
+    colback=softblue,
+    colframe=navy,
+    boxrule=0.8pt,
+    arc=2mm,
+    title=\textbf{Problem at a glance},
+    colbacktitle=navy,
+    coltitle=white,
+    fonttitle=\bfseries,
+    before skip=0.8em,
+    after skip=1.2em,
+    #1
+}
+
+\newcommand{\problemprofile}[4]{%
+\begin{problemcard}{}
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\textcolor{teal}{\textbf{LeetCode problem}} &
+\textcolor{teal}{\textbf{Difficulty}}\\[-1mm]
+\textbf{#1} & \textbf{#2}\\[2mm]
+\textcolor{teal}{\textbf{Approach}} &
+\textcolor{teal}{\textbf{Main tool}}\\[-1mm]
+#3 & #4
+\end{tabularx}
+\end{problemcard}}
+
+\newcounter{lesson}
+\newcommand{\problemstart}[5]{%
+\FloatBarrier
+\clearpage
+\refstepcounter{lesson}%
+\phantomsection
+\section*{Lesson \thelesson: #1}
+\label{lesson:\thelesson}
+\addcontentsline{toc}{section}{Lesson \thelesson: #1\space (LC #2)}
+\markboth{#1}{#4}
+\problemprofile{#2}{#3}{#4}{#5}}
+
+\newcommand{\patternintoc}[1]{%
+  \phantomsection
+  \addtocontents{toc}{\protect\Needspace{4\baselineskip}}%
+  \addcontentsline{toc}{part}{#1}}
+
+\newtcolorbox{revisionbox}[1]{
+  enhanced,breakable,colback=softteal,colframe=teal,boxrule=0.8pt,
+  arc=2mm,title=\textbf{#1},colbacktitle=teal,coltitle=white,
+  before skip=0.8em,after skip=0.8em
+}
+
+\newtcolorbox{invariantbox}[1]{
+  enhanced,breakable,colback=softblue,colframe=navy,boxrule=0.8pt,
+  arc=2mm,title=\textbf{Key idea: #1},colbacktitle=navy,coltitle=white,
+  before skip=0.8em,after skip=0.8em
+}
+
+% Real data-structure dry runs.  These drawings show the object that changes;
+% they do not use prose-filled process boxes as a substitute for a visual.
+\newcommand{\arraydryvisual}{%
+\begin{visualbox}{Array example: two positions move through the row}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \v [count=\i from 0] in {-2,1,-3,4,-1,2,1}{
+    \node[arraycell] (a\i) at (.95*\i,0) {\v};
+    \node[below=1mm of a\i,font=\tiny,text=ink!60]{\i};}
+  \node[draw=teal,very thick,fit=(a1),inner sep=1mm]{};
+  \node[draw=orange,very thick,fit=(a5),inner sep=1mm]{};
+  \draw[flowarrow,teal] ([yshift=7mm]a1.north)--(a1.north);
+  \draw[flowarrow,orange] ([yshift=7mm]a5.north)--(a5.north);
+  \node[above=8mm of a1,text=teal]{start};
+  \node[above=8mm of a5,text=orange]{current};
+  \node[below=8mm of a3]{the colored boxes are the two values used next};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\stringdryvisual}{%
+\begin{visualbox}{String example: the checked section grows and shrinks}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \v [count=\i from 0] in {A,A,B,A,B,B,A}{
+    \node[arraycell] (s\i) at (.95*\i,0) {\v};}
+  \node[draw=teal,very thick,fit=(s0)(s3),inner sep=1mm]{};
+  \node[draw=orange,very thick,densely dashed,fit=(s0)(s4),inner sep=2mm]{};
+  \draw[flowarrow,teal] ([yshift=8mm]s0.north)--(s0.north);
+  \draw[flowarrow,orange] ([yshift=8mm]s4.north)--(s4.north);
+  \node[above=9mm of s0,text=teal]{left};
+  \node[above=9mm of s4,text=orange]{right};
+  \node[below=8mm of s3]{solid = valid section; dashed = after adding one letter};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\hashdryvisual}{%
+\begin{visualbox}{Hash table example: save a value, then find it}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,active] (in) at (-3,0) {value 7};
+  \node[draw=navy,fill=softblue,minimum width=25mm,minimum height=8mm] (k1) at (0,.65) {key 2};
+  \node[draw=navy,minimum width=32mm,minimum height=8mm] (v1) at (3.8,.65) {index 0};
+  \node[draw=navy,fill=softblue,minimum width=25mm,minimum height=8mm] (k2) at (0,-.35) {key 7};
+  \node[draw=navy,minimum width=32mm,minimum height=8mm] (v2) at (3.8,-.35) {index 1};
+  \draw[flowarrow,teal] (in)--node[edgelabel,above]{save} (k2);
+  \draw[flowarrow,orange] (k1)--node[edgelabel,above=1mm]{find key 2} (v1);
+  \node[below=9mm of k2,xshift=19mm]{look up a key to find its saved index};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\listdryvisual}{%
+\begin{visualbox}{Reverse one link: make 3 point back to 2}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,visited] (l0) at (0,0) {1};
+  \node[dsnode,visited] (l1) at (1.8,0) {2};
+  \node[dsnode,active] (l2) at (3.6,0) {3};
+  \node[dsnode] (l3) at (5.4,0) {4};
+  \draw[flowarrow,teal] (l1.west)--(l0.east);
+  \draw[flowarrow,orange] (l2.west)--(l1.east);
+  \node[above=8mm of l1,text=teal]{previous node};
+  \node[above=8mm of l2,text=orange]{current node};
+  \node[above=8mm of l3,draw=navy,fill=softblue,rounded corners,
+    inner sep=2mm] {saved next: 4};
+  \node[below=10mm of l2]{save 4 first; then change \texttt{3.next} from 4 to 2};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\cycledryvisual}{%
+\begin{visualbox}{Fast catches slow inside the loop}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode] (c0) at (0,0) {3};
+  \node[dsnode] (c1) at (2.0,0.9) {2};
+  \node[dsnode,active] (c2) at (4.0,0) {0};
+  \node[dsnode] (c3) at (2.0,-0.9) {-4};
+  \draw[flowarrow] (c0)--(c1);
+  \draw[flowarrow] (c1)--(c2);
+  \draw[flowarrow] (c2)--(c3);
+  \draw[flowarrow,teal] (c3)--(c1);
+  \node[left=8mm of c0,text=navy,font=\bfseries] (head) {head};
+  \draw[flowarrow] (head)--(c0);
+  \node[right=9mm of c2,align=left,text=orange,font=\bfseries]
+    {slow and fast\\meet here};
+  \node[below=7mm of c3,text=teal]{the arrow returns to node 2};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\stackdryvisual}{%
+\begin{visualbox}{Stack dry run: the top item is handled first}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[arraycell,minimum width=29mm] (x0) {(};
+  \node[arraycell,minimum width=29mm,above=0mm of x0] (x1) {[};
+  \node[arraycell,minimum width=29mm,above=0mm of x1,active] (x2) {\{};
+  \draw[flowarrow,orange] (-2.5,1.3)--node[edgelabel,above]{top / pop} (x2.west);
+  \node[right=18mm of x1]{last opened delimiter must close first};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\queuedryvisual}{%
+\begin{visualbox}{Queue example: handle one tree level at a time}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \v [count=\i from 0] in {9,20,15,7}{\node[dsnode] (q\i) at (1.55*\i,0){\v};}
+  \draw[flowarrow,teal] ([xshift=-14mm]q0.west)--node[edgelabel,above]{front} (q0.west);
+  \draw[flowarrow,orange] ([xshift=14mm]q3.east)--node[edgelabel,above]{add} (q3.east);
+  \node[below=8mm of q1]{remove from the front; add new children at the back};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\treedryvisual}{%
+\begin{visualbox}{Tree example: child answers move up to the parent}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (r) {6};
+  \node[trienode,below left=11mm and 20mm of r] (l) {2};
+  \node[trienode,below right=11mm and 20mm of r] (rr) {8};
+  \node[trienode,visited,below left=10mm and 8mm of l] (ll) {0};
+  \node[trienode,below right=10mm and 8mm of l] (lr) {4};
+  \draw[flowarrow] (r)--(l) (r)--(rr) (l)--(ll) (l)--(lr);
+  \draw[flowarrow,teal] (ll) to[bend left=18] node[edgelabel,left]{send up} (l);
+  \draw[flowarrow,orange] (lr) to[bend right=18] node[edgelabel,right]{send up} (l);
+  \node[right=25mm of r]{the parent combines the two child answers};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\heapdryvisual}{%
+\begin{visualbox}{Heap example: the next value stays on top}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (h0) {3};
+  \node[trienode,below left=10mm and 12mm of h0] (h1) {5};
+  \node[trienode,below right=10mm and 12mm of h0] (h2) {8};
+  \node[trienode,below left=9mm and 5mm of h1] (h3) {9};
+  \draw[-,thick,navy] (h0)--(h1) (h0)--(h2) (h1)--(h3);
+  \draw[flowarrow,orange] ([yshift=9mm]h0.north)--(h0.north);
+  \node[above=10mm of h0,text=orange]{take this next};
+  \node[right=28mm of h0]{after adding or taking a value, put the best one back on top};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\graphdryvisual}{%
+\begin{visualbox}{Graph example: mark a node so it is not visited twice}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (g0) at (0,1){1};
+  \node[trienode,visited] (g1) at (2.2,2){2};
+  \node[trienode] (g2) at (4.3,1){3};
+  \node[trienode] (g3) at (2.2,0){4};
+  \draw[flowarrow] (g0)--(g1)--(g2)--(g3)--(g0);
+  \draw[flowarrow,teal] (g0)--(g2);
+  \node[right=14mm of g2]{mark it once, then visit the connected nodes};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\triedryvisual}{%
+\begin{visualbox}{Trie example: follow one letter at a time}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (t0) {root};
+  \node[trienode,right=14mm of t0] (t1) {a};
+  \node[trienode,right=14mm of t1] (t2) {p};
+  \node[trienode,right=14mm of t2,visited] (t3) {p};
+  \node[trienode,below=12mm of t1] (tb) {d};
+  \draw[flowarrow] (t0)--(t1)--(t2)--(t3);
+  \draw[flowarrow,orange] (t1)--(tb);
+  \node[right=16mm of t3]{follow one arrow for each letter};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\griddryvisual}{%
+\begin{visualbox}{Grid / DP dry run: each cell has visible neighbors}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \v [count=\k from 0] in {1,2,2,3,2,3,2,4,5}{
+    \pgfmathtruncatemacro{\r}{int(\k/3)}\pgfmathtruncatemacro{\c}{mod(\k,3)}
+    \node[arraycell,minimum width=9mm] (m\r\c) at (.95*\c,-.85*\r){\v};}
+  \node[draw=orange,very thick,fit=(m11),inner sep=1mm]{};
+  \draw[flowarrow,teal] (m10)--(m11);
+  \draw[flowarrow,orange] (m01)--(m11);
+  \node[right=20mm of m12]{update from legal neighbors or visit them once};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\intervaldryvisual}{%
+\begin{visualbox}{Interval dry run: compare start with the active end}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]},x=9mm]
+  \draw[->,navy] (0,0)--(8,0);
+  \draw[line width=5pt,teal] (1,1.1)--(5,1.1);
+  \draw[line width=5pt,orange] (4,.35)--(7,.35);
+  \foreach \x in {0,...,7}\node[below] at (\x,0){\tiny\x};
+  \draw[flowarrow,orange] (4,.1)--(4,.35);
+  \node[below=8mm] at (4,0){overlap starts before the current interval ends};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\bitdryvisual}{%
+\begin{visualbox}{Binary example: focus on one 0 or 1 at a time}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \v [count=\i from 0] in {1,0,1,1,0,0,1,0}{\node[arraycell] (b\i) at (.9*\i,0){\v};}
+  \node[draw=orange,very thick,fit=(b6),inner sep=1mm]{};
+  \draw[flowarrow,orange] ([yshift=8mm]b6.north)--(b6.north);
+  \node[above=9mm of b6,text=orange]{digit now};
+  \node[below=8mm of b3]{move through the digits or remove one 1};
+\end{tikzpicture}\end{visualbox}}
+
+\newcommand{\dpdryvisual}{%
+\begin{visualbox}{Table example: use earlier answers to find the next one}\centering
+\begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \v [count=\i from 0] in {0,1,1,2,3,5,8}{
+    \node[arraycell] (d\i) at (.95*\i,0){\v};
+    \node[below=1mm of d\i,font=\tiny]{\i};}
+  \draw[flowarrow,teal] (d4.north) to[bend left=28] (d6.north);
+  \draw[flowarrow,orange] (d5.north) to[bend left=18] (d6.north);
+  \node[above=9mm of d5]{two earlier answers make the next answer};
+\end{tikzpicture}\end{visualbox}}
+
+% Match every lesson to the structure used by its algorithm.
+\newcommand{\lessonstructurevisual}{%
+\ifcase\value{lesson}\relax
+\or\hashdryvisual\or\arraydryvisual\or\arraydryvisual\or\triedryvisual\or\triedryvisual
+\or\graphdryvisual\or\queuedryvisual\or\treedryvisual\or\graphdryvisual\or\dpdryvisual
+\or\dpdryvisual\or\treedryvisual\or\arraydryvisual\or\hashdryvisual\or\bitdryvisual
+\or\graphdryvisual\or\dpdryvisual\or\cycledryvisual\or\stringdryvisual\or\heapdryvisual
+\or\arraydryvisual\or\graphdryvisual\or\hashdryvisual\or\dpdryvisual\or\dpdryvisual
+\or\dpdryvisual\or\dpdryvisual\or\stringdryvisual\or\stringdryvisual\or\stringdryvisual
+\or\dpdryvisual\or\intervaldryvisual\or\arraydryvisual\or\treedryvisual\or\treedryvisual
+\or\treedryvisual\or\heapdryvisual\or\intervaldryvisual\or\intervaldryvisual\or\intervaldryvisual
+\or\griddryvisual\or\graphdryvisual\or\hashdryvisual\or\listdryvisual\or\heapdryvisual
+\or\griddryvisual\or\stringdryvisual\or\bitdryvisual\or\bitdryvisual\or\arraydryvisual
+\or\listdryvisual\or\listdryvisual\or\listdryvisual\or\bitdryvisual\or\griddryvisual
+\or\treedryvisual\or\treedryvisual\or\griddryvisual\or\griddryvisual\or\treedryvisual
+\or\bitdryvisual\or\heapdryvisual\or\griddryvisual\or\hashdryvisual\or\stringdryvisual
+\or\stackdryvisual\or\treedryvisual\or\dpdryvisual\or\triedryvisual\or\griddryvisual
+\or\arraydryvisual\or\dpdryvisual\or\dpdryvisual\or\treedryvisual\or\griddryvisual
+\fi}
+
+\newcommand{\chaptercheckpoint}[4]{%
+\ifnum\value{lesson}<26\lessonstructurevisual\fi
+\begin{tcolorbox}[
+  enhanced,breakable,colback=softteal,colframe=teal,boxrule=0.65pt,
+  arc=1.5mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
+  before skip=0.55em,after skip=0.55em]
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X@{}}
+\textcolor{teal}{\textbf{When to use it:}} #1 &
+\textcolor{teal}{\textbf{Keep track of:}} #2 \\[0.8mm]
+\textcolor{orange}{\textbf{Common mistake:}} #3 &
+\textcolor{navy}{\textbf{Complexity:}} #4
+\end{tabularx}
+\end{tcolorbox}}
+
+% A shared layout for the later lessons. The text passed to this command is
+% different for every problem; the headings simply keep the book consistent.
+\newcommand{\lessonexpansion}[4]{%
+\Needspace{20\baselineskip}
+\subsection{Walk Through the Example}
+% The lesson already includes a diagram made for its exact example. Repeating
+% a generic array, string, or tree here can show different values and suggest
+% the wrong operation, so the walkthrough continues directly with its trace.
+\begin{dryrunbox}{Trace the example one update at a time}
+#1
+\end{dryrunbox}
+\subsection{Why It Works}
+#2
+\begin{revisionbox}{Tests to try}
+#3
+\end{revisionbox}
+\begin{revisionbox}{How to explain it in an interview}
+#4
+\end{revisionbox}%
+\ifcsname sourcewalkthrough@\thelesson\endcsname
+  \subsection{A Closer Look}
+  \csname sourcewalkthrough@\thelesson\endcsname
+\fi
+\ifcsname sourceexcerpt@\thelesson\endcsname
+  \subsection{Step-by-Step Explanation}
+  {\small\csname sourceexcerpt@\thelesson\endcsname}
+\fi}
+
+\input{chapters/source-restoration-part2}
+\input{chapters/source-restoration-part3}
+\input{chapters/source-excerpts-part2}
+\input{chapters/source-excerpts-part3}
+
+\tikzset{
+    every picture/.style={line cap=round,line join=round},
+    arraycell/.style={draw=navy,fill=softblue,line width=0.65pt,
+      minimum width=10mm,minimum height=9mm,inner sep=2pt,outer sep=0.6pt,
+      font=\small,align=center},
+    dsnode/.style={draw=navy,fill=softblue,line width=0.65pt,rounded corners=1.2mm,
+      minimum width=15mm,minimum height=9mm,inner sep=2.5pt,outer sep=0.7pt,
+      font=\small,align=center},
+    trienode/.style={draw=navy,circle,fill=softblue,line width=0.65pt,
+      minimum size=9mm,inner sep=1.5pt,outer sep=0.7pt,font=\small,align=center},
+    active/.style={fill=softorange,draw=orange,line width=1pt,densely dashed},
+    visited/.style={fill=softteal,draw=teal,line width=0.9pt,double,double distance=0.45pt},
+    flowarrow/.style={-{Stealth[length=2.2mm,width=1.55mm]},draw=navy,
+      line width=0.8pt},
+    edgelabel/.style={fill=white,fill opacity=0.96,text opacity=1,
+      inner xsep=2pt,inner ysep=1.2pt,rounded corners=0.6mm,
+      text=ink,font=\scriptsize,align=center},
+    every edge quotes/.style={edgelabel}
+}
+
+% -------------------------------------------------
+% Document
+% -------------------------------------------------
+\begin{document}
+
+\hypersetup{pageanchor=false}
+\ifdefined\KDPINTERIOR
+\else
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  % Deep full-page background and architectural accents.
+  \fill[navy] (current page.south west) rectangle (current page.north east);
+  \fill[teal!70!navy,opacity=0.55]
+    ([xshift=-7.0cm]current page.north east) rectangle (current page.south east);
+  \fill[orange]
+    ([xshift=1.25cm]current page.north west) rectangle
+    ([xshift=1.43cm]current page.south west);
+  \draw[white,opacity=0.22,line width=0.8pt,rounded corners=2mm]
+    ([xshift=1.05cm,yshift=-1.05cm]current page.north west) rectangle
+    ([xshift=-1.05cm,yshift=1.05cm]current page.south east);
+
+  % Subtle algorithmic network on the right.
+  \coordinate (g1) at ([xshift=-4.7cm,yshift=-3.2cm]current page.north east);
+  \coordinate (g2) at ([xshift=-2.2cm,yshift=-5.0cm]current page.north east);
+  \coordinate (g3) at ([xshift=-5.8cm,yshift=-7.1cm]current page.north east);
+  \coordinate (g4) at ([xshift=-2.8cm,yshift=-9.0cm]current page.north east);
+  \coordinate (g5) at ([xshift=-5.0cm,yshift=-11.3cm]current page.north east);
+  \foreach \a/\b in {g1/g2,g1/g3,g2/g3,g2/g4,g3/g4,g3/g5,g4/g5}{
+    \draw[white,opacity=0.15,line width=1.2pt] (\a)--(\b);
+  }
+  \foreach \p/\r in {g1/5mm,g2/7mm,g3/6mm,g4/5mm,g5/7mm}{
+    \fill[softteal,opacity=0.12] (\p) circle (\r);
+    \draw[white,opacity=0.34,line width=1pt] (\p) circle (\r);
+  }
+  \fill[orange,opacity=0.9] (g2) circle (2.2mm);
+  \fill[teal!30!white,opacity=0.9] (g5) circle (2.2mm);
+
+  % Decorative code blocks.
+  \foreach \y/\w in {-15.2/4.4,-15.75/3.2,-16.3/5.1,-16.85/2.7}{
+    \draw[white,opacity=0.13,line width=3pt,rounded corners=2pt]
+      ([xshift=-6.1cm,yshift=\y cm]current page.north east) --
+      ++(\w cm,0);
+  }
+  \node[anchor=north,text=teal!22!white,font=\sffamily\bfseries\large]
+    at ([yshift=-2.15cm]current page.north)
+    {DATA STRUCTURES \& ALGORITHMS};
+
+  % The complete title is the visual center of the cover.
+  \node[anchor=center,text=white,font=\sffamily\bfseries,align=center,
+        text width=16.2cm]
+    at ([yshift=1.0cm]current page.center)
+    {\fontsize{37}{43}\selectfont
+     CRACKING\hspace{0.48em}THE\\[2mm]
+     LEETCODE\hspace{0.48em}INTERVIEW};
+  \draw[orange,line width=2.4pt]
+    ([xshift=-5.9cm,yshift=-2.25cm]current page.center) --
+    ([xshift=5.9cm,yshift=-2.25cm]current page.center);
+  \node[anchor=north,text=teal!18!white,font=\sffamily\bfseries,align=center]
+    at ([yshift=-2.85cm]current page.center)
+    {\fontsize{18}{23}\selectfont 75 Programming Questions and Solutions};
+
+  \draw[white,opacity=0.25,line width=0.8pt]
+    ([xshift=2.15cm,yshift=3.65cm]current page.south west) --
+    ([xshift=-2.15cm,yshift=3.65cm]current page.south east);
+  \node[anchor=west,text=teal!25!white,font=\sffamily\large]
+    at ([xshift=2.15cm,yshift=2.85cm]current page.south west)
+    {AUTHOR};
+  \node[anchor=west,text=white,font=\sffamily\bfseries]
+    at ([xshift=2.15cm,yshift=1.75cm]current page.south west)
+    {\fontsize{23}{28}\selectfont Om Tripathi};
+\end{tikzpicture}
+\null
+\end{titlepage}
+\fi
+
+\clearpage
+\thispagestyle{empty}
+\vspace*{0.16\textheight}
+\begin{center}
+{\Large\bfseries\color{navy}Cracking the LeetCode Interview}\par
+\smallskip
+{\large 75 Programming Questions and Solutions}\par
+\vspace{1.1cm}
+{\large\bfseries Om Tripathi}
+\end{center}
+
+\vfill
+\begin{minipage}{0.88\linewidth}
+\small
+\textbf{Cover Design: Om Tripathi}\par
+\textcopyright\ 2026 Om Tripathi\par
+All rights reserved. No part of this publication may be reproduced, stored in
+a retrieval system, or transmitted, in any form or by any means (electronic,
+mechanical, photocopying, recording or otherwise), without the prior written
+permission of the author.
+
+This book is an independent educational publication. LeetCode is a trademark
+of LeetCode, LLC. This publication is not affiliated with, sponsored by, or
+endorsed by LeetCode, LLC. Product names and trademarks mentioned in the book
+remain the property of their respective owners.
+
+The material is provided for educational purposes. Although the algorithms
+and code have been reviewed and tested, readers should independently validate
+solutions for their own environments and requirements.
+
+\textbf{First edition}\par
+\ifdefempty{\bookisbn}{}{\textbf{ISBN:} \bookisbn}
+\end{minipage}
+\vspace*{0.08\textheight}
+
+\clearpage
+
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+\begingroup
+\sloppy
+\hbadness=10000
+\setlength{\parskip}{0pt}
+\markboth{Contents}{Contents}
+\fancyhead[RO]{\small\textcolor{navy}{Contents}}
+\vspace*{0.15in}
+\begin{center}
+{\plexsans\fontsize{28}{32}\selectfont\bfseries\color{navy}CONTENTS}\par
+\end{center}
+\vspace{0.25em}
+{\color{teal}\rule{\linewidth}{1pt}}\par
+\vspace{0.85em}
+\printcontentsonly
+\endgroup
+\clearpage
+\fancyhead[RO]{\small\textcolor{navy}{Cracking the LeetCode Interview}}
+\pagenumbering{arabic}
+
+
+% =================================================
+% INTRODUCTION
+% =================================================
+
+\phantomsection
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+\markboth{Introduction}{Foundations}
+
+This book explains 75 common coding interview problems in plain C++. The goal
+is not to memorize 75 answers. The goal is to see why each solution works and
+to learn how to rebuild it on your own.
+
+We will work with arrays, strings, linked lists, trees, tries, graphs, heaps,
+greedy methods, binary search, bits, and dynamic programming. Each lesson
+starts with the simple idea, follows the changing values through an example,
+then turns that idea into code.
+
+For every problem, we will focus on the following questions:
+
+\begin{enumerate}
+    \item What is the input?
+    \item What data structure should we use?
+    \item What algorithmic technique should we use?
+    \item What should we do with the data?
+    \item What should the output be?
+\end{enumerate}
+
+We first write the idea in \textbf{pseudocode}. Then we translate it into C++.
+This keeps the reasoning separate from language details and makes the final
+code easier to understand.
+
+\begin{conceptbox}{How the C++ code is used}
+LeetCode creates the input, calls the required method, and checks the returned
+answer. That is why these solution classes usually do not print anything.
+The code uses ordinary modern C++. Tree, graph, and linked-list node types are
+the standard types supplied by the judge.
+\end{conceptbox}
+
+\begin{conceptbox}{Judge-provided pointer types used throughout the book}
+Several lessons use structures supplied by the coding platform rather than
+defined inside every solution. A \texttt{ListNode} stores
+\texttt{val} and \texttt{next}; a \texttt{TreeNode} stores \texttt{val},
+\texttt{left}, and \texttt{right}; and a graph \texttt{Node} stores a value
+plus a vector of neighboring node pointers. Complete reference definitions
+appear in the final C++ reference section.
+\end{conceptbox}
+
+\input{chapters/stl-guide}
+
+\input{chapters/data-structure-visual-guide}
+
+
+% =================================================
+% TWO SUM
+% =================================================
+
+\patternintoc{Array Patterns}
+\problemstart{Two Sum}{1}{Easy}{Arrays and hashing}{\texttt{unordered\_map}}
+
+\subsection{The Problem}
+
+Given an array of integers \texttt{nums} and an integer
+\texttt{target}, return the indices of the two numbers such that
+they add up to \texttt{target}.
+
+You may assume that each input has exactly one solution, and you
+may not use the same element twice.
+
+The answer may be returned in any order.
+
+\subsection{Examples and Rules}
+
+\begin{conceptbox}{Read the output carefully}
+The problem returns \emph{indices}, not the two values. Array positions use
+zero-based indexing, and the same position cannot be used twice.
+
+\medskip
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Input & Matching values & Output \\
+\midrule
+\texttt{[2,7,11,15]}, target \texttt{9} & $2+7=9$ & \texttt{[0,1]} \\
+\texttt{[3,2,4]}, target \texttt{6} & $2+4=6$ & \texttt{[1,2]} \\
+\texttt{[3,3]}, target \texttt{6} & $3+3=6$ & \texttt{[0,1]} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{conceptbox}
+
+For the first example, the indexed array is
+\[
+\begin{array}{c|cccc}
+\text{Index} & 0 & 1 & 2 & 3 \\ \hline
+\text{Value} & 2 & 7 & 11 & 15
+\end{array}
+\]
+Because \(\texttt{nums[0]}+\texttt{nums[1]}=2+7=9\), the answer is
+\texttt{[0,1]}.
+
+
+% =================================================
+% BREAKING DOWN THE PROBLEM
+% =================================================
+
+\subsection{What We Need to Find}
+
+The input consists of:
+
+\begin{itemize}
+    \item An array of integers called \texttt{nums}.
+    \item An integer called \texttt{target}.
+\end{itemize}
+
+Our goal is to find two elements in the array whose sum is equal
+to the target and return their indices.
+
+
+% =================================================
+% DATA STRUCTURE
+% =================================================
+
+\subsection{Data Structure: Hash Table}
+
+We can use a \textbf{hash table} to efficiently solve this problem.
+
+In C++, an \texttt{unordered\_map} can be used to implement a hash
+table.
+
+The hash table will store values that we have already visited,
+along with their matching indices.
+
+The main idea is to calculate the \textbf{complement} of the current
+element.
+
+If the current element is \(x\), then the required complement is: \(\text{complement} = \texttt{target} - x\)
+
+This comes from: \(x + \text{complement} = \texttt{target}\)
+
+So: \(\boxed{\text{complement} = \texttt{target} - x}\)
+
+For every element in the array, we check whether this complement
+already exists in our hash table.
+
+
+% =================================================
+% HOW THE HASH TABLE WORKS
+% =================================================
+
+\subsection{How the Hash Table Works}
+
+While iterating through the array, we store every element that
+we have already visited in the hash table.
+
+For the current element, we calculate: \(\text{complement} = \texttt{target} - \text{current element}\)
+
+We then check whether the complement exists in the hash table.
+
+\begin{itemize}
+    \item If the complement exists, we have found the required pair.
+    \item If the complement does not exist, we store the current
+    element and its index in the hash table.
+\end{itemize}
+
+This lets us find the required pair in a single traversal
+of the array.
+
+\begin{visualbox}{Two Sum: save a number, then find the one needed}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[anchor=east,text=navy,font=\bfseries] at (-0.35,1.8) {Step 1};
+  \foreach \x/\value in {0/2,1/7,2/11,3/15} {
+    \node[arraycell] (a\x) at (1.05*\x,1.8) {\value};
+    \node[below=1mm of a\x,font=\scriptsize,text=navy] {\x};
+  }
+  \node[draw=orange,very thick,fit=(a0),inner sep=1mm] {};
+  \node[above=4mm of a0,text=orange,font=\bfseries] {number now};
+  \node[dsnode,align=left,right=19mm of a3] (empty)
+    {hash table\\\textit{empty}};
+  \node[below=12mm of a1,draw=orange,fill=softorange,rounded corners,
+    inner xsep=3mm,inner ysep=1.2mm] (store) {save 2 at index 0};
+  \draw[flowarrow,orange] (store.east) -- (empty.west);
+
+  \node[anchor=east,text=navy,font=\bfseries] at (-0.35,-1.8) {Step 2};
+  \foreach \x/\value in {0/2,1/7,2/11,3/15} {
+    \node[arraycell] (b\x) at (1.05*\x,-1.8) {\value};
+    \node[below=1mm of b\x,font=\scriptsize,text=navy] {\x};
+  }
+  \node[draw=teal,very thick,fit=(b1),inner sep=1mm] {};
+  \node[above=4mm of b1,text=teal,font=\bfseries] {number now};
+  \node[dsnode,align=left,right=19mm of b3] (filled)
+    {hash table\\$2\to0$};
+  \node[below=12mm of b1,draw=teal,fill=softteal,rounded corners,
+    inner xsep=3mm,inner ysep=1.2mm] (look) {need 2: find it};
+  \draw[flowarrow,teal] (look.east) -- (filled.west);
+  \node[below=7mm of filled,draw=navy,fill=softblue,rounded corners,
+    inner xsep=3mm,inner ysep=1.2mm] (answer) {found: indexes $[0,1]$};
+  \draw[flowarrow] (filled) -- (answer);
+\end{tikzpicture}
+
+\smallskip
+Before checking a number, the table contains only numbers seen earlier.
+\end{visualbox}
+
+\begin{invariantbox}{the table contains only earlier numbers}
+Before index \(i\) is processed, every entry in the hash map came from an
+index smaller than \(i\). A successful complement lookup uses two
+different positions and automatically keeps the scan order.
+\end{invariantbox}
+
+The two rows above are the full dry run. The first value is remembered. At
+the next index, the needed value is already in the table, so the answer is
+found without scanning the earlier part of the array again.
+
+
+% =================================================
+% PSEUDOCODE
+% =================================================
+
+\subsection{Pseudocode}
+
+The overall pseudocode is:
+
+\begin{enumerate}
+    \item Start an empty hash table to store the complement
+    values and their indices.
+    
+    \item Loop over every element in the array.
+    
+    \item For the current element, calculate its complement:
+    \(\text{complement} = \texttt{target} - \text{current element}\)
+    
+    \item Check whether the complement exists in the hash table.
+    
+    \item If the complement exists:
+    \begin{itemize}
+        \item Return the index of the complement from the hash table.
+        \item Return the index of the current element.
+    \end{itemize}
+    
+    \item If the complement does not exist:
+    \begin{itemize}
+        \item Insert the current element and its index into the
+        hash table.
+    \end{itemize}
+    
+    \item If no pair is found, return an empty array as an edge case.
+\end{enumerate}
+
+
+% =================================================
+% C++ IMPLEMENTATION
+% =================================================
+
+\subsection{C++ Implementation}
+
+The hash table can be implemented using
+\texttt{unordered\_map} in C++.
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Two Sum}]
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        unordered_map<int, int> hashTable;
+
+        for (int i = 0; i < static_cast<int>(nums.size()); ++i) {
+            const int complement = target - nums[i];
+
+            if (hashTable.count(complement)) {
+                return {hashTable[complement], i};
+            }
+
+            hashTable[nums[i]] = i;
+        }
+
+        return {};
+    }
+};
+\end{lstlisting}
+
+
+% =================================================
+% STEP-BY-STEP CODE EXPLANATION
+% =================================================
+
+\subsection{Code Walkthrough}
+
+\subsubsection{Step 1: Start the Hash Table}
+
+We first create an empty hash table:
+
+\begin{lstlisting}
+unordered_map<int, int> hashTable;
+\end{lstlisting}
+
+The key represents the value from the array, while the value
+stored in the hash table represents its index.
+
+For example: \(\texttt{hashTable[2] = 0}\)
+
+means that the value \(2\) was found at index \(0\).
+
+\subsubsection{Step 2: Traverse the Array}
+
+We iterate through the array:
+
+\begin{lstlisting}
+for (int i = 0; i < nums.size(); i++)
+\end{lstlisting}
+
+Each element is processed exactly once.
+
+\subsubsection{Step 3: Calculate the Complement}
+
+For the current element \texttt{nums[i]}, calculate:
+
+\begin{lstlisting}
+int complement = target - nums[i];
+\end{lstlisting}
+
+For example, if: \(\texttt{target}=9\)
+
+and: \(\texttt{nums[i]}=2\)
+
+then: \(\text{complement}=9-2=7\)
+
+So, we need to determine whether \(7\) has already
+appeared in the array.
+
+\subsubsection{Step 4: Check the Hash Table}
+
+We check whether the complement exists:
+
+\begin{lstlisting}
+if (hashTable.count(complement))
+\end{lstlisting}
+
+If it exists, we have found the required pair.
+
+We can then return:
+
+\begin{lstlisting}
+return {hashTable[complement], i};
+\end{lstlisting}
+
+The hash table provides the index of the previously visited
+element, while \(i\) is the index of the current element.
+
+\subsubsection{Step 5: Store the Current Element}
+
+If the complement does not exist, we store the current element
+and its index:
+
+\begin{lstlisting}
+hashTable[nums[i]] = i;
+\end{lstlisting}
+
+This allows future elements to check whether the current element
+is their required complement.
+
+
+% =================================================
+% EDGE CASE
+% =================================================
+
+\subsection{Edge Case}
+
+If no valid pair is found, we return an empty array:
+
+\begin{lstlisting}
+return {};
+\end{lstlisting}
+
+This handles the case where there are no elements that satisfy
+the required condition.
+
+
+% =================================================
+% TIME AND SPACE COMPLEXITY
+% =================================================
+
+\subsection{Time and Space}
+
+\subsubsection{Time Complexity}
+
+The algorithm iterates through the array only once.
+
+So, the time complexity is: \(\boxed{\Oof{n}}\)
+
+where \(n\) is the number of elements in the input array.
+
+The hash table allows us to check whether a complement exists in
+constant average time.
+
+\subsubsection{Space Complexity}
+
+In the worst case, we may need to store every element of the
+array in the hash table.
+
+So, the space complexity is: \(\boxed{\Oof{n}}\)
+
+So, the overall complexity is: \(\boxed{\text{Time} = O(n)}\) \(\boxed{\text{Space} = O(n)}\)
+
+
+% =================================================
+% SUMMARY
+% =================================================
+
+\subsection{Two Sum: Summary}
+
+The key idea behind the Two Sum solution is to use a hash table
+to remember elements that we have already visited.
+
+For every current element \(x\), we calculate: \(\boxed{\text{complement} = \texttt{target} - x}\)
+
+We then check whether this complement has already been seen.
+
+\begin{itemize}
+    \item If yes, return the two indices.
+    \item If no, store the current element and its index.
+\end{itemize}
+
+This reduces the solution from a brute-force \(O(n^2)\) approach
+to an average-case \(O(n)\) time solution.
+
+\chaptercheckpoint
+  {A current value needs a previously seen complement.}
+  {A value-to-index hash map for the processed prefix.}
+  {Inserting before checking and accidentally reusing the same index.}
+  {$O(n)$ average time and $O(n)$ space.}
+
+% =================================================
+% 3SUM
+% =================================================
+
+\problemstart{3Sum}{15}{Medium}{Sorting and two pointers}{Sorted array}
+
+\subsection{The Problem}
+
+Given an integer array \texttt{nums}, return all the triplets \([\texttt{nums[i]},\texttt{nums[j]},\texttt{nums[k]}]\)
+such that: \(i \neq j,\qquad i \neq k,\qquad j \neq k\)
+
+and \(\texttt{nums[i]}+\texttt{nums[j]}+\texttt{nums[k]}=0\)
+
+The solution set must not contain duplicate triplets.
+
+\subsection{Example}
+
+Consider: \(\texttt{nums}=[-1,0,1,2,-1,-4]\)
+
+The valid triplets are: \([-1,-1,2]\)
+
+and \([-1,0,1]\)
+
+Both triplets have a sum of zero: \(-1+(-1)+2=0\)
+
+and \(-1+0+1=0\)
+
+So, the output is: \([[-1,-1,2],[-1,0,1]]\)
+
+Another example is: \(\texttt{nums}=[0,1,1]\)
+
+There is no combination of three distinct indices whose values
+sum to zero, so the result is an empty list.
+
+\subsection{What We Need to Find}
+
+The input is an array of integers called \texttt{nums}.
+
+We need to return all triplets satisfying: \(\texttt{nums[i]}+\texttt{nums[j]}+\texttt{nums[k]}=0\)
+
+where all three indices are different.
+
+We must also make sure that duplicate triplets are not included in
+the result.
+
+\subsection{Algorithmic Technique: Two Pointers}
+
+The technique used for this problem is the
+\textbf{two-pointer technique}.
+
+The general idea is:
+
+\begin{enumerate}
+    \item Sort the input array.
+    \item Traverse the array from the beginning.
+    \item For each element, use two pointers to search for the
+    remaining two elements.
+\end{enumerate}
+
+For a fixed element \texttt{nums[i]}, we need to find two values
+whose sum is: \(-\texttt{nums[i]}\)
+
+The two pointers are:
+
+\begin{itemize}
+    \item \texttt{j}: starts immediately after \texttt{i}.
+    \item \texttt{k}: starts at the end of the array.
+\end{itemize}
+
+We then calculate: \(\texttt{sum} = \texttt{nums[i]}+\texttt{nums[j]}+\texttt{nums[k]}\)
+
+Because the array is sorted, we can move the pointers intelligently.
+
+\subsection{Pointer Movement}
+
+If: \(\texttt{sum}<0\)
+
+then the sum is too small, so we increment \texttt{j}: \(\texttt{j++}\)
+
+This moves toward a larger value.
+
+If: \(\texttt{sum}>0\)
+
+then the sum is too large, so we decrement \texttt{k}: \(\texttt{k--}\)
+
+This moves toward a smaller value.
+
+If: \(\texttt{sum}=0\)
+
+then we have found a valid triplet.
+
+We add it to the result and move both pointers.
+
+\begin{visualbox}{Pick one number, then move left and right}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \foreach \row/\yy in {A/1.8,B/0,C/-1.8} {
+    \foreach \x/\value in {0/-4,1/-1,2/-1,3/0,4/1,5/2}
+      \node[arraycell] (\row\x) at (1.0*\x,\yy) {\value};
+  }
+  \node[anchor=east,font=\bfseries,text=navy] at (-0.35,1.8) {Check 1};
+  \node[draw=navy,very thick,fit=(A0),inner sep=.7mm] {};
+  \node[draw=teal,very thick,fit=(A1),inner sep=.7mm] {};
+  \node[draw=orange,very thick,fit=(A5),inner sep=.7mm] {};
+  \node[right=5mm of A5,align=left] {$-4-1+2=-3$\\too small: move left};
+
+  \node[anchor=east,font=\bfseries,text=navy] at (-0.35,0) {Check 2};
+  \node[draw=navy,very thick,fit=(B1),inner sep=.7mm] {};
+  \node[draw=teal,very thick,fit=(B2),inner sep=.7mm] {};
+  \node[draw=orange,very thick,fit=(B5),inner sep=.7mm] {};
+  \node[right=5mm of B5,align=left,text=teal] {$-1-1+2=0$\\save $[-1,-1,2]$};
+
+  \node[anchor=east,font=\bfseries,text=navy] at (-0.35,-1.8) {Check 3};
+  \node[draw=navy,very thick,fit=(C1),inner sep=.7mm] {};
+  \node[draw=teal,very thick,fit=(C3),inner sep=.7mm] {};
+  \node[draw=orange,very thick,fit=(C4),inner sep=.7mm] {};
+  \node[right=5mm of C5,align=left,text=teal] {$-1+0+1=0$\\save $[-1,0,1]$};
+
+  \node[below=4mm of C1,text=navy,font=\scriptsize] {first choice};
+  \node[below=4mm of C3,text=teal,font=\scriptsize] {left};
+  \node[below=4mm of C4,text=orange,font=\scriptsize] {right};
+\end{tikzpicture}
+
+\smallskip
+If the sum is too small, move left to a larger number. If it is too large,
+move right to a smaller number.
+\end{visualbox}
+
+\begin{invariantbox}{every pair still worth checking lies between left and right}
+After choosing the first number, the remaining possible pairs lie between the
+left and right positions. A small sum moves left; a large sum moves right.
+\end{invariantbox}
+
+The three array rows show the important pointer changes. Blue marks the fixed
+value, teal marks the left pointer, and orange marks the right pointer.
+
+\subsection{Pseudocode}
+
+The overall process is:
+
+\begin{enumerate}
+    \item Start an empty result vector.
+    
+    \item If the size of \texttt{nums} is less than \(3\), return
+    the empty result.
+    
+    \item Sort the input array.
+    
+    \item Traverse the array using index \texttt{i}.
+    
+    \item Skip duplicate values for \texttt{i}.
+    
+    \item Set:
+    \(\texttt{j}=i+1\)
+    and
+    \(\texttt{k}=n-1\)
+    
+    \item While:
+    \(\texttt{j}<\texttt{k}\)
+    calculate:
+    \(\texttt{sum} = \texttt{nums[i]}+ \texttt{nums[j]}+ \texttt{nums[k]}\)
+    
+    \item If the sum is zero:
+    \begin{itemize}
+        \item Add the triplet to the result.
+        \item Skip duplicate values for \texttt{j}.
+        \item Skip duplicate values for \texttt{k}.
+        \item Increment \texttt{j}.
+        \item Decrement \texttt{k}.
+    \end{itemize}
+    
+    \item Else if the sum is less than zero:
+    \(\texttt{j++}\)
+    
+    \item Otherwise:
+    \(\texttt{k--}\)
+    
+    \item Return the result.
+\end{enumerate}
+
+\subsection{C++ Implementation}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: 3Sum}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        vector<vector<int>> result;
+        if (nums.size() < 3) return result;
+        sort(nums.begin(), nums.end());
+        const int n = static_cast<int>(nums.size());
+        for (int i = 0; i < n - 2; ++i) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int j = i + 1;
+            int k = n - 1;
+            while (j < k) {
+                const long long sum =
+                    static_cast<long long>(nums[i]) + nums[j] + nums[k];
+                if (sum == 0) {
+                    result.push_back({nums[i], nums[j], nums[k]});
+                    while (j < k && nums[j] == nums[j + 1]) ++j;
+                    while (j < k && nums[k] == nums[k - 1]) --k;
+                    ++j;
+                    --k;
+                } else if (sum < 0) {
+                    ++j;
+                } else {
+                    --k;
+                }
+            }
+        }
+        return result;
+    }
+};
+\end{lstlisting}
+
+\subsection{Code Walkthrough}
+
+\subsubsection{Step 1: Start the Result}
+
+We first create a vector to store all valid triplets:
+
+\begin{lstlisting}
+vector<vector<int>> result;
+\end{lstlisting}
+
+If there are fewer than three elements, a triplet cannot be
+formed:
+
+\begin{lstlisting}
+if (nums.size() < 3) {
+    return result;
+}
+\end{lstlisting}
+
+\subsubsection{Step 2: Sort the Array}
+
+We sort the array:
+
+\begin{lstlisting}
+sort(nums.begin(), nums.end());
+\end{lstlisting}
+
+Sorting is important because it allows the two-pointer technique
+to determine which pointer should move based on the current sum.
+
+For example: \([0,-1,2,-1,-4,1]\)
+
+becomes: \([-4,-1,-1,0,1,2]\)
+
+\subsubsection{Step 3: Fix the First Element}
+
+We traverse the array:
+
+\begin{lstlisting}
+for (int i = 0; i < nums.size() - 2; i++)
+\end{lstlisting}
+
+The index \texttt{i} represents the first element of the triplet.
+
+For every fixed \texttt{i}, we search for two additional values.
+
+\subsubsection{Handling Duplicate Values for \texttt{i}}
+
+Since duplicate triplets are not allowed, we skip duplicate values:
+
+\begin{lstlisting}
+if (i > 0 && nums[i] == nums[i - 1]) {
+    continue;
+}
+\end{lstlisting}
+
+This prevents us from processing the same first value multiple
+times.
+
+\subsubsection{Step 4: Start the Two Pointers}
+
+For every fixed \texttt{i}, we start:
+
+\begin{lstlisting}
+int j = i + 1;
+int k = nums.size() - 1;
+\end{lstlisting}
+
+So: \(i < j < k\)
+
+The pointer \texttt{j} starts immediately after \texttt{i},
+while \texttt{k} starts at the last element.
+
+\subsubsection{Step 5: Calculate the Sum}
+
+While: \(\texttt{j}<\texttt{k}\)
+
+we calculate:
+
+\begin{lstlisting}
+int sum = nums[i] + nums[j] + nums[k];
+\end{lstlisting}
+
+There are three possibilities.
+
+\subsubsection{Case 1: Sum Equals Zero}
+
+If: \(\texttt{sum}=0\)
+
+we have found a valid triplet.
+
+We add it to the result:
+
+\begin{lstlisting}
+result.push_back({
+    nums[i],
+    nums[j],
+    nums[k]
+});
+\end{lstlisting}
+
+We then skip duplicate values for both pointers and move them
+toward each other.
+
+\subsubsection{Case 2: Sum Is Less Than Zero}
+
+If: \(\texttt{sum}<0\)
+
+we need to increase the sum.
+
+Because the array is sorted, we move \texttt{j} to the right:
+
+\begin{lstlisting}
+j++;
+\end{lstlisting}
+
+This gives us a potentially larger value.
+
+\subsubsection{Case 3: Sum Is Greater Than Zero}
+
+If: \(\texttt{sum}>0\)
+
+we need to decrease the sum.
+
+Because the array is sorted, we move \texttt{k} to the left:
+
+\begin{lstlisting}
+k--;
+\end{lstlisting}
+
+This gives us a potentially smaller value.
+
+\subsection{Why Sorting Helps}
+
+Sorting creates an important property: \(\texttt{nums[j]} \leq \texttt{nums[k]}\)
+
+So, if the current sum is too small, moving \texttt{j}
+forward increases the sum.
+
+If the current sum is too large, moving \texttt{k} backward
+decreases the sum.
+
+This lets us search for the required pair efficiently without
+checking every possible pair.
+
+\subsection{Handling Duplicates}
+
+Duplicate triplets are not allowed.
+
+After finding a valid triplet, we skip duplicate values for
+\texttt{j}:
+
+\begin{lstlisting}
+while (j < k && nums[j] == nums[j + 1]) {
+    j++;
+}
+\end{lstlisting}
+
+Similarly, we skip duplicate values for \texttt{k}:
+
+\begin{lstlisting}
+while (j < k && nums[k] == nums[k - 1]) {
+    k--;
+}
+\end{lstlisting}
+
+After that, both pointers are moved:
+
+\begin{lstlisting}
+j++;
+k--;
+\end{lstlisting}
+
+
+% =================================================
+% COMPLEXITY
+% =================================================
+
+\subsection{Time and Space}
+
+The array is first sorted, which takes: \(O(n\log n)\)
+
+After sorting, we use a loop over the array and a two-pointer
+scan for each fixed element.
+
+The resulting dominant complexity is: \(\boxed{O(n^2)}\)
+
+where \(n\) is the number of elements in the input array.
+
+The sorting step is smaller than the \(O(n^2)\) two-pointer
+processing for the overall asymptotic complexity.
+
+The extra space depends on the sorting implementation. The
+two-pointer portion itself uses constant extra space, aside
+from the space required for the returned result. The overall time complexity
+is \(O(n^2)\), and the two-pointer scan uses \(O(1)\) extra space, excluding
+the output vector and implementation-dependent sorting stack space.
+
+\subsection{3Sum Summary}
+
+The key idea is:
+
+\begin{enumerate}
+    \item Sort the array.
+    \item Fix one element.
+    \item Use two pointers to find the remaining two elements.
+    \item If the sum is too small, move the left pointer right.
+    \item If the sum is too large, move the right pointer left.
+    \item If the sum is zero, record the triplet.
+    \item Skip duplicates to ensure unique triplets.
+\end{enumerate}
+
+So, the two-pointer technique reduces the problem to an
+efficient \(O(n^2)\) solution.
+
+\chaptercheckpoint
+  {A sorted array asks for unique tuples satisfying a target sum.}
+  {One fixed index, two moving pointers, and duplicate skipping.}
+  {Recording duplicate triplets or moving the wrong pointer after comparing the sum.}
+  {$O(n^2)$ time and constant pointer space excluding sorting/output.}
+
+% =================================================
+% BEST TIME TO BUY AND SELL STOCK
+% =================================================
+
+\problemstart{Best Time to Buy and Sell Stock}{121}{Easy}{Greedy running minimum}{Array}
+
+\subsection{The Problem}
+
+The array \texttt{prices} stores the stock price for each day. Choose one day
+to buy and a later day to sell. Return the greatest possible profit. If every
+possible transaction loses money, return zero.
+
+\begin{conceptbox}{The ordering rule}
+\centering
+\textbf{Buy before sell}
+
+\smallskip
+For a buy price \(B\) and a later selling price \(S\), \(\text{profit}=S-B.\)
+The algorithm may not use a low price that appears after the selling day.
+\end{conceptbox}
+
+\subsection{Examples and Rules}
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Prices & Best transaction & Answer \\
+\midrule
+\texttt{[7,1,5,3,6,4]} & buy at \(1\), sell at \(6\) & \(5\) \\
+\texttt{[7,6,4,3,1]} & no profitable sale & \(0\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The first example earns \(6-1=5\). In the decreasing example, every future
+price is smaller than its earlier prices, so the best legal answer is zero.
+
+\subsection{First Idea: Try Every Transaction}
+
+The direct method chooses every pair of days \((i,j)\) with \(i<j\), computes
+\(\texttt{prices[j]}-\texttt{prices[i]}\), and keeps the largest result.
+There are about \(n(n-1)/2\) legal pairs, so this approach takes
+\(O(n^2)\) time.
+
+The repeated work is the clue: for every selling day, the brute-force method
+searches the earlier days again to find the cheapest possible purchase.
+
+\subsection{Greedy Observation}
+
+For a fixed selling day, the best buying day is always the cheapest earlier
+day. So, while scanning from left to right, we only need to remember
+the minimum price seen so far. \(\boxed{ \text{minimum previous price} \longrightarrow \text{current selling price} \longrightarrow \text{best profit} }\)
+
+\begin{visualbox}{For each selling day, keep the cheapest earlier price}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \foreach \x/\value in {0/7,1/1,2/5,3/3,4/6,5/4} {
+    \node[arraycell] (p\x) at (1.25*\x,0) {\value};
+    \node[below=1mm of p\x,font=\scriptsize,text=navy] {day \x};
+  }
+  \node[above=7mm of p1,text=teal,font=\bfseries] (buy) {buy at \(1\)};
+  \draw[flowarrow,teal] (buy.south)--(p1.north);
+  \node[above=7mm of p4,text=orange,font=\bfseries] (sell) {sell at \(6\)};
+  \draw[flowarrow,orange] (sell.south)--(p4.north);
+  \draw[-{Stealth[length=2.6mm,width=1.8mm]},very thick,orange]
+    ([yshift=-9mm]p1.south) -- node[edgelabel,below,font=\bfseries]{profit \(=6-1=5\)}
+    ([yshift=-9mm]p4.south);
+\end{tikzpicture}
+
+\smallskip
+When day 4 is the selling day, \(1\) is the cheapest price in days 0 through 3.
+No other earlier buying price can produce a larger profit that day.
+\end{visualbox}
+
+\subsection{The Two Variables}
+
+\begin{conceptbox}{State keeped during the scan}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}p{3cm}X@{}}
+\texttt{minPrice} & Smallest price seen up to the current day. Start at positive infinity.\\[2mm]
+\texttt{maxProfit} & Greatest legal profit found so far. Start at zero so a loss is never returned.
+\end{tabularx}
+\end{conceptbox}
+
+\begin{invariantbox}{the two variables summarize the entire processed prefix}
+Before moving to the next day, \texttt{minPrice} is the cheapest price in the
+processed prefix, and \texttt{maxProfit} is the best legal transaction
+entirely inside that prefix. No older price needs to be stored separately.
+\end{invariantbox}
+
+\subsection{Step-by-Step Algorithm}
+
+For every price, perform three operations in this order:
+
+\begin{enumerate}
+  \item Update the cheapest price:
+  \(\texttt{minPrice}=\min(\texttt{minPrice},\texttt{price}).\)
+  \item Calculate the profit obtained by selling today:
+  \(\texttt{currentProfit}=\texttt{price}-\texttt{minPrice}.\)
+  \item Update the best result:
+  \(\texttt{maxProfit}=\max(\texttt{maxProfit},\texttt{currentProfit}).\)
+\end{enumerate}
+
+Updating \texttt{minPrice} first allows the current day to act as both the new
+minimum and a zero-profit sale. This never creates an invalid positive
+transaction, and future days may use that price as their buying day.
+
+\subsection{Detailed Visual Dry Run}
+
+\begin{dryrunbox}{Scanning \texttt{[7,1,5,3,6,4]}}
+\begin{center}
+\begin{tabular}{@{}ccccc@{}}
+\toprule
+Day & Price & \texttt{minPrice} & Sell-today profit & \texttt{maxProfit} \\
+\midrule
+0 & 7 & 7 & 0 & 0 \\
+1 & 1 & 1 & 0 & 0 \\
+2 & 5 & 1 & 4 & 4 \\
+3 & 3 & 1 & 2 & 4 \\
+4 & 6 & 1 & 5 & 5 \\
+5 & 4 & 1 & 3 & 5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+The minimum changes only when a cheaper buying opportunity appears. The
+maximum profit changes only when today's selling price improves the answer.
+
+\subsection{Why the Greedy Choice Is Correct}
+
+Suppose the current selling price is \(P\). For any legal earlier buying price
+\(B\), the profit is \(P-B\). With \(P\) fixed, this expression is largest
+when \(B\) is as small as possible. So, the cheapest earlier price is
+the only buying choice needed for the current day.
+
+Every day is considered once as a possible selling day. As a result, every
+best transaction is considered when its selling day is processed, and the
+global maximum is correct.
+
+\subsection{Pseudocode}
+
+\begin{lstlisting}[style=pseudocode]
+maxProfit(prices):
+    minPrice = positive infinity
+    bestProfit = 0
+
+    for each price in prices:
+        minPrice = min(minPrice, price)
+        profitToday = price - minPrice
+        bestProfit = max(bestProfit, profitToday)
+
+    return bestProfit
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Best Time to Buy and Sell Stock}]
+#include <algorithm>
+#include <limits>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int minPrice = numeric_limits<int>::max();
+        int maxProfitSeen = 0;
+
+        for (const int price : prices) {
+            minPrice = min(minPrice, price);
+            const int currentProfit = price - minPrice;
+            maxProfitSeen = max(maxProfitSeen, currentProfit);
+        }
+
+        return maxProfitSeen;
+    }
+};
+\end{lstlisting}
+
+\begin{conceptbox}{Output and local testing}
+This class does not print output by itself. LeetCode creates the input, calls
+\texttt{maxProfit}, and checks the returned integer. A separate local test
+harness was used to compile and validate the method.
+\end{conceptbox}
+
+\subsection{Compact Interview Version}
+
+The same update can be written directly with \texttt{std::min} and
+\texttt{std::max}. The part to remember is the key rule, not the
+number of lines:
+
+\begin{lstlisting}
+for (const int price : prices) {
+    minPrice = min(minPrice, price);
+    maxProfitSeen = max(maxProfitSeen, price - minPrice);
+}
+\end{lstlisting}
+
+\subsection{Time and Space}
+
+Let \(n\) be the number of days. The loop visits every price exactly once, so
+the time complexity is \(O(n)\). Only two running values are stored, so the
+extra space is \(O(1)\).
+
+\begin{conceptbox}{Why the extra space is constant}
+The implementation stores only a constant number of integers regardless of
+the input length. So, its extra-space complexity is \(O(1)\).
+\end{conceptbox}
+
+\subsection{Edge Cases and Common Mistakes}
+
+\begin{itemize}
+  \item An empty array returns zero because the loop performs no update.
+  \item One price cannot form a transaction, so the answer remains zero.
+  \item A decreasing array must return zero, not the smallest negative loss.
+  \item Update the running minimum using only the current and earlier days.
+  \item Do not solve the multiple-transaction variation; this problem allows one transaction.
+  \item Do not sort the prices. Sorting destroys the original day order.
+\end{itemize}
+
+\subsection{How to Explain It in an Interview}
+
+\begin{revisionbox}{How to explain it in an interview}
+I would first mention the \(O(n^2)\) pair check. It repeatedly searches for a
+buying price before each sale. During one left-to-right pass, I instead keep
+the cheapest price seen so far. For each current price, I calculate the profit
+from selling today and update the global maximum. The key rule is that the
+minimum and best profit are correct for the processed prefix. Each element is
+visited once, so the algorithm takes \(O(n)\) time and \(O(1)\) extra space.
+\end{revisionbox}
+
+Useful clarifying questions include whether only one transaction is allowed,
+whether buying and selling must occur on different days, and whether returning
+zero is required when no profit exists.
+
+\subsection{Pattern-Recognition Clue}
+
+Consider this greedy pattern when each current value should be combined with
+the best earlier value:
+
+\[
+\boxed{
+\begin{gathered}
+\text{remember the best earlier value}
+\;\rightarrow\;
+\text{use today's value}\\[1mm]
+\Downarrow\\[-1mm]
+\text{update the best answer}
+\end{gathered}
+}
+\]
+
+\subsection{Revision Summary}
+
+\begin{revisionbox}{Best Time to Buy and Sell Stock}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}p{2.7cm}X@{}}
+Technique & Greedy running minimum \\
+Keep & \texttt{minPrice} and \texttt{maxProfitSeen} \\
+Update & Compare today's price with the minimum, then test selling today \\
+Complexity & \(O(n)\) time and \(O(1)\) extra space
+\end{tabularx}
+\end{revisionbox}
+
+\chaptercheckpoint
+  {Each current price should be combined with the best earlier buying price.}
+  {\texttt{minPrice} and the maximum profit found so far.}
+  {Sorting prices or allowing the selling day to precede the buying day.}
+  {$O(n)$ time and $O(1)$ extra space.}
+
+% =================================================
+% DESIGN ADD AND SEARCH WORDS DATA STRUCTURE
+% =================================================
+
+\patternintoc{Trie Patterns}
+\problemstart{Design Add and Search Words Data Structure}{211}{Medium}{Trie and recursive DFS}{Trie}
+
+\subsection{Problem Overview}
+
+The goal of this problem is to design a data structure that supports
+adding words and searching for words.
+
+The problem is closely related to the \textbf{Trie} (Prefix Tree)
+data structure that we have used previously.
+
+The main operations are:
+
+\begin{itemize}
+    \item Add a word to the data structure.
+    \item Search whether a given word exists.
+\end{itemize}
+
+The important idea is that the words will be stored character by
+character inside a Trie.
+
+\subsection{Approach}
+
+We will use a \textbf{Trie} data structure.
+
+The overall steps are:
+
+\begin{enumerate}
+    \item Create a Trie node structure.
+    \item Each node contains an array of \(26\) children, one for
+    every lowercase English letter.
+    \item Each node also contains a Boolean variable indicating
+    whether the node represents the end of a complete word.
+    \item Create a root Trie node.
+    \item While adding a word, traverse its characters one by one.
+    \item Create missing child nodes when needed.
+    \item Mark the final node as the end of the word.
+    \item During searching, traverse the Trie according to the
+    characters of the word.
+    \item Return whether the complete word exists.
+\end{enumerate}
+
+\begin{invariantbox}{a DFS state represents one matched pattern prefix}
+A call \texttt{dfs(word,index,node)} means that the first \texttt{index}
+pattern characters match the Trie path ending at \texttt{node}. A normal
+letter follows one child; a dot explores every non-null child while preserving
+the same state meaning.
+\end{invariantbox}
+
+\subsection{Trie Node}
+
+We create a structure called \texttt{TrieNode}.
+
+Each node contains:
+
+\begin{itemize}
+    \item An array of \(26\) child pointers.
+    \item A Boolean variable \texttt{isWord}.
+\end{itemize}
+
+The Boolean variable tells us whether the current node represents
+the end of a complete word.
+
+\begin{visualbox}{What one Trie node stores}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[draw=navy,fill=softblue,rounded corners,minimum width=36mm,
+        minimum height=19mm,align=left] (node) {
+    \textbf{TrieNode}\\
+    \texttt{isWord = false}\\
+    \texttt{children[26]}
+  };
+
+  \node[arraycell,below left=13mm and 22mm of node] (ca) {0};
+  \node[arraycell,right=0mm of ca] (cb) {1};
+  \node[arraycell,right=0mm of cb] (cc) {2};
+  \node[right=2mm of cc,font=\large] (dots) {$\cdots$};
+  \node[arraycell,right=2mm of dots] (cz) {25};
+
+  \node[below=1mm of ca,font=\scriptsize] {\texttt{a}};
+  \node[below=1mm of cb,font=\scriptsize] {\texttt{b}};
+  \node[below=1mm of cc,font=\scriptsize] {\texttt{c}};
+  \node[below=1mm of cz,font=\scriptsize] {\texttt{z}};
+
+  \draw[flowarrow] (node.south) -- ++(0,-5mm) -| (cb.north);
+  \node[trienode,visited,below=14mm of cb] (next) {b};
+  \draw[flowarrow,teal] (cb.south) -- (next.north);
+  \node[right=7mm of next,align=left,font=\scriptsize,text=teal]
+    {this child continues\\with letter b};
+  \node[left=7mm of ca,align=right,font=\scriptsize,text=navy]
+    {empty child\\slots};
+\end{tikzpicture}
+
+\smallskip
+Each numbered slot stands for one letter. A used slot points to the next
+letter. \texttt{isWord} tells us whether a complete word ends here.
+\end{visualbox}
+
+\subsection{Trie Node Structure}
+
+\begin{lstlisting}
+struct TrieNode {
+    TrieNode* children[26];
+    bool isWord;
+
+    TrieNode() {
+        isWord = false;
+
+        for (int i = 0; i < 26; i++) {
+            children[i] = nullptr;
+        }
+    }
+};
+\end{lstlisting}
+
+A new node starts with every child pointer set to \texttt{nullptr} and
+\texttt{isWord = false}. It has no outgoing character path and does not yet
+mark the end of a stored word.
+
+\subsection{Creating the Root}
+
+We create the root of the Trie using:
+
+\begin{lstlisting}
+TrieNode* root = new TrieNode();
+\end{lstlisting}
+
+The root does not represent any particular character.
+
+It serves as the starting point from which all words are stored.
+
+\begin{visualbox}{Trie after adding \texttt{bad}, \texttt{dad}, and \texttt{mad}}
+\centering
+\begin{tikzpicture}[level distance=12mm,>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+    \node[trienode,visited] (root) {root};
+    \node[trienode,below left=13mm and 24mm of root] (b) {b};
+    \node[trienode,below=13mm of root] (d) {d};
+    \node[trienode,below right=13mm and 24mm of root] (m) {m};
+    \node[trienode,below=10mm of b] (ba) {a};
+    \node[trienode,below=10mm of d] (da) {a};
+    \node[trienode,below=10mm of m] (ma) {a};
+    \node[trienode,active,below=10mm of ba] (bad) {d};
+    \node[trienode,active,below=10mm of da] (dad) {d};
+    \node[trienode,active,below=10mm of ma] (mad) {d};
+    \foreach \x/\y in {root/b,root/d,root/m,b/ba,d/da,m/ma,ba/bad,da/dad,ma/mad}
+        \draw[flowarrow] (\x)--(\y);
+    \node[below=6mm of dad,text=orange,font=\scriptsize]
+      {orange node = complete word};
+\end{tikzpicture}
+
+The root holds no letter. Following the arrows spells each word. Orange nodes
+show where a complete word ends.
+\end{visualbox}
+
+\subsection{Adding a Word}
+
+To add a word, we start from the root node:
+
+\begin{lstlisting}
+TrieNode* node = root;
+\end{lstlisting}
+
+We then iterate through every character in the word.
+
+For each character, we convert it into an index between \(0\) and
+\(25\): \(\texttt{index}=c-'a'\)
+
+This lets us access the matching child in the
+\texttt{children} array.
+
+For example: \(a\rightarrow0\) \(b\rightarrow1\) \(c\rightarrow2\)
+
+and so on.
+
+\subsection{Adding Characters to the Trie}
+
+For every character \(c\), we check whether its matching child
+node already exists.
+
+If it does not exist, we create a new Trie node.
+
+Conceptually:
+
+\begin{lstlisting}
+if (node->children[c - 'a'] == nullptr) {
+    node->children[c - 'a'] = new TrieNode();
+}
+\end{lstlisting}
+
+We then move to that child:
+
+\begin{lstlisting}
+node = node->children[c - 'a'];
+\end{lstlisting}
+
+This process continues until every character of the word has been
+processed.
+
+\subsection{Marking the End of a Word}
+
+After processing all characters, we mark the current node as the
+end of a word:
+
+\begin{lstlisting}
+node->isWord = true;
+\end{lstlisting}
+
+This is important because one word can be a prefix of another word.
+
+For example, suppose we insert: \(\texttt{app}\)
+
+and: \(\texttt{apple}\)
+
+The node matching to the final character of \texttt{app} must
+be marked as a complete word even though additional characters
+continue afterward for \texttt{apple}.
+
+\subsection{Search Operation}
+
+To search for a word, we again start at the root:
+
+\begin{lstlisting}
+TrieNode* node = root;
+\end{lstlisting}
+
+We then process every character in the word.
+
+For each character \(c\), we calculate: \(\texttt{index}=c-'a'\)
+
+and check whether the matching child exists.
+
+If the child does not exist, the word cannot be present in the Trie.
+
+So, we return:
+
+\begin{lstlisting}
+false
+\end{lstlisting}
+
+If the child exists, we move to that node and continue searching.
+
+After processing every character, we return:
+
+\begin{lstlisting}
+node->isWord
+\end{lstlisting}
+
+This ensures that the complete word exists rather than merely being
+a prefix of another word.
+
+\subsection{Why \texttt{isWord} Is Needed}
+
+\begin{conceptbox}{A path is not automatically a word}
+After inserting \texttt{apple}, the path
+$a\rightarrow p\rightarrow p\rightarrow l\rightarrow e$ exists. That proves
+\texttt{app} is a prefix, but it does not prove that \texttt{app} was inserted
+as a complete word. The second \texttt{p} node must have
+\texttt{isWord = true} before \texttt{search("app")} may return true.
+\end{conceptbox}
+
+The rule is simple: following child pointers proves that a path exists;
+\texttt{isWord} proves that the path ends at a stored word.
+
+\subsection{Complete Implementation}
+
+\begin{lstlisting}
+class WordDictionary {
+public:
+
+    struct TrieNode {
+        TrieNode* children[26];
+        bool isWord;
+
+        TrieNode() {
+            isWord = false;
+
+            for (int i = 0; i < 26; i++) {
+                children[i] = nullptr;
+            }
+        }
+    };
+
+    TrieNode* root;
+
+    WordDictionary() {
+        root = new TrieNode();
+    }
+
+    void addWord(string word) {
+        TrieNode* node = root;
+
+        for (char c : word) {
+            int index = c - 'a';
+
+            if (node->children[index] == nullptr) {
+                node->children[index] = new TrieNode();
+            }
+
+            node = node->children[index];
+        }
+
+        node->isWord = true;
+    }
+};
+\end{lstlisting}
+
+\subsection{Search with a Recursive Helper}
+
+The search operation becomes more interesting when the problem
+allows a special character such as: \(\texttt{'.'}\)
+
+The dot can represent any lowercase English character.
+
+So, a normal character can be handled by following one
+specific child, while a dot requires us to potentially explore all
+\(26\) children.
+
+We can handle this using recursion.
+
+The recursive search function receives:
+
+\begin{itemize}
+    \item The current word.
+    \item The current character index.
+    \item The current Trie node.
+\end{itemize}
+
+Conceptually:
+
+\begin{lstlisting}
+bool search(string word) {
+    return dfs(word, 0, root);
+}
+\end{lstlisting}
+
+The recursive helper is:
+
+\begin{lstlisting}
+bool dfs(string word, int index, TrieNode* node)
+\end{lstlisting}
+
+\subsection{Base Case}
+
+If we have reached the end of the word: \(\texttt{index == word.size()}\)
+
+then we return whether the current node represents the end of a
+complete word:
+
+\begin{lstlisting}
+return node->isWord;
+\end{lstlisting}
+
+\subsection{Normal Character}
+
+If the current character is not a dot, we simply follow its
+matching child.
+
+If that child does not exist, we return: \(\texttt{false}\)
+
+Otherwise, we recursively continue with the next character.
+
+\subsection{Dot Character}
+
+If the current character is: \(\texttt{'.'}\)
+
+then it can represent any lowercase English letter.
+
+So, we must try every possible child: \(0,1,2,\ldots,25\)
+
+If any of these recursive searches returns \texttt{true}, then the
+word exists.
+
+Otherwise, we return \texttt{false}.
+
+\begin{visualbox}{A dot tries every possible first letter}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+    \node[dsnode,visited] (query) {search \texttt{.ad}};
+    \node[trienode,below left=14mm and 27mm of query] (b) {b};
+    \node[trienode,below=14mm of query] (d) {d};
+    \node[trienode,below right=14mm and 27mm of query] (m) {m};
+    \draw[flowarrow,orange] (query)--node[edgelabel,left,font=\scriptsize]{try} (b);
+    \draw[flowarrow,orange] (query)--node[edgelabel,right,font=\scriptsize]{try} (d);
+    \draw[flowarrow,orange] (query)--node[edgelabel,right,font=\scriptsize]{try} (m);
+    \node[dsnode,active,below=13mm of b] (bad) {then \texttt{a,d}\\find \texttt{bad}};
+    \node[dsnode,active,below=13mm of d] (dad) {then \texttt{a,d}\\find \texttt{dad}};
+    \node[dsnode,active,below=13mm of m] (mad) {then \texttt{a,d}\\find \texttt{mad}};
+    \draw[flowarrow,teal] (b)--(bad);
+    \draw[flowarrow,teal] (d)--(dad);
+    \draw[flowarrow,teal] (m)--(mad);
+\end{tikzpicture}
+
+The dot may try any first letter. The letters \texttt{a} and \texttt{d} then
+follow one path. The search stops when one complete word is found.
+\end{visualbox}
+
+\begin{visualbox}{Only one dot choice is tried at a time}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[draw=navy,fill=softblue,minimum width=46mm,minimum height=8mm] (f0)
+    {start at the root};
+  \node[draw=navy,fill=softblue,minimum width=46mm,minimum height=8mm,
+    above=0mm of f0] (f1) {try letter \texttt{b}};
+  \node[draw=orange,fill=softorange,minimum width=46mm,minimum height=8mm,
+    above=0mm of f1] (f2) {then follow \texttt{a}};
+  \node[left=13mm of f2,text=orange,font=\bfseries,align=right] (top) {working\\now};
+  \draw[flowarrow,orange] (top)--(f2);
+  \node[right=22mm of f1,dsnode,fill=softteal] (next)
+    {if this path fails\\remove it, then try \texttt{d}};
+  \draw[flowarrow,teal] (f2.east) to[bend left=18] (next.north west);
+\end{tikzpicture}
+
+\smallskip
+Only the path being checked is kept on the stack. If it fails, remove that
+path and try the next first letter.
+\end{visualbox}
+
+\subsection{Complete Search Code}
+
+\begin{lstlisting}[style=compactcode]
+using namespace std;
+
+bool dfs(string word, int index, TrieNode* node) {
+
+    if (index == word.size()) {
+        return node->isWord;
+    }
+
+    char c = word[index];
+
+    if (c == '.') {
+
+        for (int i = 0; i < 26; i++) {
+
+            if (node->children[i] != nullptr &&
+                dfs(word, index + 1, node->children[i])) {
+                return true;
+            }
+        }
+
+        return false;
+
+    } else {
+
+        int childIndex = c - 'a';
+
+        if (node->children[childIndex] == nullptr) {
+            return false;
+        }
+
+        return dfs(
+            word,
+            index + 1,
+            node->children[childIndex]
+        );
+    }
+}
+\end{lstlisting}
+
+\subsection{Complete Data Structure}
+
+Here is the complete version:
+
+\begin{lstlisting}[style=longcode,float=htbp,caption={Complete C++ data structure: Word Dictionary}]
+#include <string>
+
+using namespace std;
+
+class WordDictionary {
+public:
+    struct TrieNode {
+        TrieNode* children[26];
+        bool isWord;
+        TrieNode() : isWord(false) {
+            for (int i = 0; i < 26; ++i) children[i] = nullptr;
+        }
+    };
+    TrieNode* root;
+    WordDictionary() : root(new TrieNode()) {}
+    void addWord(const string& word) {
+        TrieNode* node = root;
+        for (char c : word) {
+            const int index = c - 'a';
+            if (node->children[index] == nullptr) {
+                node->children[index] = new TrieNode();
+            }
+            node = node->children[index];
+        }
+        node->isWord = true;
+    }
+    bool search(const string& word) {
+        return dfs(word, 0, root);
+    }
+private:
+    bool dfs(const string& word, int index, TrieNode* node) {
+        if (index == static_cast<int>(word.size())) {
+            return node->isWord;
+        }
+        const char c = word[index];
+        if (c == '.') {
+            for (int i = 0; i < 26; ++i) {
+                if (node->children[i] != nullptr &&
+                    dfs(word, index + 1, node->children[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        const int childIndex = c - 'a';
+        if (node->children[childIndex] == nullptr) return false;
+        return dfs(word, index + 1, node->children[childIndex]);
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+
+Let \(L\) be the pattern length and \(d\) the number of wildcard positions.
+Adding a word takes \(O(L)\) time. A search without wildcards also takes
+\(O(L)\) time. With wildcards, the most useful exact description is
+\(O(V_L)\), where \(V_L\) is the number of Trie states actually visited up to
+depth \(L\). A loose worst-case upper bound is \(O(26^dL)\) for a dense Trie.
+The recursive call stack uses \(O(L)\) space, while the Trie itself uses space
+based on the total number of stored characters.
+
+\subsection{Key Idea}
+
+Here is the whole idea:
+
+\begin{enumerate}
+    \item Use a Trie to store all words.
+    \item Each node has \(26\) possible children.
+    \item Use \texttt{isWord} to identify the end of a complete word.
+    \item For normal characters, follow one specific child.
+    \item For \texttt{'.'}, recursively try all possible children.
+\end{enumerate}
+
+The Trie allows words to be stored and searched character by
+character, while recursion allows the search to branch whenever a
+wildcard character is seen.
+
+\subsection{Detailed Visual Dry Run}
+
+\begin{dryrunbox}{Add \texttt{bad}, \texttt{dad}, and \texttt{mad}; then search \texttt{.ad}}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}c p{3.0cm} X@{}}
+\toprule
+Step & Operation & What happens \\
+\midrule
+1 & \texttt{addWord("bad")} & Create the path root \(\to b\to a\to d\), then mark the final node as a word. \\
+2 & \texttt{addWord("dad")} & Create root \(\to d\to a\to d\). The earlier word stays unchanged. \\
+3 & \texttt{addWord("mad")} & Create root \(\to m\to a\to d\). \\
+4 & \texttt{search(".ad")} & The dot tries the root's children. The \(b\) branch follows \(a,d\) and reaches a word end, so the search stops with \texttt{true}. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{dryrunbox}
+
+\chaptercheckpoint
+  {Stored words share prefixes and a wildcard may match several children.}
+  {Trie nodes, end markers, and a DFS position/node pair.}
+  {Following only one child for a dot or accepting a prefix as a complete word.}
+  {$O(L)$ ordinary search; wildcard search is based on visited Trie states.}
+
+% =================================================
+% IMPLEMENT TRIE (PREFIX TREE)
+% =================================================
+
+\problemstart{Implement Trie (Prefix Tree)}{208}{Medium}{Prefix tree}{Trie}
+
+\subsection{The Problem}
+
+Design a Trie data structure that supports the following operations:
+
+\begin{enumerate}
+    \item \texttt{Trie()} -- Create an empty Trie.
+    \item \texttt{insert(word)} -- Store a word in the Trie.
+    \item \texttt{search(word)} -- Return \texttt{true} if the complete
+    word exists in the Trie.
+    \item \texttt{startsWith(prefix)} -- Return \texttt{true} if at
+    least one stored word starts with the given prefix.
+\end{enumerate}
+
+The words contain only lowercase English letters: \(\texttt{'a'} \text{ to } \texttt{'z'}\)
+
+\subsection{Important Observation}
+
+A prefix is not necessarily a complete word.
+
+For example, suppose we insert: \(\texttt{"apple"}\)
+
+Then: \(\texttt{search("app")}=\texttt{false}\)
+
+because \texttt{"app"} was not inserted as a complete word.
+
+However, \(\texttt{startsWith("app")}=\texttt{true}\)
+
+because \texttt{"apple"} starts with the prefix \texttt{"app"}.
+
+This distinction is important when designing the Trie.
+
+% =================================================
+% WHAT IS A TRIE?
+% =================================================
+
+\subsection{What is a Trie?}
+
+A \textbf{Trie}, also called a \textbf{Prefix Tree}, is a tree-based
+data structure used to store strings.
+
+Instead of storing an entire word inside a single node, a Trie stores
+the word character by character.
+
+For example, consider the words: \(\texttt{"app"}\)
+
+and \(\texttt{"apple"}\)
+
+Both words reuse the same nodes for the shared prefix \texttt{app}.
+The longer word continues from that node through \texttt{l} and \texttt{e}.
+
+The path: \(a\rightarrow p\rightarrow p\)
+
+represents the word \texttt{"app"}.
+
+The path: \(a\rightarrow p\rightarrow p\rightarrow l\rightarrow e\)
+
+represents the word \texttt{"apple"}.
+
+\begin{visualbox}{The words \texttt{app} and \texttt{apple} share the same beginning}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,node distance=11mm]
+    \node[trienode,visited] (root) {root};
+    \node[trienode,right=of root] (a) {a};
+    \node[trienode,right=of a] (p1) {p};
+    \node[trienode,active,right=of p1] (p2) {p};
+    \node[trienode,right=of p2] (l) {l};
+    \node[trienode,active,right=of l] (e) {e};
+    \draw[flowarrow] (root)--(a);
+    \draw[flowarrow] (a)--(p1);
+    \draw[flowarrow] (p1)--(p2);
+    \draw[flowarrow] (p2)--(l);
+    \draw[flowarrow] (l)--(e);
+    \node[below=4mm of p2,text=orange,align=center] {\texttt{app} ends here};
+    \node[below=4mm of e,text=orange,align=center] {\texttt{apple} ends here};
+    \node[above=5mm of l,text=teal] {same beginning: \texttt{app}};
+\end{tikzpicture}
+
+\texttt{search("app")} checks that a word ends at the second \texttt{p}.
+\texttt{startsWith("app")} only checks that the letters can be followed.
+\end{visualbox}
+
+\begin{invariantbox}{the current node represents exactly the consumed prefix}
+After consuming the first \(k\) characters, the current pointer is the Trie
+node for that length-\(k\) prefix. Reaching a node proves the prefix exists;
+only \texttt{isWord=true} proves it was inserted as a complete word.
+\end{invariantbox}
+
+\subsection{Why Do We Need an End Marker?}
+
+Consider inserting: \(\texttt{"apple"}\)
+
+The nodes for: \(a\rightarrow p\rightarrow p\)
+
+already exist as part of the word.
+
+However, this does not mean that: \(\texttt{"app"}\)
+
+is a complete word.
+
+So, every Trie node needs a Boolean variable: \(\texttt{isWord}\)
+
+which tells us whether the current node represents the end of a
+complete word.
+
+If both \texttt{"app"} and \texttt{"apple"} were inserted, the second
+\texttt{p} node and the final \texttt{e} node each have
+\texttt{isWord = true}. The vector diagram above shows these two endings
+without mixing tree structure with ASCII art.
+
+% =================================================
+% TRIE NODE
+% =================================================
+
+\subsection{Trie Node}
+
+Each Trie node contains:
+
+\begin{itemize}
+    \item An array of \(26\) child pointers.
+    \item A Boolean variable \texttt{isWord}.
+\end{itemize}
+
+The \(26\) children correspond to: \(a,b,c,\ldots,z\)
+
+So, each node can have at most \(26\) children.
+
+\subsection{Trie Node Implementation}
+
+\begin{lstlisting}
+struct TrieNode {
+
+    TrieNode* children[26];
+
+    bool isWord;
+
+    TrieNode() {
+
+        isWord = false;
+
+        for (int i = 0; i < 26; i++) {
+            children[i] = nullptr;
+        }
+    }
+};
+\end{lstlisting}
+
+A newly constructed node has 26 null child pointers and
+\texttt{isWord = false}. Connections and word endings are added only during
+insertion.
+
+% =================================================
+% ROOT
+% =================================================
+
+\subsection{Root Node}
+
+We create a root node for the Trie.
+
+\begin{lstlisting}
+TrieNode* root = new TrieNode();
+\end{lstlisting}
+
+The root node does not represent any character.
+
+It simply acts as the starting point from which all words are
+stored.
+
+The root is a sentinel node: it stores no character. Its child pointers lead
+to the first letters of the stored words, and every later edge represents the
+next character in a path.
+
+% =================================================
+% INSERT
+% =================================================
+
+\subsection{Insert Operation}
+
+The purpose of the \texttt{insert()} operation is to store a word in
+the Trie.
+
+Suppose we want to insert: \(\texttt{"apple"}\)
+
+We start from the root and process every character one by one.
+
+The path becomes: \(root \rightarrow a \rightarrow p \rightarrow p \rightarrow l \rightarrow e\)
+
+\begin{visualbox}{Adding \texttt{apple} reuses \texttt{app} and adds \texttt{l,e}}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,node distance=10mm]
+  \node[trienode,visited] (root) {root};
+  \node[trienode,visited,right=of root] (a) {a};
+  \node[trienode,visited,right=of a] (p1) {p};
+  \node[trienode,visited,right=of p1] (p2) {p};
+  \node[trienode,active,right=of p2] (l) {l};
+  \node[trienode,active,right=of l] (e) {e};
+  \draw[flowarrow] (root)--(a);
+  \draw[flowarrow] (a)--(p1);
+  \draw[flowarrow] (p1)--(p2);
+  \draw[flowarrow,orange] (p2)--(l);
+  \draw[flowarrow,orange] (l)--(e);
+  \node[above=5mm of $(a)!0.5!(p2)$,text=teal,font=\bfseries]
+    {already there: \texttt{app}};
+  \node[above=5mm of $(l)!0.5!(e)$,text=orange,font=\bfseries]
+    {add \texttt{l} and \texttt{e}};
+  \node[below=6mm of e,draw=orange,fill=softorange,rounded corners,
+        align=center,font=\scriptsize] (mark) {mark the\\word ending};
+  \draw[flowarrow,orange] (e)--(mark);
+\end{tikzpicture}
+
+\smallskip
+Follow letters that are already present. Add a new circle only for a missing
+letter, then mark where the complete word ends.
+\end{visualbox}
+
+\subsubsection{Character to Index Conversion}
+
+Since every node contains an array of \(26\) children, we convert a
+character into an index using: \(\boxed{\texttt{index}=c-\texttt{'a'}}\)
+
+For example: \(\texttt{'a'}-\texttt{'a'}=0\) \(\texttt{'b'}-\texttt{'a'}=1\) \(\texttt{'c'}-\texttt{'a'}=2\)
+
+and so on.
+
+So: \(\texttt{'z'}-\texttt{'a'}=25\)
+
+\subsubsection{Creating Missing Nodes}
+
+For every character, we check whether the matching child
+already exists.
+
+If it does not exist, we create a new node:
+
+\begin{lstlisting}
+if (node->children[index] == nullptr) {
+    node->children[index] = new TrieNode();
+}
+\end{lstlisting}
+
+Then we move to that child:
+
+\begin{lstlisting}
+node = node->children[index];
+\end{lstlisting}
+
+This process continues until every character of the word has been
+processed.
+
+\subsubsection{Marking the End of the Word}
+
+After processing the final character, we mark the current node as the
+end of a complete word:
+
+\begin{lstlisting}
+node->isWord = true;
+\end{lstlisting}
+
+This is what allows the Trie to distinguish between a complete word
+and merely a prefix.
+
+% =================================================
+% INSERT CODE
+% =================================================
+
+\subsection{Insert Implementation}
+
+\begin{lstlisting}
+void insert(string word) {
+
+    TrieNode* node = root;
+
+    for (char c : word) {
+
+        int index = c - 'a';
+
+        if (node->children[index] == nullptr) {
+            node->children[index] = new TrieNode();
+        }
+
+        node = node->children[index];
+    }
+
+    node->isWord = true;
+}
+\end{lstlisting}
+
+% =================================================
+% SEARCH
+% =================================================
+
+\subsection{Search Operation}
+
+The purpose of \texttt{search()} is to determine whether the
+\textbf{complete word} exists in the Trie.
+
+Suppose we search for: \(\texttt{"apple"}\)
+
+We start from the root and follow: \(a\rightarrow p\rightarrow p\rightarrow l\rightarrow e\)
+
+If at any point the required child does not exist, the word does not
+exist.
+
+So, we immediately return: \(\texttt{false}\)
+
+If we successfully process every character, we still need to check: \(\texttt{isWord}\)
+
+This is because the searched string may only be a prefix of a stored
+word.
+
+\subsection{Search Implementation}
+
+\begin{lstlisting}
+bool search(string word) {
+
+    TrieNode* node = root;
+
+    for (char c : word) {
+
+        int index = c - 'a';
+
+        if (node->children[index] == nullptr) {
+            return false;
+        }
+
+        node = node->children[index];
+    }
+
+    return node->isWord;
+}
+\end{lstlisting}
+
+% =================================================
+% STARTS WITH
+% =================================================
+
+\subsection{\texttt{startsWith()} Operation}
+
+The third operation is:
+
+\begin{lstlisting}
+startsWith(prefix)
+\end{lstlisting}
+
+Its purpose is to determine whether at least one word stored in the
+Trie begins with the given prefix.
+
+For example, if the Trie contains: \(\texttt{"apple"}\)
+
+then: \(\texttt{startsWith("app")}=\texttt{true}\)
+
+because \texttt{"apple"} begins with \texttt{"app"}.
+
+However, unlike \texttt{search()}, we do \textbf{not} need to check
+\texttt{isWord} at the end.
+
+We only need to determine whether the complete prefix path exists.
+
+\begin{visualbox}{\texttt{search} and \texttt{startsWith} stop differently}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,node distance=8mm]
+  \node[dsnode,fill=softteal] (walk) {Follow one arrow\\for each letter};
+  \node[dsnode,right=13mm of walk] (missing) {Is the needed next\\letter missing?};
+  \draw[flowarrow] (walk)--(missing);
+  \node[dsnode,fill=softorange,right=13mm of missing] (false) {answer\\\texttt{false}};
+  \draw[flowarrow,orange] (missing)--node[edgelabel,above,font=\scriptsize]{yes} (false);
+
+  \node[dsnode,fill=softteal,below=11mm of missing] (complete)
+    {All letters\\were found};
+  \draw[flowarrow,teal] (missing)--node[edgelabel,right,font=\scriptsize]{no} (complete);
+
+  \node[dsnode,below left=12mm and 7mm of complete] (prefix) {
+    \texttt{startsWith}\\answer \texttt{true}};
+  \node[dsnode,below right=12mm and 7mm of complete] (word) {
+    \texttt{search}\\does a word end here?};
+  \draw[flowarrow,teal] (complete) --
+    node[edgelabel,above left,font=\scriptsize]{beginning only} (prefix);
+  \draw[flowarrow] (complete) --
+    node[edgelabel,above right,font=\scriptsize]{whole word} (word);
+  \node[below=3mm of prefix,font=\scriptsize,text=teal,align=center]
+    {The beginning is enough.};
+  \node[below=3mm of word,font=\scriptsize,text=navy,align=center]
+    {The word must end here.};
+\end{tikzpicture}
+\end{visualbox}
+
+% =================================================
+% STARTS WITH IMPLEMENTATION
+% =================================================
+
+\subsection{\texttt{startsWith()} Implementation}
+
+\begin{lstlisting}
+bool startsWith(string prefix) {
+
+    TrieNode* node = root;
+
+    for (char c : prefix) {
+
+        int index = c - 'a';
+
+        if (node->children[index] == nullptr) {
+            return false;
+        }
+
+        node = node->children[index];
+    }
+
+    return true;
+}
+\end{lstlisting}
+
+% =================================================
+% COMPLETE IMPLEMENTATION
+% =================================================
+
+\subsection{Complete Implementation}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ data structure: Trie}]
+#include <string>
+
+using namespace std;
+
+class Trie {
+public:
+    struct TrieNode {
+        TrieNode* children[26];
+        bool isWord;
+        TrieNode() : isWord(false) {
+            for (int i = 0; i < 26; ++i) children[i] = nullptr;
+        }
+    };
+    TrieNode* root;
+    Trie() : root(new TrieNode()) {}
+    void insert(const string& word) {
+        TrieNode* node = root;
+        for (char c : word) {
+            const int index = c - 'a';
+            if (node->children[index] == nullptr) {
+                node->children[index] = new TrieNode();
+            }
+            node = node->children[index];
+        }
+        node->isWord = true;
+    }
+    bool search(const string& word) {
+        TrieNode* node = root;
+        for (char c : word) {
+            const int index = c - 'a';
+            if (node->children[index] == nullptr) return false;
+            node = node->children[index];
+        }
+        return node->isWord;
+    }
+    bool startsWith(const string& prefix) {
+        TrieNode* node = root;
+        for (char c : prefix) {
+            const int index = c - 'a';
+            if (node->children[index] == nullptr) return false;
+            node = node->children[index];
+        }
+        return true;
+    }
+};
+\end{lstlisting}
+
+% =================================================
+% EXAMPLE
+% =================================================
+
+\subsection{Example Walkthrough}
+
+Suppose we perform:
+
+\begin{lstlisting}
+Trie trie;
+
+trie.insert("apple");
+\end{lstlisting}
+
+The Trie contains the path: \(a\rightarrow p\rightarrow p\rightarrow l\rightarrow e\)
+
+and the final node has: \(\texttt{isWord}=\texttt{true}\)
+
+Now consider:
+
+\begin{lstlisting}
+trie.search("apple");
+\end{lstlisting}
+
+The complete path exists and the final node has
+\texttt{isWord = true}, so: \(\boxed{\texttt{true}}\)
+
+Now:
+
+\begin{lstlisting}
+trie.search("app");
+\end{lstlisting}
+
+The path exists, but if \texttt{"app"} was not inserted separately,
+the node has: \(\texttt{isWord}=\texttt{false}\)
+
+So: \(\boxed{\texttt{false}}\)
+
+However:
+
+\begin{lstlisting}
+trie.startsWith("app");
+\end{lstlisting}
+
+returns: \(\boxed{\texttt{true}}\)
+
+because the prefix path exists.
+
+% =================================================
+% SEARCH VS STARTSWITH
+% =================================================
+
+\subsection{\texttt{search()} vs \texttt{startsWith()}}
+
+The main difference is:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Operation} & \textbf{What it checks} & \textbf{Uses \texttt{isWord}?} \\
+\hline
+\texttt{search()} &
+Complete word exists &
+Yes \\
+\hline
+\texttt{startsWith()} &
+Prefix path exists &
+No \\
+\hline
+\end{tabular}
+\end{center}
+
+This distinction is one of the most important concepts in the
+problem.
+
+% =================================================
+% COMPLEXITY
+% =================================================
+
+\subsection{Time and Space}
+
+Let \(L\) be the length of the word or prefix.
+
+For \texttt{insert()}, we process every character exactly once: \(\boxed{O(L)}\)
+
+For \texttt{search()}, we also process every character at most once: \(\boxed{O(L)}\)
+
+For \texttt{startsWith()}, the same applies: \(\boxed{O(L)}\)
+
+So:
+
+\[
+\boxed{
+\begin{aligned}
+\text{Insert} &= O(L)\\
+\text{Search} &= O(L)\\
+\text{StartsWith} &= O(L)
+\end{aligned}
+}
+\]
+
+The space required by the Trie depends on the total number of
+characters inserted.
+
+If the total number of inserted characters is \(N\), the Trie can
+use: \(\boxed{O(N)}\)
+
+nodes in the worst case.
+
+% =================================================
+% KEY TAKEAWAYS
+% =================================================
+
+\subsection{Key Takeaways}
+
+\begin{itemize}
+    \item A Trie is also called a Prefix Tree.
+    \item A Trie stores words character by character.
+    \item Each node contains \(26\) child pointers for lowercase
+    English letters.
+    \item \texttt{isWord} identifies whether a node represents the
+    end of a complete word.
+    \item \texttt{search()} checks both the path and
+    \texttt{isWord}.
+    \item \texttt{startsWith()} only checks whether the prefix path
+    exists.
+    \item Character-to-index conversion is performed using:
+    \(c-\texttt{'a'}\)
+    \item Insert, search, and prefix operations take:
+    \(O(L)\)
+    time, where \(L\) is the length of the input string.
+\end{itemize}
+
+\subsection{Detailed Visual Dry Run}
+
+\begin{dryrunbox}{Insert \texttt{apple}, then compare \texttt{search} with \texttt{startsWith}}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}c p{4.0cm} X@{}}
+\toprule
+Step & Operation & What happens \\
+\midrule
+1 & \texttt{insert("apple")} & Walk through \(a,p,p,l,e\), creating missing nodes. Mark only the \(e\) node as a complete word. \\
+2 & \texttt{search("apple")} & The whole path exists and the final node is marked, so return \texttt{true}. \\
+3 & \texttt{search("app")} & The path exists, but the second \(p\) node is not a word end, so return \texttt{false}. \\
+4 & \texttt{startsWith("app")} & The same path exists. A prefix does not need a word-end mark, so return \texttt{true}. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{dryrunbox}
+
+\chaptercheckpoint
+  {Many operations repeatedly query complete words and shared prefixes.}
+  {Character-child links and an end-of-word Boolean at each Trie node.}
+  {Making \texttt{search} and \texttt{startsWith} use the same final condition.}
+  {$O(L)$ per operation and $O(N)$ total stored-node space.}
+
+% =================================================
+% ALIEN DICTIONARY
+% =================================================
+
+\patternintoc{Graph Patterns}
+\problemstart{Alien Dictionary}{269}{Hard}{Topological sorting}{Directed graph and queue}
+
+\subsection{The Problem}
+
+There is a new alien language that uses the English alphabet.
+However, the order of the letters in this language is unknown.
+
+You are given a list of words from the alien language's dictionary.
+The words are already sorted dictionaryly according to the rules
+of the alien language.
+
+The goal is to determine the ordering of the unique characters in
+the alien language.
+
+If there is no valid ordering, return an empty string.
+
+If multiple valid orderings exist, any one of them may be returned.
+
+\subsection{Input and Output}
+
+The input is: \(\texttt{vector<string> words}\)
+
+where the words are already sorted according to the unknown alien
+language.
+
+The output is: \(\texttt{string}\)
+
+containing the unique characters in their valid alien-language
+ordering.
+
+If no valid ordering exists: \(\boxed{\texttt{""}}\)
+
+If multiple valid orderings exist, any valid ordering is acceptable.
+
+% =================================================
+% LEXICOGRAPHICAL ORDER
+% =================================================
+
+\subsection{Understanding Dictionary Order}
+
+Dictionary order compares two strings from left to right. The first
+position where they differ decides which word comes first. For example,
+\texttt{ape} comes before \texttt{apple}: the shared prefix is \texttt{ap},
+then \texttt{e} comes before \texttt{p}.
+
+\begin{conceptbox}{Only the first difference matters}
+\centering
+\begin{tabular}{c c c c}
+\texttt{a} & \texttt{p} & \textcolor{orange}{\texttt{e}} & \\
+$=$ & $=$ & $<$ & \\
+\texttt{a} & \texttt{p} & \textcolor{navy}{\texttt{p}} & \texttt{l e}
+\end{tabular}
+
+\smallskip
+So, \(\texttt{ape}<\texttt{apple}\).
+\end{conceptbox}
+
+The same concept is used in the alien dictionary, except that the
+ordering of the characters is unknown.
+
+% =================================================
+% MAIN IDEA
+% =================================================
+
+\subsection{Main Idea}
+
+The ordering of adjacent words reveals ordering between characters. Compare
+\texttt{abc} and \texttt{axc}. Their first characters match. The first
+difference is \texttt{b} versus \texttt{x}, so the alien alphabet must place
+\texttt{b} before \texttt{x}. \(\texttt{abc}<\texttt{axc} \quad\Longrightarrow\quad b<x \quad\Longrightarrow\quad b\rightarrow x\)
+
+This gives us a directed relationship: \(b\longrightarrow x\)
+
+So, the problem can be converted into a
+\textbf{directed graph}.
+
+% =================================================
+% GRAPH REPRESENTATION
+% =================================================
+
+\subsection{Graph Representation}
+
+Each unique character is represented as a node in the graph.
+
+If we discover that: \(a<b\)
+
+we create a directed edge: \(a\longrightarrow b\)
+
+The meaning is: \(\boxed{ a\text{ must appear before }b }\)
+
+After constructing all such relationships, we need to find an ordering
+of the graph in which every directed edge goes from an earlier
+character to a later character.
+
+This is exactly the purpose of: \(\boxed{\text{Topological Sorting}}\)
+
+% =================================================
+% KAHN'S ALGORITHM
+% =================================================
+
+\subsection{Kahn's Algorithm}
+
+We use \textbf{Kahn's algorithm} to perform topological sorting.
+
+The algorithm is based on the concept of: \(\boxed{\text{Indegree}}\)
+
+The indegree of a node is the number of edges coming into that node.
+
+For example, if: \(a\rightarrow c\)
+
+and: \(b\rightarrow c\)
+
+then: \(\operatorname{indegree}(c)=2\)
+
+because two characters must appear before \(c\).
+
+Characters with: \(\operatorname{indegree}=0\)
+
+can be placed at the beginning of the ordering.
+
+\begin{invariantbox}{the queue contains exactly the available characters}
+Every queued character has zero remaining indegree and has not yet been placed
+in the result. Removing one character deletes its outgoing rules; a
+neighbor is enqueued exactly when its final unmet rule disappears.
+\end{invariantbox}
+
+% =================================================
+% IMPORTANT STEPS
+% =================================================
+
+\subsection{Algorithm Steps}
+
+The solution can be divided into four major steps.
+
+\subsubsection{Step 1: Start the Graph}
+
+Create:
+
+\begin{itemize}
+    \item An adjacency list for the graph.
+    \item An indegree array/map for all characters.
+\end{itemize}
+
+Since the alien language uses lowercase English letters, there can
+be at most \(26\) possible characters.
+
+We also need to make sure that every character appearing in the input
+is represented in the graph, even if its indegree is zero.
+
+\begin{visualbox}{What we save while building the letter order}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+  \node[draw=navy,fill=softblue,rounded corners,minimum width=38mm,
+        minimum height=27mm,align=left] (adj) {
+    \textbf{Which letters come next}\\
+    \texttt{w: \{e\}}\\
+    \texttt{e: \{r\}}\\
+    \texttt{r: \{t\}}\\
+    \texttt{t: \{f\}}
+  };
+  \node[draw=navy,fill=softblue,rounded corners,minimum width=38mm,
+        minimum height=27mm,align=left,right=12mm of adj] (degree) {
+    \textbf{Rules still waiting}\\
+    \texttt{w: 0, e: 1}\\
+    \texttt{r: 1, t: 1}\\
+    \texttt{f: 1}
+  };
+  \node[draw=teal,fill=softteal,rounded corners,minimum width=34mm,
+        minimum height=27mm,align=center,right=12mm of degree] (queue) {
+    \textbf{Ready letters}\\[2mm]
+    \texttt{next [ w ] last}\\[1mm]
+    no earlier rules left
+  };
+  \draw[flowarrow] (adj)--(degree);
+  \draw[flowarrow,teal] (degree)--(queue);
+\end{tikzpicture}
+
+\smallskip
+The first box shows which letter must follow another. The second counts how
+many earlier-letter rules remain. The last box holds letters ready to use.
+\end{visualbox}
+
+% =================================================
+% STEP 2
+% =================================================
+
+\subsubsection{Step 2: Build the Directed Graph}
+
+We compare every pair of adjacent words. For \(i=0,1,\ldots,n-2\), let
+\(\texttt{word1=words[i]}\)
+
+and: \(\texttt{word2=words[i+1]}\)
+
+We compare their characters from left to right.
+
+Let \(j\) represent the character position.
+
+As long as: \(\texttt{word1[j]}=\texttt{word2[j]}\)
+
+there is no ordering information, so we continue.
+
+When we find the first different pair: \(\texttt{word1[j]}\neq\texttt{word2[j]}\)
+
+we have discovered an ordering relationship.
+
+If: \(\texttt{word1[j]}=a\)
+
+and: \(\texttt{word2[j]}=b\)
+
+then: \(\boxed{a\rightarrow b}\)
+
+and: \(\operatorname{indegree}(b)++\)
+
+After finding the first different character, we stop comparing the
+two words because later characters provide no additional information
+about their dictionary ordering.
+
+% =================================================
+% PREFIX EDGE CASE
+% =================================================
+
+\subsection{Important Edge Case: Invalid Prefix}
+
+There is an important invalid case.
+
+Consider: \(\texttt{["abc","ab"]}\)
+
+The first word is longer than the second word, but the second word is
+a complete prefix of the first.
+
+This ordering is impossible in dictionary order.
+
+So, if: \(|\texttt{word1}|>|\texttt{word2}|\)
+
+and all characters of \texttt{word2} match the beginning of
+\texttt{word1}, then the input is invalid.
+
+We return: \(\boxed{\texttt{""}}\)
+
+\begin{visualbox}{A longer word cannot come before its own beginning}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
+    \node[dsnode] (first) {first word\\\texttt{abc}};
+    \node[dsnode,right=25mm of first] (second) {next word\\\texttt{ab}};
+    \draw[flowarrow,orange] (first)--node[edgelabel,above]{appears first} (second);
+    \node[draw=orange,fill=softorange,rounded corners,below=12mm of $(first)!0.5!(second)$,align=center]
+        (invalid) {this order is impossible\\\texttt{ab} must come before \texttt{abc}};
+    \draw[flowarrow,orange] (second.south)--(invalid.north east);
+\end{tikzpicture}
+\end{visualbox}
+
+% =================================================
+% STEP 3
+% =================================================
+
+\subsubsection{Step 3: Start the Queue}
+
+After constructing the graph, we look for all characters whose
+indegree is zero.
+
+These characters have no dependencies.
+
+So, they can appear at the beginning of the ordering.
+
+We add them to a queue:
+
+\begin{lstlisting}
+queue<char> q;
+\end{lstlisting}
+
+For every character \(c\):
+
+\begin{lstlisting}
+if (indegree[c] == 0) {
+    q.push(c);
+}
+\end{lstlisting}
+
+% =================================================
+% STEP 4
+% =================================================
+
+\subsubsection{Step 4: Perform Topological Sort}
+
+While the queue is not empty:
+
+\begin{enumerate}
+    \item Remove one character from the queue.
+    \item Add it to the result.
+    \item Visit all of its neighboring characters.
+    \item Decrease their indegree by one.
+    \item If a neighbor's indegree becomes zero, add it to the queue.
+\end{enumerate}
+
+Conceptually, take a node, append it to the result, remove its outgoing
+dependencies, and enqueue any nodes that have become available.
+
+\begin{visualbox}{Take a ready letter, then unlock the next one}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,node distance=12mm]
+    \node[trienode,visited] (w) {w};
+    \node[trienode,right=of w] (e) {e};
+    \node[trienode,right=of e] (r) {r};
+    \node[trienode,right=of r] (t) {t};
+    \node[trienode,right=of t] (f) {f};
+    \draw[flowarrow] (w)--(e);
+    \draw[flowarrow] (e)--(r);
+    \draw[flowarrow] (r)--(t);
+    \draw[flowarrow] (t)--(f);
+
+    \node[dsnode,below=17mm of w,align=left] (queue) {ready: $[w]$\\answer: \texttt{""}};
+    \node[dsnode,right=9mm of queue,align=left] (degrees) {
+        rules left\\$w:0,\ e:1,\ r:1,\ t:1,\ f:1$
+    };
+    \node[dsnode,active,right=9mm of degrees,align=left] (update) {
+        take $w$\\add $w$ to answer\\remove rule $w\to e$
+    };
+    \draw[flowarrow,teal] (queue)--(degrees);
+    \draw[flowarrow,orange] (degrees)--(update);
+    \node[below=6mm of update,text=teal,align=center] {
+        $e$ now has $0$ rules\\add $e$ to ready list
+    };
+\end{tikzpicture}
+
+A letter becomes ready only after every letter that must come before it has
+been used. In a cycle, some letters never become ready.
+\end{visualbox}
+
+% =================================================
+% EXAMPLE
+% =================================================
+
+\subsection{Example}
+
+Consider
+\texttt{["wrt", "wrf", "er", "ett", "rftt"]}. Compare only adjacent
+words and stop at each pair's first different character.
+
+\begin{dryrunbox}{Building the character rules}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Adjacent pair & First difference & Rule \\
+\midrule
+\texttt{wrt}, \texttt{wrf} & \texttt{t} versus \texttt{f} & $t\rightarrow f$ \\
+\texttt{wrf}, \texttt{er} & \texttt{w} versus \texttt{e} & $w\rightarrow e$ \\
+\texttt{er}, \texttt{ett} & \texttt{r} versus \texttt{t} & $r\rightarrow t$ \\
+\texttt{ett}, \texttt{rftt} & \texttt{e} versus \texttt{r} & $e\rightarrow r$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{dryrunbox}
+
+These edges form the chain
+$w\rightarrow e\rightarrow r\rightarrow t\rightarrow f$, so one valid
+answer is \texttt{"wertf"}.
+
+% =================================================
+% GRAPH
+% =================================================
+
+\subsection{Graph Structure}
+
+The relationships can be visualized as: \(w\longrightarrow e\longrightarrow r \longrightarrow t\longrightarrow f\)
+
+The topological ordering of this graph gives: \(\boxed{w,e,r,t,f}\)
+
+which corresponds to: \(\boxed{\texttt{"wertf"}}\)
+
+\begin{visualbox}{The letter rules form one clear order}
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small,node distance=18mm]
+    \node[trienode,visited] (w) {w};
+    \node[trienode,right=of w] (e) {e};
+    \node[trienode,right=of e] (r) {r};
+    \node[trienode,right=of r] (t) {t};
+    \node[trienode,active,right=of t] (f) {f};
+    \draw[flowarrow] (w)--(e);
+    \draw[flowarrow] (e)--(r);
+    \draw[flowarrow] (r)--(t);
+    \draw[flowarrow] (t)--(f);
+\end{tikzpicture}
+\smallskip
+Starting with \texttt{w}, the only letter with no earlier rule, gives
+$w\rightarrow e\rightarrow r\rightarrow t\rightarrow f$.
+\end{visualbox}
+
+% =================================================
+% PSEUDOCODE
+% =================================================
+
+\subsection{Pseudocode}
+
+\begin{lstlisting}[style=pseudocode,basicstyle=\ttfamily\footnotesize]
+alienOrder(words):
+    create graph
+    create indegree
+    for every word:
+        add all characters to graph
+        start their indegree
+    for every pair of adjacent words:
+        compare characters from left to right
+        if all characters match and
+           first word is longer:
+            return ""
+        when first different characters are found:
+            create directed edge
+            increase indegree
+            stop comparing this pair
+    create queue
+    for every character:
+        if indegree == 0:
+            add character to queue
+    result = ""
+    while queue is not empty:
+        character = queue.front()
+        queue.pop()
+        add character to result
+        for every neighbor:
+            decrease indegree
+            if indegree becomes 0:
+                add neighbor to queue
+    if result contains every unique character:
+        return result
+    return ""
+\end{lstlisting}
+
+% =================================================
+% C++ IMPLEMENTATION
+% =================================================
+
+\subsection{C++ Implementation}
+
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Alien Dictionary}]
+#include <algorithm>
+#include <queue>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    string alienOrder(vector<string>& words) {
+        unordered_map<char, unordered_set<char>> graph;
+        unordered_map<char, int> indegree;
+        for (const string& word : words) {
+            for (char c : word) {
+                graph[c];
+                indegree[c] = 0;
+            }
+        }
+        for (int i = 0; i + 1 < static_cast<int>(words.size()); ++i) {
+            const string& word1 = words[i];
+            const string& word2 = words[i + 1];
+            const int len = static_cast<int>(min(
+                word1.size(), word2.size()));
+            bool foundDifference = false;
+            for (int j = 0; j < len; j++) {
+                if (word1[j] != word2[j]) {
+                    const char from = word1[j];
+                    const char to = word2[j];
+                    if (graph[from].find(to) == graph[from].end()) {
+                        graph[from].insert(to);
+                        indegree[to]++;
+                    }
+                    foundDifference = true;
+                    break;
+                }
+            }
+            if (!foundDifference && word1.size() > word2.size()) {
+                return "";
+            }
+        }
+        queue<char> q;
+        for (const auto& entry : indegree) {
+            if (entry.second == 0) q.push(entry.first);
+        }
+        string result;
+        while (!q.empty()) {
+            const char current = q.front();
+            q.pop();
+            result += current;
+            for (char neighbor : graph[current]) {
+                indegree[neighbor]--;
+                if (indegree[neighbor] == 0) q.push(neighbor);
+            }
+        }
+        return result.size() == indegree.size() ? result : "";
+    }
+};
+\end{lstlisting}
+
+% =================================================
+% WHY DUPLICATE EDGES MUST BE AVOIDED
+% =================================================
+
+\subsection{Why Duplicate Edges Must Be Avoided}
+
+Suppose we discover the same relationship multiple times: \(a\rightarrow b\)
+
+If we increment the indegree every time without checking whether the
+edge already exists, we may incorrectly calculate: \(\operatorname{indegree}(b)\)
+
+So, the implementation uses an
+\texttt{unordered\_set} for the neighbors.
+
+Before adding: \(a\rightarrow b\)
+
+we check whether the edge already exists.
+
+Only a new edge increases the indegree.
+
+% =================================================
+% CYCLE DETECTION
+% =================================================
+
+\subsection{Detecting a Cycle}
+
+A valid alien alphabet ordering must form a directed acyclic graph.
+
+Suppose the graph contains: \(a\rightarrow b\)
+
+and: \(b\rightarrow a\)
+
+Then there is a cycle: \(a\rightarrow b\rightarrow a\)
+
+No valid ordering exists.
+
+Kahn's algorithm detects this naturally.
+
+If a cycle exists, some nodes will always have: \(\operatorname{indegree}>0\)
+
+and so they will never enter the queue.
+
+As a result: \(|\texttt{result}| < |\texttt{indegree}|\)
+
+So, we return: \(\boxed{\texttt{""}}\)
+
+% =================================================
+% COMPLETE PROCESS
+% =================================================
+
+\subsection{Complete Process}
+
+The entire solution can be summarized as:
+
+\[
+\boxed{
+\begin{gathered}
+\text{Words}\rightarrow\text{Compare Adjacent Words}
+\rightarrow\text{Build Directed Graph}\\[2mm]
+\Downarrow\\[-1mm]
+\text{Calculate Indegrees}\rightarrow\text{Kahn's Algorithm}
+\rightarrow\text{Topological Order}
+\end{gathered}
+}
+\]
+
+The important transformation is: \(\boxed{ \text{Unknown Alphabet Ordering} \rightarrow \text{Graph Dependencies} }\)
+
+Once the character dependencies are represented as a graph, the
+problem becomes a standard topological sorting problem.
+
+% =================================================
+% COMPLEXITY
+% =================================================
+
+\subsection{Time and Space}
+
+Let: \(C\)
+
+be the total number of characters across all words.
+
+That is: \(C= \sum_{i=0}^{n-1} |\texttt{words[i]}|\)
+
+Building the graph scans the words, and the topological sort processes every
+stored vertex and edge once. So, the full time complexity is: \(\boxed{O(C+U+E)}\)
+
+Because the distinct edges arise from adjacent-word comparisons, this is
+commonly simplified to \(O(C)\) for this problem.
+
+The graph contains the unique characters and the precedence edges discovered
+between them.
+
+Let: \(U=\text{number of unique characters}\)
+
+and let \(E\) be the number of distinct directed edges. Then the additional
+space is: \(\boxed{O(U+E)}\)
+
+Since the language uses only the lowercase English alphabet: \(U\leq26\)
+
+So, in this particular problem, \(U\) is bounded by a constant, but
+writing \(O(U+E)\) describes the graph storage exactly and generalizes to a
+larger alphabet.
+
+% =================================================
+% KEY TAKEAWAYS
+% =================================================
+
+\subsection{Key Takeaways}
+
+\begin{itemize}
+    \item The words are already sorted according to an unknown
+    alphabet.
+    
+    \item Compare adjacent words to discover character ordering
+    relationships.
+    
+    \item The first different characters determine an ordering:
+    \(a\rightarrow b\)
+    means \(a\) comes before \(b\).
+    
+    \item Represent the relationships using a directed graph.
+    
+    \item Use indegree to determine which characters can be placed
+    next.
+    
+    \item Kahn's algorithm performs the required topological sort.
+    
+    \item An invalid prefix such as:
+    \(\texttt{"abc"},\texttt{"ab"}\)
+    makes the ordering impossible.
+    
+    \item If the result does not contain every unique character, a
+    cycle exists and the answer is invalid.
+    
+    \item Time complexity:
+    \(O(C+U+E)=O(C)\)
+    
+    \item Space complexity:
+    \(O(U+E)\)
+    where \(U\) is the number of unique characters and \(E\) is the number of
+    distinct precedence edges.
+\end{itemize}
+
+\chaptercheckpoint
+  {Sorted words reveal pairwise character precedence rules.}
+  {A directed adjacency set, indegrees, and a zero-indegree queue.}
+  {Adding duplicate edges, missing the invalid-prefix case, or ignoring cycles.}
+  {$O(C)$ input processing with graph space based on unique characters and edges.}
+
+% =================================================
+% ADDITIONAL VOLUME 1 LESSONS
+% =================================================
+
+\input{chapters/part1-remaining-a}
+\input{chapters/part1-remaining-b}
+\input{chapters/part1-remaining-c}
+\input{chapters/part2-a}
+\input{chapters/part2-b}
+\input{chapters/part3-a}
+\input{chapters/part3-b}
+
+% =================================================
+% C++ REFERENCE AND PRACTICE
+% =================================================
+
+\input{chapters/practical-reference}
+
+\clearpage
+\phantomsection
+\section*{About the Author}
+\addcontentsline{toc}{section}{About the Author}
+\markboth{About the Author}{About the Author}
+
+\begin{conceptbox}{Om Tripathi}
+Om Tripathi wrote \textit{Cracking the LeetCode Interview} to explain data
+structures and algorithms in a clear, visual way. The examples show what each
+variable means, how it changes, and how the same idea becomes working C++ code.
+\end{conceptbox}
+
+The 75 problems are grouped by ideas that appear again and again. Once you can
+see what the algorithm keeps track of, the code becomes much easier to write
+again during an interview.
+
+\begin{revisionbox}{Author's note}
+Do not only read the diagrams. Cover the answer, draw the example yourself,
+and then write the code without looking. The aim is to understand the idea,
+not to memorize 75 separate programs.
+\end{revisionbox}
+
+\ifdefined\KDPINTERIOR
+\clearpage
+\thispagestyle{empty}
+\null
+\clearpage
+\thispagestyle{empty}
+\null
+\clearpage
+\thispagestyle{empty}
+\null
+\clearpage
+\thispagestyle{empty}
+\null
+\clearpage
+\thispagestyle{empty}
+\null
+\clearpage
+\thispagestyle{empty}
+\null
+\else
+\clearpage
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[navy] (current page.south west) rectangle (current page.north east);
+  \fill[teal!70!navy,opacity=0.48]
+    (current page.south west) rectangle
+    ([xshift=6.2cm]current page.north west);
+  \fill[orange]
+    ([xshift=-1.43cm]current page.north east) rectangle
+    ([xshift=-1.25cm]current page.south east);
+  \draw[white,opacity=0.22,line width=0.8pt,rounded corners=2mm]
+    ([xshift=1.05cm,yshift=-1.05cm]current page.north west) rectangle
+    ([xshift=-1.05cm,yshift=1.05cm]current page.south east);
+
+  % A restrained network echoes the front cover in the open lower field.
+  \coordinate (b1) at ([xshift=-5.4cm,yshift=-15.6cm]current page.north east);
+  \coordinate (b2) at ([xshift=-3.1cm,yshift=-17.0cm]current page.north east);
+  \coordinate (b3) at ([xshift=-5.8cm,yshift=-19.2cm]current page.north east);
+  \coordinate (b4) at ([xshift=-3.5cm,yshift=-20.7cm]current page.north east);
+  \foreach \a/\b in {b1/b2,b1/b3,b2/b3,b2/b4,b3/b4}{
+    \draw[white,opacity=0.15,line width=1.1pt] (\a)--(\b);
+  }
+  \foreach \p in {b1,b2,b3,b4}{
+    \draw[white,opacity=0.32,line width=1pt] (\p) circle (4mm);
+  }
+  \fill[orange] (b2) circle (1.8mm);
+
+  \node[anchor=north west,text=white,font=\sffamily\bfseries,
+        text width=13.2cm,align=left]
+    at ([xshift=2.0cm,yshift=-2.1cm]current page.north west)
+    {\fontsize{23}{29}\selectfont Stop memorizing solutions.\\
+     Start recognizing patterns.};
+
+  \node[anchor=north west,text=teal!15!white,font=\sffamily\large,
+        text width=12.8cm,align=left]
+    at ([xshift=2.0cm,yshift=-5.25cm]current page.north west)
+    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
+     \setlength{\baselineskip}{17pt}
+     \textit{Cracking the LeetCode Interview} turns 75 essential \mbox{programming}
+     questions into connected lessons on arrays, strings, linked lists,
+     trees, tries, graphs, heaps, greedy \mbox{algorithms}, binary search, bit
+     manipulation, and dynamic programming.};
+
+  \node[anchor=north west,text=white,font=\sffamily\bfseries\large]
+    at ([xshift=2.0cm,yshift=-10.1cm]current page.north west)
+    {INSIDE THIS BOOK};
+
+  \node[anchor=north west,text=teal!12!white,font=\sffamily\normalsize,
+        text width=12.6cm,align=left]
+    at ([xshift=2.0cm,yshift=-11.0cm]current page.north west)
+    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
+     \setlength{\baselineskip}{18pt}
+     \textcolor{orange}{\textbullet}\quad Clear pictures and step-by-step dry runs\\
+     \textcolor{orange}{\textbullet}\quad The simple idea explained before the code\\
+     \textcolor{orange}{\textbullet}\quad Complete C++ solutions with code walkthroughs\\
+     \textcolor{orange}{\textbullet}\quad Tests, common mistakes, time, and space\\
+     \textcolor{orange}{\textbullet}\quad 75 lessons grouped by topic};
+
+  \node[anchor=west,text=white,font=\sffamily\bfseries]
+    at ([xshift=2.0cm,yshift=4.25cm]current page.south west)
+    {\fontsize{19}{24}\selectfont OM TRIPATHI};
+  \node[anchor=west,text=teal!20!white,font=\sffamily]
+    at ([xshift=2.0cm,yshift=3.45cm]current page.south west)
+    {Author};
+
+  % Keep the lower-right area visually clear so KDP can place its barcode.
+\end{tikzpicture}
+\null
+\fi
+
+\end{document}

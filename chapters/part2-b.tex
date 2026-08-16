@@ -1,0 +1,1173 @@
+% Lessons 38--49: intervals, graphs, linked lists, DP, windows, and bits.
+
+\problemstart{Non-overlapping Intervals}{435}{Medium}{Greedy by earliest finish}{Intervals}
+
+\subsection{The Problem}
+Return the minimum number of intervals to remove so the remaining intervals
+do not overlap.
+
+\subsection{Keep the Interval That Finishes First}
+Sort by end time. Whenever the next interval starts before the last kept end,
+remove it. Choosing the earliest possible end leaves the greatest amount of
+space for all future intervals.
+
+\begin{invariantbox}{the kept intervals finish as early as possible}
+After scanning a prefix, the algorithm has kept the maximum possible number
+of compatible intervals from that prefix, and the final kept interval has the
+smallest achievable end among choices of that size.
+\end{invariantbox}
+
+\begin{visualbox}{An early finish keeps more future choices}
+\centering
+\begin{tikzpicture}[font=\small,x=8mm]
+  \node[anchor=east,text=teal,font=\bfseries] at (0.7,1.25) {keep};
+  \draw[line width=4pt,teal] (1,1.25)--(3,1.25);
+  \node[above=2mm] at (2,1.25) {\([1,3]\)};
+  \draw[line width=4pt,navy] (3.25,1.25)--(5,1.25);
+  \draw[line width=4pt,navy] (5.25,1.25)--(7,1.25);
+  \node[below=2mm,text=navy] at (5.1,1.25) {two later intervals still fit};
+
+  \node[anchor=east,text=orange,font=\bfseries] at (0.7,-0.35) {remove};
+  \draw[line width=4pt,orange] (1,-0.35)--(6,-0.35);
+  \node[above=2mm] at (3.5,-0.35) {\([1,6]\)};
+  \node[below=2mm,text=orange] at (3.5,-0.35) {this long interval blocks both};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+sort intervals by end time
+keptEnd = end of first interval; removals = 0
+for each remaining interval:
+    if interval.start < keptEnd: increment removals
+    else: keptEnd = interval.end
+return removals
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Non-overlapping Intervals}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int eraseOverlapIntervals(vector<vector<int>>& intervals) {
+        sort(intervals.begin(), intervals.end(),
+             [](const vector<int>& a, const vector<int>& b) {
+                 return a[1] < b[1];
+             });
+        int removals = 0;
+        int lastEnd = intervals[0][1];
+        for (int i = 1; i < static_cast<int>(intervals.size()); ++i) {
+            if (intervals[i][0] < lastEnd) {
+                ++removals;
+            } else {
+                lastEnd = intervals[i][1];
+            }
+        }
+        return removals;
+    }
+};
+\end{lstlisting}
+
+\subsection{Why It Works and Complexity}
+The standard exchange argument replaces any later-finishing kept interval with
+the greedy one without harming compatibility. Sorting dominates at
+\(O(n\log n)\); the scan uses \(O(1)\) extra state. Touching endpoints do
+not overlap.
+
+\lessonexpansion
+  {For \texttt{[[1,2],[2,3],[3,4],[1,3]]}, keep \([1,2]\), then \([2,3]\),
+   then \([3,4]\). The interval \([1,3]\) conflicts and is removed, producing
+   the minimum removal count one.}
+  {Among overlapping choices, keeping the interval with the earliest finish
+   leaves at least as much room for every future interval as keeping a later
+   finish. Repeating this exchange argument proves the greedy optimum.}
+  {Check empty input, one interval, touching endpoints, identical intervals,
+   nested intervals, and several conflicts sharing the same ending time.}
+  {I sort by end time and keep each interval whose start is at least the last
+   kept end. Every rejected interval overlaps the most future-friendly choice,
+   so counting those rejections gives the minimum removals.}
+
+\chaptercheckpoint
+  {Remove as few intervals as possible to eliminate overlap.}
+  {Intervals sorted by end and the end of the last kept interval.}
+  {Sorting only by start and keeping a later-finishing conflict.}
+  {$O(n\log n)$ time.}
+
+
+\problemstart{Merge Intervals}{56}{Medium}{Sort and sweep}{Intervals}
+
+\subsection{The Problem}
+Merge every pair of overlapping intervals and return non-overlapping intervals.
+
+\subsection{Build One Active Interval}
+After sorting by start, compare the next start with the end of the last merged
+interval. An overlap extends that end; otherwise the next interval begins a
+new non-overlapping group.
+
+\begin{invariantbox}{the output is merged and ends with the active group}
+Before each comparison, all output intervals except possibly the last are
+final and cannot overlap any later interval. The last interval equals the union of the current
+overlapping group.
+\end{invariantbox}
+
+\begin{visualbox}{Overlapping ranges collapse into one range}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]},x=8mm]
+  \foreach \x in {0,...,7} \node[below] at (\x,0) {\scriptsize \x};
+  \draw[->,navy] (0,0)--(7.4,0);
+  \node[anchor=east,text=teal] at (0.7,1.6) {first};
+  \draw[line width=5pt,teal] (1,1.6)--(3,1.6);
+  \node[above=2mm] at (2,1.6) {$[1,3]$};
+  \node[anchor=east,text=orange] at (0.7,.75) {next};
+  \draw[line width=5pt,orange] (2,.75)--(6,.75);
+  \node[above=2mm] at (4,.75) {$[2,6]$};
+  \node[anchor=east,text=navy,font=\bfseries] at (0.7,-1.0) {output};
+  \draw[line width=6pt,navy] (1,-1.0)--(6,-1.0);
+  \node[below=2mm] at (3.5,-1.0) {$[1,6]$};
+  \draw[densely dotted,ink!45] (1,-.75)--(1,1.35) (6,-.75)--(6,.5);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+sort intervals by start time
+merged = empty
+for interval in sorted order:
+    if merged is empty or interval starts after merged.back ends:
+        append interval
+    else: extend merged.back end
+return merged
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Merge Intervals}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> merge(
+            vector<vector<int>>& intervals) {
+        sort(intervals.begin(), intervals.end());
+        vector<vector<int>> merged;
+        for (const auto& interval : intervals) {
+            if (merged.empty() || merged.back()[1] < interval[0]) {
+                merged.push_back(interval);
+            } else {
+                merged.back()[1] = max(merged.back()[1], interval[1]);
+            }
+        }
+        return merged;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(n\log n)\) for sorting and \(O(n)\) for the sweep. Excluding the
+returned vector, sorting may use \(O(\log n)\) stack space. Equal endpoints
+merge because the intervals overlap at that endpoint.
+
+\lessonexpansion
+  {Sort \texttt{[[1,3],[2,6],[8,10],[15,18]]}. Merge the first two into
+   \([1,6]\); the next starts after 6, so append \([8,10]\), followed by
+   \([15,18]\).}
+  {Once intervals are sorted by start, only the final merged interval can
+   overlap the next input. Extending that final end keeps the exact union;
+   otherwise appending begins a new non-overlapping group.}
+  {Check one interval, contained intervals, equal endpoints, repeated
+   intervals, one chain of overlaps, and input with no overlaps.}
+  {I sort by start time and compare each interval with the end of the current
+   merged block. It either extends that block or begins a new one.}
+
+\chaptercheckpoint
+  {Return the union of overlapping intervals.}
+  {Sorted intervals and the final merged interval.}
+  {Forgetting to extend with the larger of the two ends.}
+  {$O(n\log n)$ time.}
+
+
+\problemstart{Insert Interval}{57}{Medium}{Three-phase interval scan}{Intervals}
+
+\subsection{The Problem}
+Insert one interval into a sorted, non-overlapping interval list and merge any
+new overlaps.
+
+\subsection{Before, Overlap, After}
+Append intervals ending before the new interval. Merge every interval whose
+start is at most the new end. Append the merged interval, then copy all
+remaining intervals.
+
+\begin{invariantbox}{processed intervals are final and sorted}
+During the first phase, copied intervals lie strictly before the new range.
+During the second, the mutable new interval equals the union of every overlap
+seen so far. The remaining intervals begin after it once merging stops.
+\end{invariantbox}
+
+\begin{visualbox}{Insertion has three consecutive regions}
+\centering
+\begin{tikzpicture}[font=\small,x=8mm]
+  \draw[->,navy] (0,0)--(10,0);
+  \foreach \x in {0,2,4,6,8,10}{\node[below=1mm] at (\x,0) {\x};}
+  \draw[line width=4pt,teal] (0.5,1.35)--(1.5,1.35);
+  \node[above=2mm,text=teal] at (1,1.35) {copy before};
+  \draw[line width=4pt,orange] (2,1.35)--(5,1.35);
+  \draw[line width=4pt,orange,dashed] (4,0.75)--(8,0.75);
+  \node[above=2mm,text=orange] at (5,1.35) {merge \([2,5]\) with \([4,8]\)};
+  \draw[line width=4pt,navy] (8.5,1.35)--(9.5,1.35);
+  \node[above=2mm,text=navy] at (9,1.35) {copy after};
+  \draw[line width=5pt,teal] (2,-0.75)--(8,-0.75);
+  \node[below=2mm,text=teal,font=\bfseries] at (5,-0.75) {insert merged interval \([2,8]\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+append intervals ending before newInterval starts
+while intervals overlap newInterval:
+    expand newInterval to their minimum start and maximum end
+append the expanded newInterval
+append every interval starting after it
+return result
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Insert Interval}]
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> insert(
+            vector<vector<int>>& intervals,
+            vector<int>& newInterval) {
+        vector<vector<int>> result;
+        int i = 0, n = static_cast<int>(intervals.size());
+        while (i < n && intervals[i][1] < newInterval[0])
+            result.push_back(intervals[i++]);
+        while (i < n && intervals[i][0] <= newInterval[1]) {
+            newInterval[0] = min(newInterval[0], intervals[i][0]);
+            newInterval[1] = max(newInterval[1], intervals[i][1]);
+            ++i;
+        }
+        result.push_back(newInterval);
+        while (i < n) result.push_back(intervals[i++]);
+        return result;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time, Space, and Edge Cases}
+Every interval is copied or merged once: \(O(n)\) time and \(O(n)\) output
+space. Test insertion before all intervals, after all intervals, inside one
+interval, and across several intervals.
+
+\lessonexpansion
+  {Insert \([4,8]\) into \([[1,2],[3,5],[6,7],[9,12]]\). Copy \([1,2]\).
+   Merge \([3,5]\) to obtain \([3,8]\), then merge \([6,7]\) without changing
+   the bounds. Append \([3,8]\), followed by \([9,12]\).}
+  {Because the original intervals are sorted and do not overlap, they form three
+   consecutive regions: strictly before, overlapping, and strictly after the
+   inserted interval. Processing these regions in order produces a sorted,
+   fully merged result.}
+  {Test an empty list, insertion before or after everything, containment in
+   either direction, touching endpoints, and one new interval spanning the
+   complete list.}
+  {I exploit the existing sorted order. I first copy intervals that end before
+   the new one, then enlarge the new boundaries across every overlap, and
+   finally copy the remaining suffix. Each interval is visited once.}
+
+\chaptercheckpoint
+  {Insert into an already sorted, non-overlapping interval list.}
+  {A scan position and the expanding new interval.}
+  {Using strict comparison when touching endpoints must merge.}
+  {$O(n)$ time.}
+
+
+\patternintoc{Grid and Graph Components}
+\problemstart{Number of Islands}{200}{Medium}{Grid DFS}{Matrix and recursion}
+
+\subsection{The Problem}
+Count connected groups of land cells in a grid. Connections are horizontal or
+vertical, not diagonal.
+
+\subsection{Flood One Island at a Time}
+When an unvisited land cell is found, increment the answer and flood-fill its
+entire component. Marking visited cells as water prevents recounting and makes
+the grid itself the visited structure.
+
+\begin{invariantbox}{every discovered land component is erased exactly once}
+After the scan passes a cell, no remaining land cell in its connected
+component survives. So each future land discovery belongs to a new
+island and increments the count exactly once.
+\end{invariantbox}
+
+\begin{visualbox}{DFS floods all four-directionally connected land}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[arraycell,fill=softorange,draw=orange,very thick] (g00) at (0,0) {1};
+  \node[arraycell,fill=softorange,draw=orange,very thick] (g01) at (1.05,0) {1};
+  \node[arraycell,fill=white] (g02) at (2.10,0) {0};
+  \node[arraycell,fill=white] (g03) at (3.15,0) {0};
+  \node[arraycell,fill=softorange,draw=orange,very thick] (g10) at (0,-0.9) {1};
+  \node[arraycell,fill=white] (g11) at (1.05,-0.9) {0};
+  \node[arraycell,fill=white] (g12) at (2.10,-0.9) {0};
+  \node[arraycell,fill=softteal,draw=teal,very thick] (g13) at (3.15,-0.9) {1};
+  \node[arraycell,fill=white] (g20) at (0,-1.8) {0};
+  \node[arraycell,fill=white] (g21) at (1.05,-1.8) {0};
+  \node[arraycell,fill=softteal,draw=teal,very thick] (g22) at (2.10,-1.8) {1};
+  \node[arraycell,fill=softteal,draw=teal,very thick] (g23) at (3.15,-1.8) {1};
+  \node[above=4mm of g00,text=orange,font=\bfseries] {island 1};
+  \node[right=7mm of g13,text=teal,font=\bfseries] {island 2};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+answer = 0
+for every grid cell:
+    if cell is land:
+        increment answer
+        DFS from it, changing all connected land to visited water
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Number of Islands}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    void flood(vector<vector<char>>& grid, int row, int col) {
+        if (row < 0 || col < 0 || row >= static_cast<int>(grid.size()) ||
+            col >= static_cast<int>(grid[0].size()) || grid[row][col] != '1')
+            return;
+        grid[row][col] = '0';
+        flood(grid, row + 1, col); flood(grid, row - 1, col);
+        flood(grid, row, col + 1); flood(grid, row, col - 1);
+    }
+
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int islands = 0;
+        for (int r = 0; r < static_cast<int>(grid.size()); ++r) {
+            for (int c = 0; c < static_cast<int>(grid[0].size()); ++c) {
+                if (grid[r][c] == '1') {
+                    ++islands;
+                    flood(grid, r, c);
+                }
+            }
+        }
+        return islands;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time, Space, and Safety}
+Each cell is examined a constant number of times: \(O(mn)\) time. Recursion
+can use \(O(mn)\) stack space for one large island. The rules provide a
+non-empty grid; an iterative stack can avoid call-stack limits in production.
+
+\lessonexpansion
+  {In the grid \texttt{[[1,1,0],[1,0,0],[0,0,1]]}, the scan first discovers
+   the upper-left land cell. DFS erases the three connected cells, so none can
+   be counted again. The final lower-right land cell starts a second DFS and
+   produces the answer two.}
+  {A new island is counted only at an unvisited land cell. Flood fill reaches
+   exactly its four-directional connected component and marks every member,
+   so later scan positions cannot count that component again.}
+  {Check a single water cell, a single land cell, all land, all water, a thin
+   row, a thin column, diagonal-only contact, and a large snake-shaped island.}
+  {I scan every cell and launch DFS only from unvisited land. That one DFS
+   consumes the complete island. Since each cell changes from land to visited
+   at most once, the total work is linear in the grid size.}
+
+\chaptercheckpoint
+  {Count connected land regions in a four-neighbor grid.}
+  {The grid doubles as visited state during flood fill.}
+  {Including diagonal cells or marking after recursion.}
+  {$O(mn)$ time and up to $O(mn)$ stack space.}
+
+
+\problemstart{Number of Connected Components in an Undirected Graph}{323}{Medium}{Graph DFS}{Adjacency list}
+
+\subsection{The Problem}
+Given \(n\) vertices and undirected edges, return the number of connected
+components.
+
+\subsection{Start One Traversal per Component}
+Build an adjacency list. Each unvisited vertex starts a DFS that marks every
+vertex reachable from it; this single start represents one component.
+
+\begin{invariantbox}{visited vertices belong to already counted components}
+After a DFS finishes, every vertex in that connected component is marked.
+So the next unvisited vertex cannot belong to any component already counted.
+\end{invariantbox}
+
+\begin{visualbox}{Two DFS starts reveal two components}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[trienode,visited] (a) {0}; \node[trienode,right=13mm of a] (b) {1};
+  \node[trienode,below=11mm of b] (c) {2};
+  \draw[-,thick,teal] (a)--(b)--(c);
+  \node[trienode,active,right=30mm of b] (d) {3};
+  \node[trienode,right=13mm of d] (e) {4};
+  \draw[-,thick,orange] (d)--(e);
+  \node[below=9mm of c]{component 1}; \node[below=20mm of d]{component 2};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+build an undirected adjacency list
+visited = all false; components = 0
+for each vertex:
+    if vertex is unvisited:
+        increment components
+        DFS and mark its entire component
+return components
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Connected Components}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    void visit(int node, const vector<vector<int>>& graph,
+               vector<bool>& seen) {
+        seen[node] = true;
+        for (int neighbor : graph[node])
+            if (!seen[neighbor]) visit(neighbor, graph, seen);
+    }
+
+public:
+    int countComponents(int n, vector<vector<int>>& edges) {
+        vector<vector<int>> graph(n);
+        for (const auto& edge : edges) {
+            graph[edge[0]].push_back(edge[1]);
+            graph[edge[1]].push_back(edge[0]);
+        }
+        vector<bool> seen(n, false);
+        int components = 0;
+        for (int node = 0; node < n; ++node) {
+            if (!seen[node]) {
+                ++components;
+                visit(node, graph, seen);
+            }
+        }
+        return components;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Building and traversing the graph costs \(O(V+E)\) time and space. Isolated
+vertices are valid one-vertex components. Because the graph is undirected,
+each edge must be added in both directions.
+
+\lessonexpansion
+  {With \(n=5\) and edges \texttt{[[0,1],[1,2],[3,4]]}, DFS from 0 marks
+   \(0,1,2\) as one component. The next unvisited vertex is 3, whose DFS also
+   marks 4. Exactly two DFS launches occur, so the answer is two.}
+  {A DFS started at an unvisited vertex reaches exactly its connected
+   component. Marking that entire set prevents recounting it, while every
+   later unvisited vertex must belong to a different component.}
+  {Check no edges, one vertex, a fully connected graph, duplicate edges,
+   self-loops, and several isolated vertices.}
+  {I build an undirected adjacency list and launch DFS from each still-unseen
+   vertex. Each launch discovers one complete component, giving linear time
+   in the vertices and edges.}
+
+\chaptercheckpoint
+  {Count disconnected regions of an undirected graph.}
+  {An adjacency list and a visited flag per vertex.}
+  {Adding each undirected edge in only one direction.}
+  {$O(V+E)$ time and space.}
+
+
+\problemstart{Longest Consecutive Sequence}{128}{Medium}{Hash-set starts}{Hash set}
+
+\subsection{The Problem}
+Return the length of the longest run of consecutive integer values in an
+unsorted array. The algorithm should run in linear average time.
+
+\subsection{Count Only from Sequence Starts}
+Put every value in a set. A value begins a sequence only when its previous
+is absent. From such starts, count upward until the sequence ends. Interior
+values never launch redundant scans.
+
+\begin{invariantbox}{each sequence is expanded exactly once}
+Only the smallest value of a consecutive run lacks a previous. So
+one scan accounts for the entire run, and every value participates in at most
+one forward expansion.
+\end{invariantbox}
+
+\begin{visualbox}{The missing previous identifies a start}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/100,1/4,2/200,3/1,4/3,5/2}{
+    \node[arraycell] (v\x) at (1.05*\x,1.0) {\v};
+  }
+  \foreach \x/\v in {0/1,1/2,2/3,3/4}{
+    \node[arraycell,fill=softteal] (s\x) at (1.05*\x,0) {\v};
+  }
+  \node[left=9mm of s0,text=orange]{0 absent};
+  \draw[flowarrow,orange] ([xshift=-7mm]s0.west)--(s0);
+  \node[right=8mm of s3]{length 4};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+values = hash set of all numbers
+answer = 0
+for value in values:
+    if value - 1 is absent:
+        length = 1
+        while value + length exists: increment length
+        answer = max(answer, length)
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Longest Consecutive Sequence}]
+#include <algorithm>
+#include <unordered_set>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        unordered_set<int> values(nums.begin(), nums.end());
+        int answer = 0;
+        for (int value : values) {
+            if (!values.count(value - 1)) {
+                int current = value, length = 1;
+                while (values.count(current + 1)) {
+                    ++current;
+                    ++length;
+                }
+                answer = max(answer, length);
+            }
+        }
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Set operations are \(O(1)\) average, and every distinct value is advanced
+through once, giving \(O(n)\) average time and \(O(n)\) space. Duplicates are
+removed automatically by the set.
+
+\lessonexpansion
+  {For \texttt{[100,4,200,1,3,2]}, only 100, 200, and 1 lack predecessors.
+   The scan starting at 1 advances through 2, 3, and 4, producing length four;
+   values 2, 3, and 4 never start duplicate scans.}
+  {Every consecutive sequence has exactly one value with no previous.
+   Starting only there counts every member once and prevents the quadratic
+   repeated work caused by expanding from interior values.}
+  {Check empty input, duplicates, negative values, one long sequence, several
+   tied sequences, and values near integer limits.}
+  {I place values in a hash set and expand only from values whose previous
+   is absent. Those are exactly the starts of maximal sequences, so the
+   total expected work is linear.}
+
+\chaptercheckpoint
+  {Find consecutive values without sorting.}
+  {A set and values whose previous is absent.}
+  {Starting a forward scan from every interior value.}
+  {$O(n)$ average time and $O(n)$ space.}
+
+
+\patternintoc{Linked-List Merging}
+\problemstart{Merge Two Sorted Lists}{21}{Easy}{Two-pointer merge}{Linked lists}
+
+\subsection{The Problem}
+Merge two sorted singly linked lists by reusing their nodes and return the
+head of the sorted result.
+
+\subsection{Attach the Smaller Front Node}
+A dummy node removes special handling for the first attachment. At each step,
+link the smaller current node after the tail and advance that list. Once one
+list ends, append the other remainder.
+
+\begin{invariantbox}{the merged prefix is sorted and complete}
+The nodes before \texttt{tail} are exactly the smallest consumed nodes from
+both lists in sorted order. The two current pointers identify the smallest
+remaining choice from each input.
+\end{invariantbox}
+
+\begin{visualbox}{Two sorted fronts feed one output tail}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,active] (a1) at (0,1.3) {1};
+  \node[dsnode] (a2) at (2.0,1.3) {2};
+  \node[dsnode] (a3) at (4.0,1.3) {4};
+  \node[left=6mm of a1,text=navy] {list 1};
+  \draw[flowarrow] (a1)--(a2)--(a3);
+  \node[dsnode,active] (b1) at (0,0) {1};
+  \node[dsnode] (b2) at (2.0,0) {3};
+  \node[dsnode] (b3) at (4.0,0) {4};
+  \node[left=6mm of b1,text=navy] {list 2};
+  \draw[flowarrow] (b1)--(b2)--(b3);
+  \node[left=18mm of b1,text=orange,font=\bfseries,align=right]
+    {compare the\\two front nodes};
+  \node[dsnode] (dummy) at (-2.0,-1.55) {dummy};
+  \node[dsnode,visited] (out1) at (0,-1.55) {1};
+  \draw[flowarrow,teal] (dummy)--(out1);
+  \draw[flowarrow,orange] (b1.south)--node[edgelabel,right]{attach} (out1.north);
+  \node[right=7mm of out1,text=teal,font=\bfseries] {tail};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dummy tail starts an empty result
+while both lists are non-empty:
+    attach the smaller front node; advance that list
+attach the remaining non-empty list
+return dummy.next
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Merge Two Sorted Lists}]
+using namespace std;
+
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        ListNode dummy(0);
+        ListNode* tail = &dummy;
+        while (list1 != nullptr && list2 != nullptr) {
+            if (list1->val <= list2->val) {
+                tail->next = list1;
+                list1 = list1->next;
+            } else {
+                tail->next = list2;
+                list2 = list2->next;
+            }
+            tail = tail->next;
+        }
+        tail->next = (list1 != nullptr) ? list1 : list2;
+        return dummy.next;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Each node is linked once: \(O(m+n)\) time and \(O(1)\) extra space. The
+dummy node is stack allocated and is not part of the returned list.
+
+\lessonexpansion
+  {Merge \texttt{1->2->4} with \texttt{1->3->4}. Attach 1 from the first
+   list, 1 from the second, then 2, 3, and 4. When one list becomes empty,
+   attach the remaining suffix directly.}
+  {At every step the smaller front node is the smallest value not yet emitted.
+   Attaching it keeps sorted order, and once one list is empty the other
+   suffix is already sorted and no longer competes with another value.}
+  {Check two null lists, one null list, equal front values, one list entirely
+   smaller, and lists containing negative or repeated values.}
+  {I use a dummy head and one tail pointer. The smaller current node is linked
+   after the tail, its source advances, and the final remaining suffix is
+   attached in constant time.}
+
+\chaptercheckpoint
+  {Combine two already sorted linked sequences.}
+  {Two current nodes and one output tail.}
+  {Advancing the output tail without advancing the chosen input.}
+  {$O(m+n)$ time and $O(1)$ space.}
+
+
+\problemstart{Merge K Sorted Lists}{23}{Hard}{Minimum-node heap}{Linked lists and min heap}
+
+\subsection{The Problem}
+Merge \(k\) sorted linked lists into one sorted list.
+
+\subsection{Expose One Choice per List}
+The smallest remaining node must be one of the current list heads. Store those
+heads in a min heap, remove the smallest, attach it, and push its next.
+
+\begin{invariantbox}{the heap contains every possible next output node}
+For each non-empty unmerged list suffix, the heap contains its first node.
+Because each suffix is sorted, the minimum heap entry is globally the smallest
+remaining node and is safe to append.
+\end{invariantbox}
+
+\begin{visualbox}{One heap entry represents each list frontier}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[trienode,active] (h) {1};
+  \node[trienode,below left=11mm and 9mm of h] (a) {1};
+  \node[trienode,below right=11mm and 9mm of h] (b) {2};
+  \draw[-,thick,navy] (h)--(a); \draw[-,thick,navy] (h)--(b);
+  \node[left=23mm of h,dsnode] (lists) {list heads\\1, 1, 2};
+  \draw[flowarrow] (lists)--(h);
+  \node[right=20mm of h,dsnode,visited] (out) {append 1\\push next};
+  \draw[flowarrow,teal] (h)--(out);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+push every non-null list head into a min heap
+dummy tail starts the result
+while heap is not empty:
+    node = pop smallest
+    attach node to result
+    if node.next exists: push node.next
+return dummy.next
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Merge K Sorted Lists}]
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    struct Compare {
+        bool operator()(ListNode* a, ListNode* b) const {
+            return a->val > b->val;
+        }
+    };
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        priority_queue<ListNode*, vector<ListNode*>, Compare> heap;
+        for (ListNode* head : lists) if (head != nullptr) heap.push(head);
+        ListNode dummy(0);
+        ListNode* tail = &dummy;
+        while (!heap.empty()) {
+            ListNode* node = heap.top();
+            heap.pop();
+            tail->next = node;
+            tail = node;
+            if (node->next != nullptr) heap.push(node->next);
+        }
+        return dummy.next;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+For \(N\) total nodes, each heap operation costs \(O(\log k)\), producing
+\(O(N\log k)\) time and \(O(k)\) heap space. Null list heads are never pushed.
+
+\lessonexpansion
+  {For lists \texttt{1->4->5}, \texttt{1->3->4}, and \texttt{2->6}, the heap
+   begins with \(1,1,2\). Pop the first 1 and push 4; pop the second 1 and push
+   3; then pop 2 and push 6. Continuing yields
+   \texttt{1->1->2->3->4->4->5->6}.}
+  {Every remaining list is sorted, so its head is its smallest unmerged node.
+   The smallest remaining node must be among the heap entries. Popping
+   it is safe, and pushing its next restores one frontier per list.}
+  {Check zero lists, all-null lists, one list, duplicate values, lists of very
+   different lengths, and negative values.}
+  {I place one current node from each list into a min heap. The heap exposes
+   the next global output value, after which I insert only that node's
+   next. This uses \(O(k)\) extra space rather than storing all nodes.}
+
+\chaptercheckpoint
+  {Merge several sorted linked lists.}
+  {A min heap containing one frontier node per non-empty list.}
+  {Pushing every node initially and wasting linear heap space.}
+  {$O(N\log k)$ time and $O(k)$ space.}
+
+
+\patternintoc{String DP and Windows}
+\problemstart{Longest Common Subsequence}{1143}{Medium}{Two-dimensional DP}{Strings and DP table}
+
+\subsection{The Problem}
+Return the length of the longest sequence appearing in both strings in the
+same relative order. Characters need not be consecutive.
+
+\subsection{Prefix Update Rule}
+Let \(dp[i][j]\) be the LCS length of the first \(i\) characters of the first
+string and the first \(j\) of the second. Equal final characters extend the
+diagonal state; otherwise skip one final character from either string.
+
+\begin{invariantbox}{each cell solves one pair of prefixes}
+When \(dp[i][j]\) is computed, the top, left, and diagonal previous cells
+already contain correct answers for smaller prefixes. The update rule covers
+whether the two final characters are paired or one is excluded.
+\end{invariantbox}
+
+\begin{visualbox}{A match reads the diagonal DP cell}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \matrix[matrix of nodes,nodes={arraycell,minimum width=9mm},row sep=-\pgflinewidth,column sep=-\pgflinewidth] (m) {
+    0 & 0 & 0 & 0 \\
+    0 & 1 & 1 & 1 \\
+    0 & 1 & 1 & 2 \\
+    0 & 1 & 2 & 2 \\
+  };
+  \node[above=3mm of m-1-2]{a}; \node[above=3mm of m-1-3]{c}; \node[above=3mm of m-1-4]{e};
+  \node[left=3mm of m-2-1]{a}; \node[left=3mm of m-3-1]{b}; \node[left=3mm of m-4-1]{c};
+  % For the matching c/c cell, the diagonal predecessor is dp[2][1] = 1.
+  \node[draw=orange,line width=1pt,fit=(m-3-2),inner sep=0.6pt] {};
+  \node[draw=teal,line width=1pt,fit=(m-4-3),inner sep=0.6pt] {};
+  \draw[->,very thick,orange] ([yshift=-1mm]m-3-2.south)
+    to[out=-70,in=-110] node[edgelabel,below]{add 1 for matching \texttt{c}}
+    ([yshift=-1mm]m-4-3.south);
+  \node[dsnode,fill=softorange,right=16mm of m,yshift=7mm]
+    {diagonal cell is \(1\)};
+  \node[dsnode,fill=softteal,right=16mm of m,yshift=-8mm]
+    {new cell is \(1+1=2\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+dp table starts at zero
+for i from 1 to length(text1):
+    for j from 1 to length(text2):
+        if characters match: dp[i][j] = 1 + dp[i-1][j-1]
+        else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+return dp[last row][last column]
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Longest Common Subsequence}]
+#include <algorithm>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int longestCommonSubsequence(string a, string b) {
+        vector<vector<int>> dp(
+            a.size() + 1, vector<int>(b.size() + 1, 0));
+        for (int i = 1; i <= static_cast<int>(a.size()); ++i) {
+            for (int j = 1; j <= static_cast<int>(b.size()); ++j) {
+                if (a[i - 1] == b[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
+                else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+        return dp[a.size()][b.size()];
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+For lengths \(m,n\), time and table space are \(O(mn)\). Space can be reduced
+to \(O(n)\) with two rows, but the full table makes dependencies and sequence
+reconstruction clearer.
+
+\lessonexpansion
+  {For \texttt{abcde} and \texttt{ace}, the first match writes one at the
+   \texttt{a}/\texttt{a} cell. Mismatches copy the maximum from above or left.
+   Matches at \texttt{c} and \texttt{e} read the diagonal and add one, so the
+   bottom-right answer is three.}
+  {If the final characters match, a best subsequence can include that
+   character and extend the solution for both shorter prefixes. If they differ,
+   at least one final character is excluded, so the maximum of the top and
+   left states is complete.}
+  {Check one empty string, identical strings, no common characters, repeated
+   characters, reversed order, and one string contained as a subsequence.}
+  {I define each DP cell as the LCS length for two prefixes. Equal final
+   characters use diagonal plus one; unequal characters choose the better
+   result after skipping one side.}
+
+\chaptercheckpoint
+  {Characters keep order but may skip positions.}
+  {A DP cell for every pair of string prefixes.}
+  {Treating the problem as a consecutive substring.}
+  {$O(mn)$ time and space.}
+
+
+\problemstart{Minimum Window Substring}{76}{Hard}{Variable sliding window}{Character counts}
+
+\subsection{The Problem}
+Return the shortest substring of \texttt{s} containing every character of
+\texttt{t}, including duplicate requirements. Return an empty string if none
+exists.
+
+\subsection{Expand Until Valid, Then Contract}
+A requirement table stores how many of each character are still needed.
+\texttt{missing} counts the total required occurrences not yet satisfied.
+Once it reaches zero, move the left boundary while the valid condition remains and record
+the shortest window.
+
+\begin{invariantbox}{missing counts unsatisfied required occurrences}
+After adding or removing a boundary character, the requirement count and
+\texttt{missing} exactly describe whether the active window covers the target
+multiset. The contraction loop ends at the smallest valid window for that
+right endpoint.
+\end{invariantbox}
+
+\begin{visualbox}{The window contracts around the required multiset}
+\centering
+\begin{tikzpicture}[font=\small,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \foreach \x/\v in {0/A,1/D,2/O,3/B,4/E,5/C,6/O,7/D,8/E,9/B,10/A,11/N,12/C}{
+    \node[arraycell,minimum width=8mm] (w\x) at (0.78*\x,0) {\v};
+  }
+  \node[draw=orange,very thick,fit=(w9)(w10)(w11)(w12),inner sep=1mm] {};
+  \node[below=8mm of w10]{\texttt{BANC} covers \texttt{ABC}};
+  \node[above=8mm of w0,text=navy] (oldleft) {old left edge};
+  \node[above=8mm of w9,text=teal,font=\bfseries] (newleft) {new left edge};
+  \draw[flowarrow] (oldleft.south)--(w0.north);
+  \draw[flowarrow,teal] (newleft.south)--(w9.north);
+  \draw[->,teal,very thick] (oldleft.east)--node[edgelabel,above]{move right} (newleft.west);
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+count required characters and number of satisfied kinds
+for each right boundary:
+    add its character to the window
+    while all required kinds are satisfied:
+        record the window if it is shorter
+        remove the left character and advance left
+return the best recorded substring
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Minimum Window Substring}]
+#include <array>
+#include <limits>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        array<int, 256> need{};
+        for (unsigned char ch : t) ++need[ch];
+        int missing = static_cast<int>(t.size());
+        int left = 0, bestStart = 0, bestLength = numeric_limits<int>::max();
+        for (int right = 0; right < static_cast<int>(s.size()); ++right) {
+            unsigned char in = static_cast<unsigned char>(s[right]);
+            if (need[in] > 0) --missing;
+            --need[in];
+            while (missing == 0) {
+                if (right - left + 1 < bestLength) {
+                    bestLength = right - left + 1;
+                    bestStart = left;
+                }
+                unsigned char out = static_cast<unsigned char>(s[left++]);
+                ++need[out];
+                if (need[out] > 0) ++missing;
+            }
+        }
+        return bestLength == numeric_limits<int>::max()
+             ? "" : s.substr(bestStart, bestLength);
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Each boundary advances at most \(n\) times, so time is \(O(n+|t|)\) and the
+fixed character table is \(O(1)\). Duplicates in \texttt{t} are handled by
+counts rather than a set.
+
+\lessonexpansion
+  {For \texttt{s=ADOBECODEBANC} and \texttt{t=ABC}, expand until the first
+   valid window \texttt{ADOBEC}. Contracting loses the required A, so expansion
+   resumes. Near the end, the valid condition is restored and repeated contraction
+   produces \texttt{BANC}, the shortest length-four window.}
+  {The requirement array and \texttt{missing} exactly encode whether the
+   current window covers the target multiset. For each right endpoint, the
+   inner loop records every valid left contraction and stops immediately after
+   removing a required occurrence. So the shortest valid window is tested.}
+  {Check an empty target if the interface permits it, a target longer than the
+   source, repeated required characters such as \texttt{AABC}, exact equality,
+   no solution, and a one-character answer.}
+  {I expand a counted window until all required occurrences are present, then
+   contract it as far as the valid condition allows. Counts are essential because a set
+   cannot represent duplicate requirements. Both boundaries move only forward.}
+
+\chaptercheckpoint
+  {Find the smallest window covering a character multiset.}
+  {Two boundaries, remaining counts, and total missing occurrences.}
+  {Using distinct-character counts and losing duplicate requirements.}
+  {$O(n+|t|)$ time and $O(1)$ alphabet space.}
+
+
+\patternintoc{Bit Manipulation}
+\problemstart{Missing Number}{268}{Easy}{XOR cancellation}{Array and bits}
+
+\subsection{The Problem}
+An array contains \(n\) distinct values chosen from \([0,n]\). Return the one
+missing value.
+
+\subsection{Cancel Equal Values with XOR}
+XOR every expected value \(0\) through \(n\) and every array value. Each
+present value occurs twice and cancels to zero; only the missing value remains.
+
+\begin{invariantbox}{the running value is the XOR imbalance so far}
+After processing index \(i\), the running value equals the XOR of the expected
+indexes processed and the array values processed, together with \(n\). Values
+appearing in both groups cancel regardless of order.
+\end{invariantbox}
+
+\begin{visualbox}{Pairs cancel and expose the missing value}
+\centering
+\begin{tikzpicture}[font=\small]
+  \node[anchor=east,font=\bfseries,text=navy] at (-0.75,0.65) {expected};
+  \node[anchor=east,font=\bfseries,text=teal] at (-0.75,-0.65) {in array};
+  \foreach \x/\v in {0/0,1/1,2/2,3/3}{
+    \node[arraycell,minimum width=11mm] (e\x) at (1.25*\x,0.65) {\v};
+  }
+  \node[arraycell,minimum width=11mm] (a0) at (0,-0.65) {0};
+  \node[arraycell,minimum width=11mm] (a1) at (1.25,-0.65) {1};
+  \node[draw=orange,dashed,minimum width=11mm,minimum height=8mm] at (2.5,-0.65) {?};
+  \node[arraycell,minimum width=11mm] (a3) at (3.75,-0.65) {3};
+  \foreach \x in {0,1,3}{
+    \draw[teal,line width=1.1pt]
+      ([xshift=-4mm,yshift=-3mm]e\x.center)--([xshift=4mm,yshift=3mm]e\x.center);
+    \draw[teal,line width=1.1pt]
+      ([xshift=-4mm,yshift=-3mm]a\x.center)--([xshift=4mm,yshift=3mm]a\x.center);
+  }
+  \node[dsnode,active,right=14mm of e3,yshift=-5mm]
+    {only \(2\) has no pair\\missing number \(=2\)};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+answer = n
+for i from 0 to n-1:
+    answer = answer XOR i XOR nums[i]
+return answer
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Missing Number}]
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int missingNumber(vector<int>& nums) {
+        int answer = static_cast<int>(nums.size());
+        for (int i = 0; i < static_cast<int>(nums.size()); ++i)
+            answer ^= i ^ nums[i];
+        return answer;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+Time is \(O(n)\), space is \(O(1)\), and XOR avoids arithmetic overflow. The
+initial \(n\) is required because the loop indexes provide only \(0\) through
+\(n-1\).
+
+\lessonexpansion
+  {For \texttt{[3,0,1]}, begin with \(answer=3\). XOR the pairs
+   \((0,3),(1,0),(2,1)\). Equal values cancel, leaving 2, the only number that
+   appears in the expected range but not in the array.}
+  {XOR is associative and self-canceling. Combining every expected value
+   \(0\ldots n\) with every actual value removes all matched pairs and leaves
+   exactly the missing value.}
+  {Check a missing zero, a missing \(n\), one-element input, shuffled input,
+   and the largest permitted range.}
+  {I XOR all indexes, all array values, and the endpoint \(n\). Every present
+   number cancels with its expected copy, leaving the missing number with
+   constant extra space.}
+
+\chaptercheckpoint
+  {One distinct value is absent from a complete integer range.}
+  {An XOR running value over expected and actual values.}
+  {Forgetting to include the endpoint $n$.}
+  {$O(n)$ time and $O(1)$ space.}
+
+
+\problemstart{Number of 1 Bits}{191}{Easy}{Clear lowest set bit}{Unsigned integer}
+
+\subsection{The Problem}
+Return the number of set bits in the binary representation of a 32-bit
+unsigned integer.
+
+\subsection{Remove One Set Bit per Iteration}
+The expression \(n\mathbin{\&}(n-1)\) clears the lowest set bit. Repeating it
+until zero makes the number of iterations equal to the number of ones.
+
+\begin{invariantbox}{each loop removes exactly one one-bit}
+Subtracting one flips the lowest one to zero and every lower zero to one.
+ANDing with the original clears that one while preserving every higher bit.
+\end{invariantbox}
+
+\begin{visualbox}{Brian Kernighan's bit-clearing step}
+\centering
+\begin{tikzpicture}[font=\ttfamily\small]
+  \matrix[matrix of nodes,nodes={minimum width=6mm,minimum height=7mm,
+    draw=navy,fill=softblue},column sep=-\pgflinewidth,row sep=3mm] (bits) {
+    1&0&1&1&0&0&0&0\\
+    1&0&1&0&1&1&1&1\\
+    1&0&1&0&0&0&0&0\\};
+  \node[left=5mm of bits-1-1] {$n$};
+  \node[left=5mm of bits-2-1] {$n-1$};
+  \node[left=5mm of bits-3-1,font=\sffamily\bfseries] {AND};
+  \node[draw=orange,very thick,fit=(bits-1-4)(bits-3-4),inner sep=1mm] {};
+  \node[right=7mm of bits-3-8,font=\sffamily,align=left,text=orange]
+    {lowest 1\\is cleared};
+\end{tikzpicture}
+\end{visualbox}
+
+\subsection{Pseudocode}
+\begin{lstlisting}[style=pseudocode]
+count = 0
+while n is not zero:
+    n = n AND (n - 1)   // clear its lowest set bit
+    increment count
+return count
+\end{lstlisting}
+
+\subsection{C++ Implementation}
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete solution: Number of 1 Bits}]
+#include <cstdint>
+
+using namespace std;
+
+class Solution {
+public:
+    int hammingWeight(uint32_t n) {
+        int count = 0;
+        while (n != 0) {
+            n &= n - 1;
+            ++count;
+        }
+        return count;
+    }
+};
+\end{lstlisting}
+
+\subsection{Time and Space}
+The loop runs once per set bit, at most 32 times: \(O(1)\) for fixed-width
+input and \(O(1)\) space. Using an unsigned type avoids sign-extension issues.
+
+\lessonexpansion
+  {For binary \texttt{1011000}, subtracting one gives \texttt{1010111}; AND
+   clears the lowest set bit to obtain \texttt{1010000}. Repeating produces
+   \texttt{1000000} and then zero, so the count is three.}
+  {For any nonzero unsigned integer, \(n\mathbin{\&}(n-1)\) removes exactly
+   its lowest set bit and changes no higher set bit. The number of iterations
+   equals the number of set bits.}
+  {Check zero, one, all 32 bits set, only the highest bit set, and alternating
+   bit patterns.}
+  {I repeatedly clear the lowest set bit with \(n\mathbin{\&}(n-1)\) and count
+   how many times that operation is possible.}
+
+\chaptercheckpoint
+  {Count set bits in a fixed-width integer.}
+  {The current bit pattern and a counter.}
+  {Using signed right shift for values with the top bit set.}
+  {At most 32 iterations and $O(1)$ space.}

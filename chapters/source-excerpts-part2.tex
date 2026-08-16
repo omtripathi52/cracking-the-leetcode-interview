@@ -1,0 +1,712 @@
+% Extended lesson notes for the middle group of problems.
+
+\expandafter\def\csname sourceexcerpt@26\endcsname{%
+Kadane's algorithm we really are just scanning throughout
+the rest of the subarray to find the maximum sum accordingly depending on various
+combinations and it is a pretty efficient algorithm to be able to solve such a problem
+at the same time and so what I will be doing in this case is use a
+new type of algorithm called Kadane's algorithm And in this one what we will be doing
+is that we are going to have a series of steps that will help us find our particular
+subarray.
+
+For the input that we have is a given array and what we need to do is return the
+maximum sum of a subarray. What are we going to do with the data? We are going to find
+we're going to scan through the array to find the maximum sum of a subarray. We should
+be able to create a subarray while we're scanning through while we are scanning it
+through our given array. To start with, we're going to use Kadane's algorithm and we
+will we're going to scan through the array and create a subarray to find the maximum
+sum of the subarray.
+
+ultimately to find the maximum sum is what we are returning. So to be able to start we
+are first going to initialize a current max number and then a we're going to
+initialize a global max number which should be an index of the array next of the given
+array. should be the initial. So that it's much like in the case of having a variable
+and setting it to zero. Okay.
+
+So to be able to start an current max is going to be equal to nums of zero as we are
+already given a vector at the top and then we're also going to have a global max as
+well of zero and then what we will be doing is that we are one going to be scanning
+through array. So we're going to have a for loop int i is going to be.
+}
+
+\expandafter\def\csname sourceexcerpt@27\endcsname{%
+The reason being is because after scanning every single possible subarray to start
+with the x two and three happen to be the highest relative to three and two and then
+-2 and four to start when comparing all the rest of the numbers all together and then
+we can also have an edge case at the same time as well. So given that we have -2 and1
+the result cannot be two because -2 and 1 is not a subarray. So they all have to be
+connected one way or another.
+
+So we know the relationship as result from coming from set examples and the technique
+that we are going to focus on is not going to be a data structure to start with. it's
+going to be focusing on the STL library in C++. So we're going to do a swap and max
+technique where these methods are from the STL library where we're able to swap some
+of the variables that we're going to initialize first then we are going to loop
+through arrays. So what we are going to do is that we will initialize our min, max and
+answer relative to the index of the array given array.
+
+And while we are scanning through the array, we have to take in mind of some edge
+cases because as highlighted in the example, we will have negative numbers to start
+with and the constraints given the fact that numbers of I will range from -10 all the
+way to 10. consider negative numbers. That is why we're going to use the swap. But
+really our main technique is going to be the max to begin edge case of negative
+numbers. And then what we are going to do is also max and minimum calculation and swap for
+edge case. Okay.
+
+So overall the technique that we're going to focus on is focusing on re redeclaration
+from the STL library. We're going to redeclare our initialized variables first for
+both the max and the minimum as they are going through the rest of the array because we
+have to consider all other possibilities when we are scanning through the array and we
+will declare the min and max products accordingly.
+}
+
+\expandafter\def\csname sourceexcerpt@28\endcsname{%
+Okay, I'm just going to put in the rest of comments over here to start. Let's get
+further out. All right, you're given a string as an integer K. You can choose any
+character of the string and change this to other uppercase English character. You can
+perform this operation at most k times return the length of the longest substring
+container the same letter you can get after performing the above operations. Okay, so
+just to give a breakdown of what we're doing. So it looks like that we are will be
+returning the length of the longest substring containing the same letter you can get
+after performing the above operations.
+
+Now the same amount. So in particular by what they mean to be able to start is that we
+just need to return the maximum length of the substring that can be performed by
+replacing as many most characters. So going over example one we have a given input of
+string a b a ab a b and k of two.
+
+Now and then the output of this is for and the reason being as they state is replace
+the two A's or two B's and vice versa as in how many times can you replace the number
+of characters inside of our given string and in this case for example a b a bba it's
+asking us to replace one of the characters and in this output it said we can replace
+it four times such as replace the one a in the middle of b and form a b BB B A with
+the longest substring of being BBB with the longest repeating character.
+
+So after we replace the character we would have to see what the longest substring
+would be after we replace for instance two characters and then we could have the
+longest output accordingly as a result from replacing the two characters. Okay. So we
+are so k represents the number of characters we can replace and then we are again
+returning the length of long substring taking the same number you can.
+}
+
+\expandafter\def\csname sourceexcerpt@29\endcsname{%
+This problem uses dynamic programming. Dynamic programming solves a complex problem
+by breaking it into smaller overlapping subproblems and saving answers that will be
+needed again. Instead of solving the whole string problem at once, we first describe
+the answer for a smaller range and then build larger answers from it.
+
+So it's taking the elephant bit by bit and then you just expand upon the relationships
+over variables that you have already been given to start with and what variables you
+can also keep track of. So what we are going to create we are going to create two what
+we are going to do is that we will need to think of the string and we would need to
+keep track of what we what we have already considered as well.
+
+So the first thing that's already going to be keep kept in mind is that we will create
+a vector where it will be a matrix to keep track of all the characters visited and if
+they are matching or not.
+
+not the matrix will be called DP with N * N and then what we are going to be doing is
+that for what we have already initialized when expanding upon the relationship we're
+also going to have start and max length of our string and then to what we are doing
+with the following data just expanding upon it is that we will first loop through the
+string s from the end to start because we're going to break up the string into two
+parts and then in the next part we will from end to start and in the same operation we
+will loop through the string s from the beginning to the end and then we're going to
+check for every single and we're going to check for every single character which has
+been visited and then visited and we're not necessarily storing since.
+}
+
+\expandafter\def\csname sourceexcerpt@30\endcsname{%
+The answer is B with the length of one. Hence right over here. Pretty straightforward.
+And for this one, P WW K W with the output of three. The answer is W K with a length
+of three right here. And notice the answer must be a substring and it cannot be pwke.
+Hence, because we have another character that is in between PW and K. So with our
+following output we have here an S contains English. Okay. So be able to break down
+over the questions we have already answered. So we already know what our input's going
+to be from our question.
+
+You can even look at the parameters at the same time to discern what our input's going
+to be. It's a string. And then we already know what we're going to do with the data.
+We need to find the length of longest substring without repeating characters. And for
+our output as highlighted by the example, we will return an integer representing the
+number of unique elements we have visited in our string. What is the longest substring
+with unique characters? Those are our questions that we would have.
+
+And so the technique we will useday is going to be called the
+sliding window technique where unlike binary search where it's divide and conquer
+method and you have three different variables of a low, highend, and a middle and then
+you find one area and then cut off another area until you found the specific element
+you're looking for. And it's not the two-pointer technique where you just have two
+variables, a low and a high end where in your sliding window you are given a range
+that you also need to figure out within a data structure you're trying to scan through
+like an array.
+
+The sliding window technique has one two points and then also has a length that one
+could already set. So there are three variables one must construct particular low,
+high and maximum length for the sliding window technique. And with our sliding window
+technique, we will scan through our array to keep track over the number of unique
+characters we have visited through our array and how we're going to keep track of
+everything.
+}
+
+\expandafter\def\csname sourceexcerpt@31\endcsname{%
+So return the number of combinations of palindromic substrings and a palindrome is as
+stated before is when it reads the same forward and backwards. It's like damn it I'm
+mad spelled backwards as racecar like same way the same amount of characters
+in the string accordingly forward and back. All right. And so this type of problem for
+palindrome dynamic programming is a popular technique that we would use for our
+solution. And I'm just going to go further in depth inside the steps of what we got to
+do. So break it down.
+
+First thing we need to do is that we need to initialize the string length and the
+matrix that will have the string length on the inside to check to see if there is a
+palindrome. if so it will be true. This may be a little bit confusing and for the
+first step but what I mean by the first step to start is that we are going to be
+creating a matrix and I will write this out after we go through the steps.
+
+So the first step we will do is that I'm going to have n be equal to s dolength right
+here and then we're going to create our matrix over here. We're going to initialize
+our matrix where it's going to be a vector bull. It's going to be a matrix accordingly
+where it is n which is the size of our string vector boolean and false right here. And
+this will represent the and n represents the size of our given string that we have.
+
+And we're checking to see by using this matrix throughout each of the steps that we
+will be doing because we're going to be looping through our entire string to check for
+palenromes. We'll be using this to keep track of if there is a palrrome or not. Okay.
+So for the second step, what we need to do is that we need to create a count as well.
+And then for the third, we're going to iterate through our string s two.
+}
+
+\expandafter\def\csname sourceexcerpt@32\endcsname{%
+So interval we have array of intervals as even indicated by right up here in the
+parameter. So let's go over the example. Example, we have interval of 0 3 0 30 5 10 15
+20 where intervals I equals start I and I. Determine if a person could attend all the
+meetings. Well, the question is can the person attend all Okay.
+
+So to be able to give a rundown of this whole thing and to be able to break up the
+question is that so if we have intervals in particular so the med is going to be
+starting at this time and then ends at this time starts at this time ends at this time
+starts at this time ends at this time as a result from this given the fact it's
+overlapping the other times therefore it's going to be false.
+
+But then for example two we have seven 10 two and four where it looks like it's just
+for three hours over here and looks like it's two hours over here they don't overlap
+so it's going to be true. Okay.
+
+So to be able to go further down over what we will use the data structure we will be
+using is going to be a min-heap which is built using a priority queue or that is the
+principle of last in first out much like in the grocery no it's first in first out
+sorry on that priority queue or Q's in general is first in first out much like in the case
+of the grocery store for instance and shopping cart. That's the best way of
+metaphorizing it. And so what we will be using this to sort the intervals. All right.
+Here we go.
+
+And then we need to ask ourselves what to do with the data. Okay. So what we need to
+do with the data is first sort the intervals based on their start times. Then we will
+iterate over the sorted intervals adding each interval to priority queue and heap. Okay,
+just clean this up. All right. If the start time of the current interval is greater
+than or equal to the smallest end time, the root of the min-heap, we can use the same
+room and pop the end time from min heat.
+}
+
+\expandafter\def\csname sourceexcerpt@33\endcsname{%
+So going over the example, example one, is it possible to jump from one index jump
+from the very first index and all the way to each element accordingly. Okay. And each
+element in the array presents your maximum jump position. Okay. right here. Okay.
+Yeah, right there. That's pretty straightforward. So, we have this three zero false.
+You can't because it's zero. Makes sense. All right. And the jump we're going to for
+output is going to be return true if we can make the jump. false if we cannot. So
+looks like for this entire thing we will be using the greedy algorithm and what are we
+going to do with the data?
+
+Well, three four five. All right. So one we need to Overall, traverse the array from
+right to left and maintain a last position which is initially the last index and then
+the current index plus the value at the index. X is greater than or equal to the last
+position, we update the last position to be the current index. So how are we going to
+do this? Well, based on the number of steps we are going to do, which is going to be
+four, we're going to initialize the last position to be the last index of nums. And
+then we are going to traverse through the array from left to right.
+
+And then if the current index Plus the value at that index is greater than or equal to
+the last position. Update last position to be the current index. So that way we know
+exactly if we have attained our maximum jump. And then finally if and finally we will
+return true if the last position equals zero otherwise false. So we're going to first
+do our last position equals nums do size minus one over here. Then we're going to do
+step two. we are going to iterate through our entire array. Zero is going to be equal
+to nums do size minus one since we're going from the rear equals zero.
+
+and then I minus over here. Then step three if I like for example hang on I'll write
+this out and be able to showcase what we have.
+}
+
+\expandafter\def\csname sourceexcerpt@34\endcsname{%
+Okay so we are given a tree and we need to return maximum depth and so the technique
+we're going to be doing is depth-first search hence in the name it's useful to find depth
+and then there are typically two techniques in trees breadth-first search and depth-first search
+deer search utilizes more of a stack buffer search uses a Q in this case but C++ and
+their STL library is very intuitive when it comes to their own library and so we'll
+just be focusing on leveraging on that and it's really four easy steps to go over. So,
+it's going to be really fast.
+
+So, the first step we're going to do, we're going to have our edge case when we don't
+have when don't have any value in the root is equal to null. Second step we will have
+is calculate the maximum depth of the left subree. Then we'll do the same for the
+right finally return the max of depth of both the left and right sub trees plus one to
+include the root. All right. So this will be straightforward.
+
+So if root equals null ptr we return turn return turn return turn return turn return
+turn return turn return turn return turn return turn return turn return turn zero
+since we don't have anything in here and we are returning a number and then step two
+step two the maximum so it's going to be equal to the max depth root left. We'll do
+the same thing for the right stuff. Just going to make sure we have everything already
+set and it is right. All right, passes all the test cases and here we go. Woohoo. That
+was quick and efficient.
+
+Okay, just be able to give a rundown and breakdown of everything we already did. So
+the time collective for our following solution is going to be O of N where N is
+representing the number of nodes in the tree to start and that we are finding both the
+right and left depth of our following tree. We have to keep track of all of the nodes
+that have been visited to be able to get our max step.
+}
+
+\expandafter\def\csname sourceexcerpt@35\endcsname{%
+So we would have we have this accordingly and we are going to sort them out first. So
+we have one two three and four and it's asking us the smallest element throughout the
+rest of our binary search tree that we need. It's just all right and our output for
+this one will be one accordingly because the value that we have at one that's the
+smallest within this area is one. Now if we were to go over the second example, if we
+were to have root for this following binary search tree and then we have K.
+
+What we need to do for this specific problem is that we need to first sort everything
+out. Four, five, six, and then we also have null and null. But really we're just
+focusing on the following numbers right here. Those will be gone. So what we need to
+do is that we need to find the third smallest element accordingly and so our output
+would be three. That is what they mean by the kth smallest value at the following
+indexed.
+
+So what we need to do is that we need to find a way or we can one sort all the values
+within our binary search tree and then according to K find the k smallest value which
+is indexed at the given position. So if we were to have for instance k be four for
+example the solution would be four. But our biggest problem that we have is that we
+have a binary search tree rather than a sorted array. The useful technique is an
+inorder traversal. It begins at the leftmost node, visits the current node, and then
+moves through the right subtree. For a binary search tree, this visits the values in
+increasing order.
+}
+
+\expandafter\def\csname sourceexcerpt@36\endcsname{%
+So if we have our input right over here root is equal to 6 280479 and then null 3 and
+five then we have P equal to two and then Q equal to 8 lowest common ancestor of nodes
+two and six two and 8 is going to be six over here given the fact we are working with
+a binary search tree but then if we have the root of 6 28 8 0479 null 35 P and Q 2 and
+4 two over here and then we have four accordingly what is the lowest one that we would
+have this relation to well according for this one two the long the lowest common
+ancestor nodes two and four is two since a node can be a descendant of itself
+according to longest to the lowest common ancestor definition.
+
+Okay. So two and one accordingly. All right. So it looks like that the lowest common
+ancestor refers to the root at the highest level possible. So meaning in particular
+that if we have for example six over here P and Q 2 and 8 they are both descendants of
+six. The definition states the lowest common ancestor is defined between two nodes and
+the lowest node in T. That means that P and Q are descendants of it. And if four is a
+branch of two that means two will be the lowest common ancestor. Okay. So we need to
+replicate this behavior for the lowest common ancestor. Just clarifying on this.
+
+And so what we will be doing for our following steps accordingly is that from this we
+will be extrapolating on binary search tree properties. on the relationship of the
+nodes we have. And in doing so, we will traverse the tree and compare the values of
+the current node with the values of P and Q. All right. And so just to be able to go
+over the steps, we're going to first have our edge case that we need for the
+following.
+
+It looks like for the tree, what we would need to do is that well since we already
+given a binary search tree, let me see if there are any other constraints as well.
+}
+
+\expandafter\def\csname sourceexcerpt@37\endcsname{%
+So are given an array of interval times we need to return number conference rooms
+required. And in this case, we're going to use a min-heap, which is a pri which acts
+like which is a priority queue to do with the data. So to be able to figure out what we
+will be doing with the data, we're going to break it up into four different steps.
+One, we are going to sort the intervals by their start times. Second, We will
+initialize a min-heap to keep track of all the end times of the meetings. Then three
+for each interval in the sorted list of intervals.
+
+If min-heap is not empty and start time of the current interval is greater than or
+equal to the smallest end time root of min-heap. Gonna pop the end time from min-heap
+and then we will add the current intervals end time to the min-heap. Then we're going
+to output put size of the min-heap. That's pretty much it. It's going to be asking
+just overall based on the following times how many meetings there are in total. the
+minimum number of conference rooms required.
+
+So it could be intervals for instance on if we have two meetings going on at the same
+time within a given context like for instance 5 and 10 fall in 0 and or 15 and 20.
+We're going to need at least two conference rooms for the star. And in this case, we
+can have one to begin with. So, let's kick things off. Step one, go to sort again.
+intervals end just calling from the STL library. We're going to create a priority
+queue. three. Then we're going to look through part A. If not, min-heap if the
+min-heap is not empty.
+
+and the interval at the very first index is greater than or equal to the min-heap at
+the top. We're going to min-heap going to pop the heap and then we're going to add the
+current element with the min-heap. And then finally we're going to output the size.
+So, we're going to turn min heaps size.
+}
+
+\expandafter\def\csname sourceexcerpt@38\endcsname{%
+So we have all of the numbers inside of our intervals array. So we have 1 2 3 and four
+for the most part. And what it looks like, it looks like if we were to remove this
+overlapping interval that we have, one and three, because if we were to scan the rest
+of the numbers, we see 1 and two is inside of one and three. And two and three is also
+inside of 1 and three. So highlight the numbers to visualize the relationship between
+all the elements.
+
+And for our input and output and if we were to go forward on example two we have so in
+this case it makes sense over exactly why the output would be two in this case for the
+minimum number of intervals we have to ultimately get an array that would have
+intervals where all the numbers are non-overlapping and we need to return the
+number of intervals equals one needs remove to make the rest of the intervals not
+overlapping. And for example, three looks like between 1 and two, two and three, zero.
+
+Because even though it may appear at first, if we were to expand more at least on this
+example and our output is zero. The reason being is, hey, we have one, two, and three.
+One and two, and two and three. Even though they're connected by two, they're not
+overlapping. Technically, it's really just in the case like this one for example, one
+through three and then we have one and two where we have a number inside of our
+interval. Over overlappinging is when we have a number inside another number inside
+our interval.
+
+And so the technique that we will be using that we use for
+our solution to be able to solve is going to be a greedy algorithm with sorting. And
+what I mean by that is that a greedy algorithm is more of a technique really that
+explores all the possible relationships within a given series of elements that we are
+given. Meaning that if we for instance are given an array, we need to discern exactly
+the relationship from all of the elements and all the possibilities that are possible.
+}
+
+\expandafter\def\csname sourceexcerpt@39\endcsname{%
+And so if we were to break down the example 1 and two, let's say for instance we have
+intervals equal 1 3 2 6 8 10 15 and 18. Our expected output that we have is that we
+need to merge all the overlapping intervals and return rate of non-overlapping
+intervals. So we have 1 6 8 10 15 8. And it looks like from what we have, we're able
+to merge the rest of the intervals that we have. And you see 158, 810, and then 1 and
+6.
+
+And it may be confusing to be able to start, but we merge 1 and 3 and 2 and 6 together
+to make one interval. Since intervals 1 and three and two and six overlap, we merge
+them into one and six. Pretty vivid example. right over here. Just going to put this
+in the comment section as well. And then we also are able to do the same for intervals
+1 and four, four and five. What they come together to become one and five. And it's
+because 1 and four and four and five are considered overlapping. All right, it's
+pretty self-explanatory or what we need to do.
+
+And so the technique that we will use is we're going to be
+doing a sorting approach. with an iterative method where what we will be doing with
+the data in order to merge all the inter overlapping intervals is that we will first
+sort the intervals based on their start times. Then we will iterate over the sorted
+intervals merging the over overlapping intervals and iteration and iterating means to
+go through or scan through. That's just a fancy way of putting it.
+
+And so just to be able to go over the steps over how we're going to do this is that
+for step one, we need to sort the intervals by their start time. Then step two, we
+need to initialize a new list for the result. Then for step three, we're going to do a
+for each loop for each interval in the sorted list of intervals.
+}
+
+\expandafter\def\csname sourceexcerpt@40\endcsname{%
+And so it looks like from the following data over exactly what we need to do. We need
+to insert the new interval into the new into the intervals such that intervals is
+still sorted in ascending order and they are and all the intervals are nonover
+overlapping. All right. And it looks like for our output we need to return another
+interval where the numbers are not over overlapping each other with the new inserted
+interval we are given. Okay.
+
+And so if we want to break down the following example, say for instance we have
+intervals equal 1 3 6 and 9 and we have a new interval 2 and 5 and our output is 1 5 6
+and 9. It looks like from the following since the problem also states that we may need
+to merge overlapping intervals if necessary because we need to return the new
+intervals that don't have any overlapping intervals. So we have an intervals array and
+then for our output 1 5 6 and 9 these numbers are non-overlapping.
+
+So the relationship that we are seeing between the input and the output is that well
+if we are given a new interval we need to insert that new interval on the inside. So
+we would have 1 3 6 and 9. But since 2 and 5 are overlapping 1 and 3. This is why we
+merge 1 and 3 with 2 and 5. So we get 1 and five accordingly and then 6 and 9 because
+all these intervals are non-overlapping and we insert the new interval. Now if we
+were to look over example two, we have an array of intervals to start with and a new
+interval 4 and 8.
+
+Well, it looks like four and eight merge within three, five, six, seven, and eight and
+10. So, these three different intervals are having four and eight be overlapped inside
+of them and we need to merge them accordingly, which is why we get three and 10. And
+so, our output would be 1 and 2, 3 and 10, 12 and 16 as non-overlapping
+intervals.
+}
+
+\expandafter\def\csname sourceexcerpt@41\endcsname{%
+Okay. So if we want to highlight this, we got ones here, ones there, and they're all
+adjacent ones and ones accordingly. We have one island and our output is going to be
+one. Now, if we were to expand on example two, we have the grid already here and then
+we have ones. So, we got one island, then we have one island over here, then we have
+another island over here. The rest of them are just zeros and the output is going to
+be three.
+
+So the technique for us to be able to use to accomplish this pattern, we're going to
+use depth first search where unlike breath first search, depth-first search and I'll also
+have a visual to be able to add and explain more. Deer search focuses on the levels in
+particular starting from the leftmost all the way to the right. So it's going down
+then it's moving up from each branch accordingly until all the nodes are accounted for
+and they're all connected starting from the root. That is the key difference between
+breadth-first search and breath research accordingly.
+
+And so the steps needed to be able to solve the following problem is that to keep in
+mind over what we're going to do with the data, we're going to we're going to overall
+we will traverse the grid and perform depth-first search for each one cell and increment our
+counter accordingly. We will create a recursive function called DFS which we will use
+to implement depth-first search behavior.
+
+And so just to give a breakdown on steps on how we're going to do this accordingly is
+that the first thing that we need to do is that we will steps we're going to
+initialize a counter to count the number of islands and that will be int counter zero.
+int counter is equal to zero. And then what we will be doing is that we're going to
+loop over each cell in the grid every row and column which is going to be indication.
+We're going to have a nested for loop.
+}
+
+\expandafter\def\csname sourceexcerpt@42\endcsname{%
+So looks like from our input it will be a number of nodes in the graph which is going
+to be n and a list of edges representing the connections between nodes. And it looks
+like our output is going to be the count of connected components in the graph. And it
+looks like since we are focusing on connectivity in this case and we are dealing with
+a graph problem.
+
+a thing to note in trees popular methods to be able to solve the following solution
+would be deaf research or breath research and deaf research would be ideal for a
+solution since we are focusing on connectivity of the nodes and the differences
+between deaf research and breath research is that deaf research focuses on the
+connectivity starting at the root of a given tree or graph and then goes to the
+leftmost type of node on the downward word, hence depth in the name. And then does the
+same thing for the right branches accordingly starting from the left most branch.
+
+While breath for search on the other hand focuses on the nodes per level. So for
+instance on breath for search we have one level and then it just counts the nodes from
+the left to the right accordingly. Unlike depress search and since we're focusing
+connectivity depth for search would be the technique to use count the number of
+connected components. So we will use depth-first search to find the connectivity of the
+nodes and count the number of connected components. And what we will do with the data
+is that by principle we will create an adjacency list to represent the graph.
+
+Then starting from each unvisited node, we will perform depth-first search to explore all
+connected nodes and mark them as visited. And so the steps for us to be able to go
+over this entire thing, and I'll also have expanded pseudo code as well, is that for
+step one, we're going to initialize an adjacency list to represent the graph. In step
+two, we will create a variable to store the count of connected components.
+}
+
+\expandafter\def\csname sourceexcerpt@43\endcsname{%
+Okay, so to be able to give a breakdown over exactly what we need to do for the
+following. the first thing that comes to mind is that well for one our given input is
+that we are given a list of nums. especially when looking at the example. And the
+expected output is to return the length of the longest consecutive element sequence.
+So if we were investigating this, the longest consecutive elements inside of the whole
+thing depending on how it's jumbled up at the same time. So we have 1 2 3 and four are
+the longest consecutive. So therefore it would be four.
+
+And then since we have all these numbers already jumbled up together, but we still
+have an output of nine, we have the following longest consecutive sequence being nine
+since it starts from zero and goes all the way up to eight accordingly. And the
+technique that we will be using for this is that we will be hashing. Now hashing is a
+way where we are able to keep track of the length of a given sequence accordingly
+where we are able to break up our given data and keep track of each part accordingly.
+
+So what we will do namely is that we will insert all numbers into a hash set for fast
+lookup and then iterate through each number and check if it is the first number of a
+sequence. then count the longest sequence it can form. All right. Now, for us to be
+able to go over the steps on how to replicate this type of hashing behavior is that
+the first step we need to do is that one we need to create a hashet and add all
+numbers to it. Then we need to initialize a variable to track the max length of a
+sequence.
+
+Then we will loop through each number in the array since we were dealing with arrays.
+And then we're going to check if it is the first number of a sequence. num minus one
+does int doesn't exist in the hash set and then if it is then count the length of the
+sequence it can form and update the max length if necessary.
+}
+
+\expandafter\def\csname sourceexcerpt@44\endcsname{%
+Okay. Well, it looks like we got to merge the two list and one sorted list. And we
+found a way just from the question to be able to break it down based on keywords and
+how and knowing how to organize it. So it looks like in particular that we are just
+merging all the link lists together. Like we have list one, list two, all of them
+being sorted and merged accordingly. If we have an empty list, we just have an empty
+list return. And then if we have an empty list and zero. So we have zero right here.
+
+And the numbers can go from -100 to 100 in value for each node. And the number of
+nodes in both lists is in the range of 0 and 50 the value. Interesting. And then we
+have both list one and list two are sorted in nondereasing order. All right. So, we
+already have that. So, luckily what we will do because of how easy it was to be able
+to dissect the problem is that we're going to use merge algorithm of merge sort where
+as the name explains what we're doing is we will be creating an algorithm to merge
+both of the link lists accordingly and then we will be sorting them.
+
+ultimately we can sort them first and merge them all together. Well, since we already
+have two sorted link lists to begin with and what we will do is that we're just going
+to check while we are scanning through them. So the steps for us to be able to operate
+on this are the following. Step one, we need to initialize a new head and current
+pointer. Then step two, while both list one and list two are not null, if list one's
+value is less than list 2's value, we will add list one's node to the current list and
+move list one forward.
+
+Otherwise, we will add list 2's node to the current list and move list two forward.
+Then, while we are doing this inside the while loop, we're going to move the current
+pointer forward after adding the node since everything is already sorted and that
+helps us a lot.
+}
+
+\expandafter\def\csname sourceexcerpt@45\endcsname{%
+So that means in particular what we will do is that we will for one we would need to
+create a structure to compare the values of each node from one list to another. That's
+just a key indication over what we need to do for Q's. In our case, what we will be
+doing for this data structure, cues in general operate on the principle of a last in
+first out situation. Much like in the case of a grocery cart line where people are
+going in throughout the line and then they happen to appear out of the line that those
+how in some retrospect that's how cues operate.
+
+And so the steps that we would need in order for us to be able to go through are the
+following. one, we're going to create a boolean function called compare to compare the
+values of each linked list like list one and list two. Second, we're going to
+initialize a priority queue that orders the nodes by their values.
+
+the third step and then for each list in the input if the list is not empty we're we
+will add our first node to the que then the fourth we will initialize a new head and
+current pointer for us to return then we will scan the que and while the Q is not
+empty. We are going to move the current pointer forward after adding the node and then
+we will return the new list from the head which will be called dummy. So the way how
+this is going to work out accordingly are the following steps. Step one, step two,
+step three, step four, step five, step six, step seven.
+
+A thing to note since we're going to be comparing the values, we're going to create a
+separate function all the way at the top and we're going to start comparing each of
+the values accordingly. So the way how it will look is that this is how we create a
+new function that will be called later. We have a structure called compare. And what
+it's going to be is that it's going to be a boolean function or really just an
+operator that will incorporate the parameters of a list node.
+}
+
+\expandafter\def\csname sourceexcerpt@46\endcsname{%
+And we need to return the length of longest common subsequence. So that's the first
+one. return the length of their longest common subsequence. And the technique that
+we'll be using for this following solution, if we're going over the examples, namely
+what we're trying to do is that we're trying to find the longest common subsequence
+between the two patterns of two different texts when we're scanning both of them
+accordingly. And the technique we're going to use is a dynamic programming to scan
+both text one and two.
+
+Using a dynamic programming table to check for character and a size of our text
+strings and the steps for us to be able to go about the this are for the following. So
+step one, we're going to initialize a DP table with the size of text one dot size + 1
+* text 2 dot size + one and when we do so this is how we create our table. Then what
+we will do is that for step two, we're going to loop through each character in both
+strings.
+
+And then for step three, if the current characters in both strings are the same, the
+value of the current cell is 1 plus the value of the cell diagonally of the table both
+above and to the left of it. And for step four, if otherwise if they are different,
+the value of the current cell is the maximum between the cell to the left and the cell
+above in our dynamic programming table. Finally, for step five, we're going to return
+the value in the bottom right corner of the dynamic programming table we created to
+show the longest common subsequence.
+
+And I'll also have a visual as well for the dynamic programming table while we are
+constructing this whole behavior. now just to clean up everything else and just go
+straight into the code over how it will look like. So I'm just going to write the
+steps just five steps accordingly. Step one, step two, step three, step four, step
+five. Let's just get after this.
+}
+
+\expandafter\def\csname sourceexcerpt@47\endcsname{%
+Since the largest window of s only has one a and we return an empty string. Okay, so
+those are some things to be able to keep in mind. Now, my use since we were dealing
+with two strings in particular, the technique that we'll be doing is going to be the
+sliding window technique. I'll have a visual on the side to be able to help illustrate
+the idea that we're trying to construct for this solution. But the sliding window
+technique, we will create two maps to keep track of the frequencies of our characters,
+including duplicates.
+
+And maps the best way of visualizing them is that they have a key value pair type of
+relationship where maps are like lockers in particular and keys. There's a specific
+data element that we keep track of in order to access another data type. So that's the
+scope really of how maps are seen visually. I'm just giving a metaphor on that. So we
+will use the maps to indicate what has been visited and the frequency of each
+character. And the steps for us to be able to be able to create the sliding window
+technique for this problems are going to be as follows.
+
+Step one, I will also put it up here. We need to find the substring of S that includes
+all the letters from T. So the steps for us to be able to solve this particular
+problem are going to be as follows. Step one, we're going to initialize two pointers
+left and right at the beginning of string S. Step two, we're going to initiate we're
+going to initialize two frequency maps called frequency S and frequency T to store the
+count of the characters in S and T. And we're going to create a variable counter to
+keep track of the number of characters from t that are missing in the current window.
+
+And we are going to create variables min length and start index to track the minimum
+window length and the starting index of the minimum window substring. Then add the
+frequency of characters from t to frequency t.
+}
+
+\expandafter\def\csname sourceexcerpt@48\endcsname{%
+So pretty straightforward. We have an array of nums and we have an output of two. The
+reason being is that with our following nums n= 3 since there are three numbers. So
+all the numbers in the range 0 to three between the lowest point 0 and all the way to
+the highest point we are accounting for all the numbers and we have to figure out
+exactly which number is missing from our sequence between zero all the way to n and
+we're going to be using bitwise manipulation for this technique bit manipulation That
+is a freaking spell.
+
+Anyway, so just to decide between our input and output, we are given an array of nums.
+We need to return the missing number in the sequence that is between 0 and n. All
+right. Right. Okay. So, the following steps for us to be able to accomplish this bit
+manipulation is that we are going to use the sore operation used for exclusivity. And
+the steps for us to accomplish this are going to be the following. Step one, we will
+initialize a missing integer for the missing number. We will return.
+
+Step two, we will calculate the or of all numbers from 0 to n and we will scan through
+the array while doing so. We will sort the current number with the variable. And then
+for the third step inside of our for loop or outside of it, we're going to calculate
+the zor of all numbers in the given array. And while scanning each num we will use Zor
+to update where the missing number is since we found the range. earlier between 0 to n
+finally we will return our missing number. All right, just to give a breakdown I'm
+just going to move this all up here for the sake of clarity.
+
+So to go over the steps, we got step one, step two, step three, step four. And to make
+this work, this is what we're going to do. Int missing number is going to be equal to
+zero. Then what we will do is that we're going to scan for a range.
+}
+
+\expandafter\def\csname sourceexcerpt@49\endcsname{%
+Also known as Hamming weight. Okay, that's pretty straightforward. They also give us a
+couple notes and mention about Java and then also more Java, but we're working with
+C++. So, well, it's pretty straightforward what they want us to do with the data. they
+want us to write a function that takes the binary representation of an unsigned
+integer and there are symbols that we use pretty much for the technique that we'll be
+doing called bit manipulation and allows us to get the binary representation of our
+following u for our following input where it looks like we're given into 32.
+
+So we are given an unsigned integer and we need to return the number of one bits it
+has. So looking at this, we just need to scan through all of our integers that we're
+given for any well all the binaries with a given integer and we return the number of
+ones. So the steps for us to be able to go about this and I will also have a visual at
+the same time to be able to understand more on what forms of bit manipulation to use
+which would be the following. So what we are going to do four steps are this.
+
+Step one we have a given unsigned integer we will create a count to keep track of the
+ones. Then what we're going to do is that while scanning through our unsigned integer
+if n at the specified index, which is represent by and equals 1, we're going to
+increase our count and then we will write shift the unsigned integer by one bit to
+check for the rest of the bits and finally we will return our count. So the steps for
+us to be able to go about this. Step one, step two, and then step three. Let me just
+clean this up focusing on these steps we have over here.
+
+So step one, the way how it's going to work, we're going to first create a count. Int
+count is equal to zero. This is how we first initialize.
+}

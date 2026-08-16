@@ -1,0 +1,452 @@
+% Problem-specific visual traces for all 75 lessons.
+% These are kept in one file so the lesson chapters stay easy to edit.
+
+\expandafter\def\csname lessontrace@1\endcsname{\visualtrace
+  {Use \texttt{[2,7,11,15]} with target 9. Start with an empty hash table.}
+  {At index 0, the needed value is 7. It is absent, so store \(2\to0\).}
+  {At index 1, the needed value is 2. The table already contains \(2\to0\).}
+  {Return indexes \texttt{[0,1]}.}}
+
+\expandafter\def\csname lessontrace@2\endcsname{\visualtrace
+  {Sort the input into \texttt{[-4,-1,-1,0,1,2]}. Fix one value and place two pointers around the remaining range.}
+  {With fixed value \(-1\), left \(-1\), and right 2, the sum is zero. Save \texttt{[-1,-1,2]}.}
+  {Skip equal values, move both pointers, and find \texttt{[-1,0,1]}. A small sum moves left; a large sum moves right.}
+  {Return the two unique triplets.}}
+
+\expandafter\def\csname lessontrace@3\endcsname{\visualtrace
+  {Use prices \texttt{[7,1,5,3,6,4]}. Start with minimum price 7 and profit 0.}
+  {Price 1 becomes the new minimum. Price 5 gives profit \(5-1=4\).}
+  {Price 6 gives a better profit \(6-1=5\); later prices do not improve it.}
+  {Return maximum profit 5.}}
+
+\expandafter\def\csname lessontrace@4\endcsname{\visualtrace
+  {Add \texttt{bad}, \texttt{dad}, and \texttt{mad} to a Trie. Each letter follows or creates one child link.}
+  {Searching \texttt{pad} follows a missing \texttt{p} link and returns false.}
+  {Searching \texttt{.ad} branches from the root; the \texttt{b}, \texttt{d}, or \texttt{m} branch can finish the word.}
+  {Return true as soon as one complete branch reaches a word end.}}
+
+\expandafter\def\csname lessontrace@5\endcsname{\visualtrace
+  {Insert \texttt{apple}. Create the path \(a\to p\to p\to l\to e\) and mark the last node as a word.}
+  {Searching \texttt{apple} reaches the marked end node, so it succeeds.}
+  {Searching \texttt{app} reaches a valid path but not a word end; \texttt{startsWith(app)} only needs the path.}
+  {Return false for \texttt{search(app)} and true for the prefix check.}}
+
+\expandafter\def\csname lessontrace@6\endcsname{\visualtrace
+  {Compare adjacent sorted words. The first different letters create a directed ordering edge.}
+  {For \texttt{wrt} and \texttt{wrf}, add \(t\to f\). Continue building indegrees without duplicate edges.}
+  {Repeatedly remove a zero-indegree character and reduce the indegree of its neighbors.}
+  {Return the complete order, or an empty string for an invalid prefix or cycle.}}
+
+\expandafter\def\csname lessontrace@7\endcsname{\visualtrace
+  {Put the tree root in a queue. The queue size tells how many nodes belong to the current level.}
+  {Remove every node in that level, record its value, and enqueue its children.}
+  {After the level count reaches zero, the queue contains exactly the next row.}
+  {Return one vector for each tree level.}}
+
+\expandafter\def\csname lessontrace@8\endcsname{\visualtrace
+  {In tree \texttt{[-10,9,20,null,null,15,7]}, leaves 15 and 7 return one-sided gains.}
+  {At node 20, the complete path is \(15+20+7=42\). Record it as the global best.}
+  {Only one child path can continue upward, so node 20 returns \(20+\max(15,7)=35\).}
+  {Return the global best path sum 42.}}
+
+\expandafter\def\csname lessontrace@9\endcsname{\visualtrace
+  {Start DFS at graph node 1. Create its clone immediately and store the old-to-new pointer pair.}
+  {For each neighbor, recursively clone an unseen node or reuse the clone already stored in the map.}
+  {When an edge points back to node 1, the map prevents another copy and closes the cycle correctly.}
+  {Return the cloned pointer corresponding to the original start node.}}
+
+\expandafter\def\csname lessontrace@10\endcsname{\visualtrace
+  {Use coins \texttt{[1,2,5]} and amount 11. Set \(dp[0]=0\) and other entries to impossible.}
+  {For each amount, try placing every coin last: \(dp[a]=1+dp[a-coin]\).}
+  {The best route to 11 uses 5, 5, and 1, so \(dp[11]=3\).}
+  {Return 3, or \(-1\) if the target state stays impossible.}}
+
+\expandafter\def\csname lessontrace@11\endcsname{\visualtrace
+  {Use numbers \texttt{[1,2,3]} and target 4. Start with one way to make total 0.}
+  {For each total, add the counts from states reached by removing one possible final number.}
+  {Order matters: \texttt{1,3} and \texttt{3,1} come from different final-step paths.}
+  {The count stored at total 4 is 7.}}
+
+\expandafter\def\csname lessontrace@12\endcsname{\visualtrace
+  {Preorder \texttt{[3,9,20,15,7]} chooses root 3. Inorder \texttt{[9,3,15,20,7]} splits left and right parts.}
+  {Build node 9 from the left inorder range. Then preorder chooses 20 for the right subtree.}
+  {The position of 20 splits that subtree into child values 15 and 7.}
+  {Return the fully connected tree rooted at 3.}}
+
+\expandafter\def\csname lessontrace@13\endcsname{\visualtrace
+  {Use heights \texttt{[1,8,6,2,5,4,8,3,7]}. Begin at the two ends.}
+  {Measure the area, then discard the shorter wall because keeping it with a smaller width cannot help.}
+  {The walls at indexes 1 and 8 give height 7, width 7, and area 49.}
+  {Return the largest area 49.}}
+
+\expandafter\def\csname lessontrace@14\endcsname{\visualtrace
+  {Use \texttt{[1,2,3,1]}. Start with an empty set of seen values.}
+  {Insert 1, 2, and 3 as the scan moves right.}
+  {The final 1 is already in the set, so a duplicate has been found.}
+  {Return true immediately.}}
+
+\expandafter\def\csname lessontrace@15\endcsname{\visualtrace
+  {Build answers from 0 upward. The value for 0 is zero set bits.}
+  {For each \(i\), remove its lowest bit with \(i\gg1\) and add \(i\mathbin{\&}1\).}
+  {For 5, reuse the answer for 2 and add the final one-bit: \(1+1=2\).}
+  {Return the count array for every value from 0 through \(n\).}}
+
+\expandafter\def\csname lessontrace@16\endcsname{\visualtrace
+  {Build an edge from each prerequisite to the course that depends on it. Mark all courses unvisited.}
+  {DFS marks a course as active while exploring its prerequisites and marks it finished afterward.}
+  {Reaching an active course again reveals a directed cycle; reaching a finished course is safe.}
+  {Return true only when every DFS finishes without finding a cycle.}}
+
+\expandafter\def\csname lessontrace@17\endcsname{\visualtrace
+  {Use \texttt{226}. Start with one way before the string.}
+  {The first 2 is valid alone. The prefix \texttt{22} is also valid as one letter, so the counts add.}
+  {At 6, count decoding it alone and decoding \texttt{26} together.}
+  {Return 3 ways: \texttt{2|2|6}, \texttt{22|6}, and \texttt{2|26}.}}
+
+\expandafter\def\csname lessontrace@18\endcsname{\visualtrace
+  {Place slow and fast at the head of the linked list. Slow moves one edge; fast moves two.}
+  {If the list has no cycle, fast reaches null. If it has a cycle, fast keeps gaining on slow inside the loop.}
+  {In the sample cycle, both pointers eventually land on the same node.}
+  {Return true when the pointers meet.}}
+
+\expandafter\def\csname lessontrace@19\endcsname{\visualtrace
+  {Encode \texttt{[lint,code]} as a length, a separator, and the exact payload for each string.}
+  {The decoder reads digits until \texttt{\#}, then consumes exactly that many following characters.}
+  {Digits or separators inside the payload are safe because the length, not the contents, controls the boundary.}
+  {Return the original vector of strings.}}
+
+\expandafter\def\csname lessontrace@20\endcsname{\visualtrace
+  {Keep the smaller half in a max heap and the larger half in a min heap. Start both empty.}
+  {Insert each number into the correct half, then rebalance until their sizes differ by at most one.}
+  {For an odd count, the larger heap top is the median; for an even count, average both tops.}
+  {Return the current median without sorting the whole stream again.}}
+
+\expandafter\def\csname lessontrace@21\endcsname{\visualtrace
+  {Use \texttt{[3,4,5,1,2]}. Compare the middle value with the rightmost value.}
+  {Because 5 is greater than 2, the rotation point must be to the right of the middle.}
+  {The range shrinks to \texttt{[1,2]}; now the middle is no greater than the right end.}
+  {Both bounds meet at value 1, the minimum.}}
+
+\expandafter\def\csname lessontrace@22\endcsname{\visualtrace
+  {A tree with \(n\) nodes must have exactly \(n-1\) edges. Build an undirected adjacency list.}
+  {DFS from node 0 while remembering the parent edge. Mark each newly reached node.}
+  {Seeing an already visited non-parent neighbor means a cycle; missing nodes afterward means disconnection.}
+  {Return true only when the graph is connected and cycle-free.}}
+
+\expandafter\def\csname lessontrace@23\endcsname{\visualtrace
+  {Use \texttt{eat}, \texttt{tea}, and \texttt{ate}. Build the same letter-count key for all three.}
+  {Use that key in a hash map and append each word to the vector stored there.}
+  {Words with different counts, such as \texttt{tan}, produce a different key and group.}
+  {Return all hash-map groups.}}
+
+\expandafter\def\csname lessontrace@24\endcsname{\visualtrace
+  {Use house values \texttt{[2,7,9,3,1]}. Keep the best totals one and two positions back.}
+  {At each house, compare skipping it with taking it plus the best total two houses back.}
+  {At value 9, taking gives \(2+9=11\), better than the previous total 7.}
+  {Return the final best total 12.}}
+
+\expandafter\def\csname lessontrace@25\endcsname{\visualtrace
+  {Because the houses form a circle, the first and last houses cannot both be chosen.}
+  {Run the ordinary house-robber update once without the last house.}
+  {Run it again without the first house, then compare the two totals.}
+  {Return the larger result; for \texttt{[2,3,2]}, it is 3.}}
+
+\expandafter\def\csname lessontrace@26\endcsname{\visualtrace
+  {Use \texttt{[-2,1,-3,4,-1,2,1,-5,4]}. Start with sum \(-2\) and best \(-2\).}
+  {At \(1\), starting again is better than keeping \(-2\), so the running sum becomes \(1\).}
+  {At \(4\), start again. The next values make the running sums \(4,3,5,6\).}
+  {The largest sum seen is \(6\), from \texttt{[4,-1,2,1]}.}}
+
+\expandafter\def\csname lessontrace@27\endcsname{\visualtrace
+  {Use \texttt{[-2,3,-4]}. Both the largest and smallest ending products start at \(-2\).}
+  {After \(3\), the largest ending product is \(3\), while the smallest is \(-6\).}
+  {Multiplying \(-6\) by \(-4\) gives \(24\), so the old minimum becomes the new maximum.}
+  {The maximum product is \(24\).}}
+
+\expandafter\def\csname lessontrace@28\endcsname{\visualtrace
+  {Use \texttt{AABABBA} with \(k=1\). Begin with an empty window.}
+  {The window \texttt{AABA} has length 4 and three A's, so one replacement is enough.}
+  {When the window becomes too expensive, move the left side until at most one change is needed again.}
+  {The longest valid window has length \(4\).}}
+
+\expandafter\def\csname lessontrace@29\endcsname{\visualtrace
+  {Use \texttt{babad}. Try every character and every gap as a center.}
+  {From the center at the first \texttt{a}, expand to \texttt{bab}.}
+  {From the center at the middle \texttt{b}, expand to \texttt{aba}. Neither can grow farther.}
+  {A longest palindrome is \texttt{bab}; \texttt{aba} is also valid.}}
+
+\expandafter\def\csname lessontrace@30\endcsname{\visualtrace
+  {Use \texttt{abcabcbb}. Start a window at index 0.}
+  {The first three letters make \texttt{abc}, so the best length becomes 3.}
+  {The next \texttt{a} repeats index 0, so move the left side to index 1. Repeat this rule for later letters.}
+  {The longest substring without a repeated character has length \(3\).}}
+
+\expandafter\def\csname lessontrace@31\endcsname{\visualtrace
+  {Use \texttt{aaa}. Every single character is already a palindrome.}
+  {The two length-2 ranges \texttt{aa} also match at both ends.}
+  {The full range \texttt{aaa} matches at the ends and has a palindromic middle.}
+  {There are \(3+2+1=6\) palindromic substrings.}}
+
+\expandafter\def\csname lessontrace@32\endcsname{\visualtrace
+  {Use meetings \texttt{[[0,30],[5,10],[15,20]]} and sort by start time.}
+  {The second meeting starts at 5, before the first ends at 30, so they overlap.}
+  {Because one overlap is enough to fail the one-room test, no later comparison can repair it.}
+  {Return \texttt{false}.}}
+
+\expandafter\def\csname lessontrace@33\endcsname{\visualtrace
+  {Use \texttt{[2,3,1,1,4]}. The farthest reachable index starts at 0.}
+  {Index 0 reaches index 2. Index 1 is reachable and extends the farthest point to 4.}
+  {Index 4 is the final index, so the rest of the array is reachable.}
+  {Return \texttt{true}.}}
+
+\expandafter\def\csname lessontrace@34\endcsname{\visualtrace
+  {Use tree \texttt{[3,9,20,null,null,15,7]}. Null children have depth 0.}
+  {Node 20 gets depth \(1+\max(1,1)=2\). Node 9 gets depth 1.}
+  {The root uses the deeper right side: \(1+\max(1,2)=3\).}
+  {The maximum depth is \(3\).}}
+
+\expandafter\def\csname lessontrace@35\endcsname{\visualtrace
+  {Use BST \texttt{[3,1,4,null,2]} with \(k=2\). Push the left path \(3,1\).}
+  {Pop 1 first; it is the smallest value. Then visit its right child 2.}
+  {Pop 2 second, which reduces \(k\) to zero.}
+  {The second smallest value is \(2\).}}
+
+\expandafter\def\csname lessontrace@36\endcsname{\visualtrace
+  {Use the BST rooted at 6 and find the LCA of nodes 2 and 4.}
+  {Both values are smaller than 6, so move left to node 2.}
+  {At node 2, one target equals the current node while the other lies to its right.}
+  {Node 2 is the lowest common ancestor.}}
+
+\expandafter\def\csname lessontrace@37\endcsname{\visualtrace
+  {Use \texttt{[[0,30],[5,10],[15,20]]}. Push end time 30 into the min heap.}
+  {At start 5, no room is free, so push 10. Two rooms are now in use.}
+  {At start 15, remove 10, then push 20. The heap size returns to two.}
+  {The largest heap size is \(2\), so two rooms are needed.}}
+
+\expandafter\def\csname lessontrace@38\endcsname{\visualtrace
+  {Use \texttt{[[1,2],[2,3],[3,4],[1,3]]} and sort by end time.}
+  {Keep \([1,2]\), then keep \([2,3]\) because touching endpoints do not overlap.}
+  {Skip \([1,3]\) because it starts before the current end. Keep \([3,4]\).}
+  {Remove one interval.}}
+
+\expandafter\def\csname lessontrace@39\endcsname{\visualtrace
+  {Use \texttt{[[1,3],[2,6],[8,10],[15,18]]} after sorting by start.}
+  {The interval \([2,6]\) overlaps \([1,3]\), so extend the current end to 6.}
+  {The intervals \([8,10]\) and \([15,18]\) start after the current interval ends, so add them separately.}
+  {Return \texttt{[[1,6],[8,10],[15,18]]}.}}
+
+\expandafter\def\csname lessontrace@40\endcsname{\visualtrace
+  {Insert \([2,5]\) into \texttt{[[1,3],[6,9]]}.}
+  {The first interval overlaps the new one, so merge them into \([1,5]\).}
+  {The next interval starts after 5, so place \([1,5]\) before \([6,9]\).}
+  {Return \texttt{[[1,5],[6,9]]}.}}
+
+\expandafter\def\csname lessontrace@41\endcsname{\visualtrace
+  {Scan the grid from top left. The first unvisited land cell starts island 1.}
+  {DFS marks every connected land cell in that island before the scan continues.}
+  {Later land that was already marked is skipped; a new unmarked land cell starts the next island.}
+  {The counter equals the number of separate land groups.}}
+
+\expandafter\def\csname lessontrace@42\endcsname{\visualtrace
+  {Use \(n=5\) with edges \texttt{[[0,1],[1,2],[3,4]]}. Start with no visited nodes.}
+  {DFS from 0 visits \(0,1,2\), so this is one component.}
+  {Nodes 1 and 2 are skipped later. DFS from 3 visits \(3,4\), giving a second component.}
+  {Return \(2\).}}
+
+\expandafter\def\csname lessontrace@43\endcsname{\visualtrace
+  {Use \texttt{[100,4,200,1,3,2]}. Put all values in a set.}
+  {Skip 2, 3, and 4 as starting points because each has a previous value in the set.}
+  {Start at 1 and count \(1,2,3,4\). Starts 100 and 200 produce runs of length 1.}
+  {The longest consecutive run has length \(4\).}}
+
+\expandafter\def\csname lessontrace@44\endcsname{\visualtrace
+  {Merge \texttt{1->2->4} and \texttt{1->3->4}. Begin at a dummy node.}
+  {Choose the smaller front node each time: 1, 1, 2, 3.}
+  {One list then has \texttt{4}; attach it, followed by the remaining \texttt{4}.}
+  {Return \texttt{1->1->2->3->4->4}.}}
+
+\expandafter\def\csname lessontrace@45\endcsname{\visualtrace
+  {Put the first node of every non-empty sorted list into a min heap.}
+  {Pop the smallest node, add it to the answer, and push that node's next.}
+  {The heap always holds the smallest unused front node from each list.}
+  {When the heap is empty, all lists have been merged in sorted order.}}
+
+\expandafter\def\csname lessontrace@46\endcsname{\visualtrace
+  {Use \texttt{abcde} and \texttt{ace}. Start with an empty DP table border.}
+  {Matching \texttt{a} gives length 1. Nonmatching cells copy the better top or left value.}
+  {Matches at \texttt{c} and \texttt{e} raise the best length to 2 and then 3.}
+  {The longest common subsequence has length \(3\): \texttt{ace}.}}
+
+\expandafter\def\csname lessontrace@47\endcsname{\visualtrace
+  {Use \texttt{s=ADOBECODEBANC} and \texttt{t=ABC}. Expand the right side of the window.}
+  {At \texttt{ADOBEC}, all required letters are present, so record length 6 and try shrinking.}
+  {Later, the window \texttt{BANC} still contains A, B, and C and is shorter.}
+  {Return \texttt{BANC}.}}
+
+\expandafter\def\csname lessontrace@48\endcsname{\visualtrace
+  {Use \texttt{[3,0,1]}. XOR the expected numbers \(0,1,2,3\) and all array values.}
+  {The two 0s cancel, the two 1s cancel, and the two 3s cancel.}
+  {Only 2 has no matching copy.}
+  {The missing number is \(2\).}}
+
+\expandafter\def\csname lessontrace@49\endcsname{\visualtrace
+  {Use binary \texttt{1011}. Start the count at zero.}
+  {Clear the lowest set bit: \texttt{1011 -> 1010}; count becomes 1.}
+  {Clear again: \texttt{1010 -> 1000 -> 0000}; count reaches 3.}
+  {The number has \(3\) set bits.}}
+
+\expandafter\def\csname lessontrace@50\endcsname{\visualtrace
+  {Use \texttt{[1,2,3,4]}. First store products to the left: \texttt{[1,1,2,6]}.}
+  {Walk from right to left with a running right product. Multiply each stored left product by it.}
+  {The right products used are \(1,4,12,24\).}
+  {Return \texttt{[24,12,8,6]}.}}
+
+\expandafter\def\csname lessontrace@51\endcsname{\visualtrace
+  {Use \texttt{1->2->3->4->5} with \(n=2\). Start both pointers at a dummy node.}
+  {Move the fast pointer two steps ahead, then move both pointers together.}
+  {When fast reaches the final node, slow is just before node 4. Link node 3 to node 5.}
+  {Return \texttt{1->2->3->5}.}}
+
+\expandafter\def\csname lessontrace@52\endcsname{\visualtrace
+  {Use \texttt{1->2->3->4->5}. Find the middle at node 3.}
+  {Reverse the second half, changing \texttt{4->5} into \texttt{5->4}.}
+  {Weave the halves: take 1, then 5, then 2, then 4, then 3.}
+  {The list becomes \texttt{1->5->2->4->3}.}}
+
+\expandafter\def\csname lessontrace@53\endcsname{\visualtrace
+  {Use \texttt{1->2->3}. Start with \texttt{previous=null} and \texttt{current=1}.}
+  {Save node 2, point node 1 backward to null, then move forward.}
+  {Repeat for nodes 2 and 3; each saved next pointer prevents the rest of the list from being lost.}
+  {Return head 3: \texttt{3->2->1}.}}
+
+\expandafter\def\csname lessontrace@54\endcsname{\visualtrace
+  {Read the input as 32 bits. Start the result at zero.}
+  {Shift the result left, copy the input's lowest bit, then shift the input right.}
+  {Repeat exactly 32 times, including leading and trailing zeroes.}
+  {The result contains the input bits in reverse order.}}
+
+\expandafter\def\csname lessontrace@55\endcsname{\visualtrace
+  {Use matrix \texttt{[[1,2,3],[4,5,6],[7,8,9]]}.}
+  {Transpose across the main diagonal to get \texttt{[[1,4,7],[2,5,8],[3,6,9]]}.}
+  {Reverse every row.}
+  {The rotated matrix is \texttt{[[7,4,1],[8,5,2],[9,6,3]]}.}}
+
+\expandafter\def\csname lessontrace@56\endcsname{\visualtrace
+  {Compare the two roots. If both are null, that pair matches.}
+  {If only one is null or the values differ, return false at once.}
+  {Otherwise compare the two left children and the two right children in the same way.}
+  {The trees are the same only when every paired position matches.}}
+
+\expandafter\def\csname lessontrace@57\endcsname{\visualtrace
+  {Serialize tree \texttt{[1,2,3,null,null,4,5]} in preorder.}
+  {Write each value when visited and write a null marker for every missing child.}
+  {During decoding, read one token at a time and build left before right.}
+  {The null markers rebuild the exact original shape.}}
+
+\expandafter\def\csname lessontrace@58\endcsname{\visualtrace
+  {Use \texttt{[[1,1,1],[1,0,1],[1,1,1]]}.}
+  {The zero at row 1, column 1 marks its row and column in the first column and first row.}
+  {A second pass clears every cell whose row or column marker is zero.}
+  {Return \texttt{[[1,0,1],[0,0,0],[1,0,1]]}.}}
+
+\expandafter\def\csname lessontrace@59\endcsname{\visualtrace
+  {Use a \(3\times3\) matrix. Set top, bottom, left, and right boundaries.}
+  {Read the top row, right column, bottom row backward, and left column upward.}
+  {Move all four boundaries inward and read the remaining center cell.}
+  {The values are returned in spiral order.}}
+
+\expandafter\def\csname lessontrace@60\endcsname{\visualtrace
+  {Start at the root of the large tree and compare it with the small tree.}
+  {If the roots do not begin equal trees, try the large tree's left child.}
+  {If that fails, try the right child. Each equality check compares both shapes and values.}
+  {Return true as soon as one root begins a complete match.}}
+
+\expandafter\def\csname lessontrace@61\endcsname{\visualtrace
+  {Add 1 and 2. XOR gives partial sum 3; shifted AND gives carry 0.}
+  {For values with overlapping 1-bits, XOR keeps the sum without carries.}
+  {Shifted AND moves every carry one bit left; repeat until no carry remains.}
+  {The final XOR value is the sum.}}
+
+\expandafter\def\csname lessontrace@62\endcsname{\visualtrace
+  {Use \texttt{[1,1,1,2,2,3]} with \(k=2\). Count frequencies: \(1:3,2:2,3:1\).}
+  {Push each value and count into a min heap of size at most 2.}
+  {When a third item enters, remove the smallest frequency.}
+  {The two most frequent values are \texttt{[1,2]}.}}
+
+\expandafter\def\csname lessontrace@63\endcsname{\visualtrace
+  {Use a \(3\times7\) grid. Every cell in the first row has one path.}
+  {For each later row, update left to right: paths here equal paths from above plus paths from the left.}
+  {Each update reuses the same one-dimensional array.}
+  {The bottom-right value is \(28\).}}
+
+\expandafter\def\csname lessontrace@64\endcsname{\visualtrace
+  {Compare \texttt{anagram} and \texttt{nagaram}. Start 26 counts at zero.}
+  {Add counts for the first word and subtract counts for the second.}
+  {Each letter appears the same number of times, so every final count is zero.}
+  {Return \texttt{true}.}}
+
+\expandafter\def\csname lessontrace@65\endcsname{\visualtrace
+  {Use \texttt{A man, a plan, a canal: Panama}. Put one pointer at each end.}
+  {Skip spaces and punctuation, and compare letters without case.}
+  {Every pair matches as the pointers move toward the middle.}
+  {Return \texttt{true}.}}
+
+\expandafter\def\csname lessontrace@66\endcsname{\visualtrace
+  {Use \texttt{([\{\}])}. Start with an empty stack.}
+  {Push each opening bracket. For a closing bracket, check the stack top and pop its matching opener.}
+  {The final bracket removes the first opener, leaving the stack empty.}
+  {The string is valid.}}
+
+\expandafter\def\csname lessontrace@67\endcsname{\visualtrace
+  {Start the root with no finite lower or upper limit.}
+  {For the left child, the root value becomes the upper limit. For the right child, it becomes the lower limit.}
+  {A value that reaches or crosses either limit makes the tree invalid, even if it fits its direct parent.}
+  {Return true only if every node stays inside its allowed range.}}
+
+\expandafter\def\csname lessontrace@68\endcsname{\visualtrace
+  {Use \texttt{leetcode} with words \texttt{leet} and \texttt{code}. Mark position 0 reachable.}
+  {From position 0, matching \texttt{leet} marks position 4 reachable.}
+  {From position 4, matching \texttt{code} marks position 8 reachable.}
+  {The end is reachable, so return \texttt{true}.}}
+
+\expandafter\def\csname lessontrace@69\endcsname{\visualtrace
+  {Build a trie from the requested words, then start DFS from each board cell.}
+  {A board letter with no matching trie child stops that path immediately.}
+  {When a trie node marks a full word, add it once; backtrack to try other neighbors.}
+  {Return every word reached by a valid board path.}}
+
+\expandafter\def\csname lessontrace@70\endcsname{\visualtrace
+  {Search for \texttt{ABCCED}. Start at a board cell containing \texttt{A}.}
+  {Move to adjacent cells matching \texttt{B}, \texttt{C}, \texttt{C}, \texttt{E}, and \texttt{D}.}
+  {Mark each used cell during the path, then restore it when backtracking.}
+  {A complete matching path returns \texttt{true}.}}
+
+\expandafter\def\csname lessontrace@71\endcsname{\visualtrace
+  {Use \texttt{[4,5,6,7,0,1,2]} with target 0. Begin with the full range.}
+  {The left half is sorted. Because 0 is not between 4 and 7, search the right half.}
+  {The next middle value is 1; its left side contains 0.}
+  {Find 0 at index \(4\).}}
+
+\expandafter\def\csname lessontrace@72\endcsname{\visualtrace
+  {Use \texttt{[10,9,2,5,3,7,101,18]}. Let \(dp[i]\) be the best increasing subsequence ending at \(i\).}
+  {Value 5 can follow 2, so its length becomes 2. Value 7 can follow 2, 5, or 3, reaching length 3.}
+  {Value 101 can follow 7, reaching length 4.}
+  {The longest increasing subsequence has length \(4\).}}
+
+\expandafter\def\csname lessontrace@73\endcsname{\visualtrace
+  {For \(n=5\), there is one way to stand before the stairs and one way to reach step 1.}
+  {Ways to step 2 are \(1+1=2\); ways to step 3 are \(2+1=3\).}
+  {Continue with the previous two values: step 4 has 5 ways and step 5 has 8.}
+  {Return \(8\).}}
+
+\expandafter\def\csname lessontrace@74\endcsname{\visualtrace
+  {At each tree node, save the original left and right children.}
+  {Recursively invert both subtrees.}
+  {Attach the inverted original right subtree on the left and the inverted original left subtree on the right.}
+  {Every parent-child direction is mirrored.}}
+
+\expandafter\def\csname lessontrace@75\endcsname{\visualtrace
+  {Start DFS from every cell touching the Pacific and mark cells reachable in reverse.}
+  {Do the same from every cell touching the Atlantic. Reverse travel only moves to equal or higher cells.}
+  {A cell marked by both searches has a downhill path to both oceans in the original direction.}
+  {Return the intersection of the two marked sets.}}

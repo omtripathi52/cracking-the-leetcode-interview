@@ -1,0 +1,152 @@
+% Practical C++ reference and guided exercises. The separate problem and
+% pattern indexes were removed; the redesigned contents page is the book's
+% single navigation system.
+
+\clearpage
+\phantomsection
+\section*{C++ Reference and Guided Practice}
+\addcontentsline{toc}{section}{C++ Reference and Guided Practice}
+\markboth{C++ Reference and Guided Practice}{Reference}
+
+The solutions use the signatures expected by an online judge. This reference
+collects the node definitions that are normally supplied by the judge and
+clarifies the difference between borrowed links and owned objects. It also
+provides a small set of exercises for turning the completed lessons into
+active interview practice.
+
+\begin{conceptbox}{Implementation validation}
+All 75 complete solutions are checked independently with a C++
+compiler. The audit includes judge-provided tree, list, and graph types, so a
+solution cannot pass merely because another chapter supplied a missing type or
+header. Representative examples and boundary cases are also exercised for
+each algorithm family.
+\end{conceptbox}
+
+\subsection{Judge-provided pointer structures}
+
+\begin{visualbox}{Values and links in the three common node types}
+\centering
+\begin{tikzpicture}[font=\footnotesize,>={Stealth[length=2.2mm,width=1.55mm]}]
+  \node[dsnode,active,minimum width=24mm] (tree) at (0,1.5)
+    {\texttt{TreeNode}\\value};
+  \node[dsnode,minimum width=19mm] (tl) at (-2.0,0) {left child};
+  \node[dsnode,minimum width=19mm] (tr) at (2.0,0) {right child};
+  \draw[flowarrow] (tree.south west) -- (tl.north);
+  \draw[flowarrow] (tree.south east) -- (tr.north);
+
+  \node[dsnode,active,minimum width=24mm] (list) at (5.2,1.5)
+    {\texttt{ListNode}\\value};
+  \node[dsnode,minimum width=19mm] (next) at (5.2,0) {next node};
+  \draw[flowarrow] (list.south) -- (next.north);
+
+  \node[dsnode,active,minimum width=24mm] (graph) at (2.6,-1.8)
+    {graph node\\value};
+  \node[dsnode,minimum width=22mm] (neighbors) at (2.6,-3.2)
+    {neighbor pointers};
+  \draw[flowarrow] (graph.south) -- (neighbors.north);
+\end{tikzpicture}
+
+\smallskip
+The pointer fields describe structure. In judge code, the judge normally owns
+the input nodes and the solution temporarily follows or rearranges those links.
+\end{visualbox}
+
+\subsection{Common judge definitions}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Typical linked-list and binary-tree definitions}]
+using namespace std;
+
+struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(nullptr) {}
+};
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+\end{lstlisting}
+
+\begin{lstlisting}[style=compactcode,float=htbp,caption={Typical graph-node definition}]
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+class Node {
+public:
+    int val;
+    vector<Node*> neighbors;
+
+    Node() : val(0) {}
+    Node(int value) : val(value) {}
+    Node(int value, vector<Node*> links)
+        : val(value), neighbors(move(links)) {}
+};
+\end{lstlisting}
+
+\begin{conceptbox}{Raw pointers and ownership}
+The examples use raw pointers because the judge owns the supplied structures
+and requires standard method signatures. Production C++ should make ownership
+explicit with RAII containers and smart pointers where one object genuinely
+owns another. A map used while cloning a graph stores lookup pointers; it does
+not become a second owner of the original or cloned nodes.
+\end{conceptbox}
+
+\subsection{A reliable code-review pass}
+
+Before submitting a solution, read it once without thinking about the example.
+Check the following properties directly in the code.
+
+\begin{revisionbox}{Five checks before submission}
+\begin{enumerate}
+  \item Every input permitted by the rules reaches a valid base case or
+  loop termination condition.
+  \item Array and string indexes are checked before access, especially after a
+  pointer moves or a window shrinks.
+  \item Values needed by an update are copied before the original variables are
+  overwritten.
+  \item Recursive and graph solutions mark, unmark, or memoize state at the
+  exact point required by their key rule.
+  \item The stated complexity counts sorting, heap operations, recursion depth,
+  and output storage consistently.
+\end{enumerate}
+\end{revisionbox}
+
+\subsection{Guided practice with hints}
+
+For each exercise, first draw the changing state, then write the key rule and
+only afterward modify the implementation.
+
+\begin{revisionbox}{Practice prompts}
+\small
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{2.45cm}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X@{}}
+\toprule
+Area & Exercise & Hint after drawing \\
+\midrule
+Arrays and greedy & Return the buy and sell days, not only the profit. & Save
+the day when the running minimum changes and snapshot both days when the best
+profit improves. \\
+Two pointers & Generalize 3Sum to an arbitrary target. & Compare the total to
+the requested target; the safe pointer directions do not change. \\
+Trie recursion & Count every word matching a wildcard pattern. & Sum successful
+branches instead of returning after the first match. \\
+Tree queues & Produce zigzag level order. & Keep the BFS queue unchanged and
+alter only the destination index inside each row. \\
+Graphs & Return one valid course order. & Record vertices when they leave a
+zero-indegree queue; a short result still detects a cycle. \\
+Dynamic programming & Reconstruct a minimum coin selection. & Store the final
+coin responsible for each improving transition. \\
+Heaps & Support deletion from a median stream. & Combine the heaps with delayed
+deletion counts in hash maps. \\
+Strings & Decode payloads containing digits and \texttt{\#}. & The stored
+length, not a delimiter search, controls how many payload characters to read. \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}

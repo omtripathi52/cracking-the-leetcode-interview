@@ -1,0 +1,133 @@
+% Full-wrap paperback cover for the 8.25 x 11 inch, standard-color edition.
+% Sized for a 376-page interior on standard color white paper.
+
+\documentclass{article}
+\usepackage[
+  paperwidth=17.596752in,
+  paperheight=11.25in,
+  margin=0in
+]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[semibold]{plex-sans}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\definecolor{covernavy}{cmyk}{0.84,0.61,0.27,0.52}
+\definecolor{coverteal}{cmyk}{0.83,0.32,0.34,0.28}
+\definecolor{coverorange}{cmyk}{0.08,0.58,0.96,0.08}
+\definecolor{coverice}{cmyk}{0.10,0.02,0.02,0.00}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\begin{document}
+\begin{tikzpicture}[remember picture,overlay,x=1in,y=1in]
+\begin{scope}[shift={(current page.south west)}]
+  % Continuous artwork extends through the 0.125-inch bleed on every edge.
+  \fill[covernavy] (0,0) rectangle (17.596752,11.25);
+  \fill[coverteal,opacity=0.52] (0,0) rectangle (2.55,11.25);
+  \fill[coverteal,opacity=0.42] (14.773136,0) rectangle (17.596752,11.25);
+  \fill[coverorange] (0.42,0) rectangle (0.53,11.25);
+  \fill[coverorange] (17.093136,0) rectangle (17.203136,11.25);
+
+  % ---------------- Back cover: trim x = 0.125 to 8.375 ----------------
+  \node[anchor=north west,text=white,font=\sffamily\bfseries,
+        text width=6.65in,align=left]
+    at (0.78,10.30)
+    {\fontsize{20}{24}\selectfont
+     Stop memorizing solutions.\\[-1mm]
+     Start recognizing patterns.};
+
+  \node[anchor=north west,text=coverice,font=\sffamily,
+        text width=6.45in,align=left]
+    at (0.78,8.93)
+    {\fontsize{11.5}{15.5}\selectfont
+     \textit{Cracking the LeetCode Interview} turns 75 essential programming
+     questions into connected lessons on arrays, strings, linked lists,
+     trees, tries, graphs, heaps, greedy algorithms, binary search, bit
+     manipulation, and dynamic programming.};
+
+  \node[anchor=north west,text=white,font=\sffamily\bfseries]
+    at (0.78,6.72) {\fontsize{13}{16}\selectfont INSIDE THIS BOOK};
+
+  \node[anchor=north west,text=coverice,font=\sffamily,
+        text width=6.55in,align=left]
+    at (0.78,6.28)
+    {\fontsize{10.4}{14.4}\selectfont
+     \textcolor{coverorange}{\textbullet}\quad Clear pictures and step-by-step dry runs\\
+     \textcolor{coverorange}{\textbullet}\quad The simple idea explained before the code\\
+     \textcolor{coverorange}{\textbullet}\quad Complete C++ solutions with code walkthroughs\\
+     \textcolor{coverorange}{\textbullet}\quad Tests, common mistakes, time, and space\\
+     \textcolor{coverorange}{\textbullet}\quad 75 lessons grouped by topic};
+
+  \node[anchor=west,text=white,font=\sffamily\bfseries]
+    at (0.78,1.20) {\fontsize{16}{19}\selectfont OM TRIPATHI};
+  \node[anchor=west,text=coverice,font=\sffamily]
+    at (0.78,0.88) {\fontsize{9.5}{11}\selectfont Author};
+
+  % Clear lower-right back-cover area for KDP's automatically generated barcode.
+  \fill[white] (5.62,0.69) rectangle (7.70,1.94);
+
+  % Decorative network in the open back-cover field.
+  \coordinate (b1) at (5.25,3.95);
+  \coordinate (b2) at (6.65,3.25);
+  \coordinate (b3) at (5.10,2.50);
+  \coordinate (b4) at (6.75,2.05);
+  \foreach \a/\b in {b1/b2,b1/b3,b2/b3,b2/b4,b3/b4}
+    \draw[white,opacity=0.18,line width=1pt] (\a)--(\b);
+  \foreach \p in {b1,b2,b3,b4}
+    \draw[white,opacity=0.38,line width=1pt] (\p) circle (0.13);
+  \fill[coverorange] (b2) circle (0.055);
+
+  % ---------------- Spine: x = 8.375 to 9.221752 ----------------
+  \node[rotate=90,anchor=center,text=white,font=\sffamily\bfseries]
+    at (8.798376,5.96)
+    {\fontsize{11}{13}\selectfont
+     CRACKING\hspace{0.42em}THE\hspace{0.42em}LEETCODE\hspace{0.42em}INTERVIEW};
+  \node[rotate=90,anchor=center,text=coverice,font=\sffamily]
+    at (8.798376,1.52)
+    {\fontsize{9}{11}\selectfont OM TRIPATHI};
+
+  % ---------------- Front cover: trim x = 9.221752 to 17.471752 ----------------
+  \node[anchor=north,text=coverice,font=\sffamily\bfseries]
+    at (13.346752,10.31)
+    {\fontsize{14}{17}\selectfont DATA STRUCTURES \& ALGORITHMS};
+
+  \node[anchor=center,text=white,font=\sffamily\bfseries,
+        text width=7.35in,align=center]
+    at (13.346752,6.70)
+    {\fontsize{31}{36}\selectfont
+     CRACKING\hspace{0.48em}THE\\[1mm]
+     LEETCODE\hspace{0.48em}INTERVIEW};
+  \draw[coverorange,line width=2.2pt]
+    (10.833136,5.33)--(15.853136,5.33);
+  \node[anchor=north,text=coverice,font=\sffamily\bfseries]
+    at (13.346752,5.06)
+    {\fontsize{16}{20}\selectfont 75 Programming Questions and Solutions};
+
+  \node[anchor=west,text=coverice,font=\sffamily]
+    at (9.873136,1.20) {\fontsize{10}{12}\selectfont AUTHOR};
+  \node[anchor=west,text=white,font=\sffamily\bfseries]
+    at (9.873136,0.82) {\fontsize{18}{22}\selectfont Om Tripathi};
+
+  % Front-cover algorithmic network.
+  \coordinate (f1) at (14.953136,9.44);
+  \coordinate (f2) at (16.203136,8.62);
+  \coordinate (f3) at (14.673136,7.64);
+  \coordinate (f4) at (16.073136,6.92);
+  \foreach \a/\b in {f1/f2,f1/f3,f2/f3,f2/f4,f3/f4}
+    \draw[white,opacity=0.17,line width=1.1pt] (\a)--(\b);
+  \foreach \p/\r in {f1/0.16,f2/0.21,f3/0.18,f4/0.15}{
+    \fill[coverice,opacity=0.07] (\p) circle (\r);
+    \draw[white,opacity=0.38,line width=1pt] (\p) circle (\r);
+  }
+  \fill[coverorange] (f2) circle (0.06);
+
+  % Subtle code-line motif, kept well inside the front safe area.
+  \foreach \y/\w in {3.47/1.85,3.20/1.38,2.93/2.08,2.66/1.12}
+    \draw[white,opacity=0.13,line width=3pt,rounded corners=2pt]
+      (14.833136,\y)--++(\w,0);
+\end{scope}
+\end{tikzpicture}
+\null
+\end{document}
