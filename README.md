@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/C%2B%2B-Complete%20solutions-00599C?style=flat-square&logo=cplusplus&logoColor=white" alt="Complete C++ solutions" />
   <img src="https://img.shields.io/badge/LaTeX-Source%20available-008080?style=flat-square&logo=latex&logoColor=white" alt="LaTeX source available" />
 
-  <a href="pdf/Cracking-The-LeetCode-Interview.pdf"><strong>Read the book</strong></a>
+  <a href="pdf/Cracking%20The%20Leetcode%20Interview.pdf"><strong>Read the book</strong></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="#the-reading-experience"><strong>Explore the method</strong></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
