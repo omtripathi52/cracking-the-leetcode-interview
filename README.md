@@ -68,7 +68,7 @@ Problems are grouped by the data structure or algorithmic pattern they teach, cr
 
 <div align="center">
 
-### [Open the complete PDF](pdf/Cracking-The-LeetCode-Interview.pdf)
+### [Open the complete PDF](pdf/Cracking%20The%20Leetcode%20Interview.pdf)
 
 The complete typeset edition is included in this repository.
 
