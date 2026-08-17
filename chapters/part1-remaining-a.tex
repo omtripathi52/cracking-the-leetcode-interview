@@ -74,7 +74,7 @@ levelOrder(root):
 \end{lstlisting}
 
 \subsection{C++ Implementation}
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Binary Tree Level Order Traversal}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Binary Tree Level Order Traversal}]
 #include <queue>
 #include <utility>
 #include <vector>
@@ -273,7 +273,7 @@ dfs(node):
 \end{lstlisting}
 
 \subsection{C++ Implementation}
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Binary Tree Maximum Path Sum}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Binary Tree Maximum Path Sum}]
 #include <algorithm>
 #include <limits>
 
@@ -430,7 +430,7 @@ clone(node):
 \end{lstlisting}
 
 \subsection{C++ Implementation}
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Clone Graph}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Clone Graph}]
 #include <unordered_map>
 
 using namespace std;
@@ -599,7 +599,7 @@ every construction of \(x\), and the minimum choice becomes best.
 \begin{tikzpicture}[font=\small]
   \foreach \x/\v in {0/0,1/1,2/1,3/2,4/2,5/1,6/2,7/2,8/3,9/3,10/2,11/3} {
     \node[arraycell] (d\x) at (0.8*\x,0) {\v};
-    \node[below=1mm of d\x,font=\tiny] {\x};
+    \node[below=1mm of d\x,font=\scriptsize] {\x};
   }
   \draw[flowarrow,orange] (d6.north) to[bend left=28]
     node[edgelabel,above,font=\scriptsize]{add coin 5} (d11.north);
@@ -618,7 +618,7 @@ return -1 if dp[amount] is unreachable, otherwise dp[amount]
 \end{lstlisting}
 
 \subsection{C++ Implementation}
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Coin Change}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Coin Change}]
 #include <algorithm>
 #include <vector>
 
@@ -779,7 +779,7 @@ for total from 1 through target:
 return dp[target]
 \end{lstlisting}
 
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Combination Sum IV}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Combination Sum IV}]
 #include <vector>
 
 using namespace std;
@@ -940,7 +940,7 @@ build(left, right):
 \end{lstlisting}
 
 \subsection{C++ Implementation}
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Construct Binary Tree}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Construct Binary Tree}]
 #include <unordered_map>
 #include <vector>
 

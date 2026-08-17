@@ -1,4 +1,4 @@
-\documentclass[12pt,twoside]{article}
+\documentclass[12pt,oneside]{article}
 
 % -------------------------------------------------
 % Packages
@@ -34,17 +34,25 @@
 \usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric,matrix,decorations.pathreplacing}
 
 % -------------------------------------------------
+% Book Metadata
+% -------------------------------------------------
+\newcommand{\booktitle}{Cracking The LeetCode Interview}
+\newcommand{\bookauthor}{Om Tripathi}
+% Add the public repository URL after the GitHub repository is created.
+\providecommand{\bookrepository}{}
+
+% -------------------------------------------------
 % Page Setup
 % -------------------------------------------------
 \geometry{
-    paperwidth=8.25in,
+    paperwidth=8.5in,
     paperheight=11in,
-    top=0.78in,
-    bottom=0.82in,
-    inner=0.92in,
-    outer=0.70in,
-    bindingoffset=0.12in,
-    headsep=0.24in
+    top=0.74in,
+    bottom=0.80in,
+    left=0.82in,
+    right=0.82in,
+    bindingoffset=0in,
+    headsep=0.22in
 }
 
 % -------------------------------------------------
@@ -82,8 +90,8 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE]{\small\textcolor{navy}{\nouppercase{\rightmark}}}
-\fancyhead[RO]{\small\textcolor{navy}{Cracking the LeetCode Interview}}
+\fancyhead[L]{\small\textcolor{navy}{\nouppercase{\rightmark}}}
+\fancyhead[R]{\small\textcolor{navy}{\booktitle}}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \setlength{\headheight}{15pt}
@@ -126,9 +134,9 @@
 % Keep every heading with a substantial portion of the material that follows.
 % The larger reservation also covers the opening rows of diagrams and tables,
 % preventing a title from being left at the bottom of the previous page.
-\pretocmd{\section}{\Needspace{24\baselineskip}}{}{}
-\pretocmd{\subsection}{\Needspace{20\baselineskip}}{}{}
-\pretocmd{\subsubsection}{\Needspace{12\baselineskip}}{}{}
+\pretocmd{\section}{\Needspace{12\baselineskip}}{}{}
+\pretocmd{\subsection}{\Needspace{7\baselineskip}}{}{}
+\pretocmd{\subsubsection}{\Needspace{5\baselineskip}}{}{}
 
 % The code caption already names a complete solution. Suppressing the repeated
 % "C++ Implementation" line prevents that line from being stranded when an
@@ -136,13 +144,14 @@
 % reserve only the amount of room their first table or paragraph needs.
 \let\standardbooksubsection\subsection
 \renewcommand{\subsection}[1]{%
-  \ifstrequal{#1}{C++ Implementation}{}{% 
-    \ifstrequal{#1}{Complete Implementation}{}{% 
-      \ifstrequal{#1}{Pseudocode}{\Needspace{14\baselineskip}}{}%
-      \ifstrequal{#1}{Common judge definitions}{\Needspace{30\baselineskip}}{}%
-      \ifstrequal{#1}{Detailed Table Walkthrough}{\Needspace{22\baselineskip}}{}%
-      \ifstrequal{#1}{Detailed Grouping Walkthrough}{\Needspace{22\baselineskip}}{}%
-      \standardbooksubsection{#1}}}}
+  \ifstrequal{#1}{C++ Implementation}{}{%
+    \ifstrequal{#1}{Complete Implementation}{}{%
+      \ifstrequal{#1}{Complete Data Structure}{}{%
+        \ifstrequal{#1}{Pseudocode}{\Needspace{14\baselineskip}}{}%
+        \ifstrequal{#1}{Common judge definitions}{\Needspace{30\baselineskip}}{}%
+        \ifstrequal{#1}{Detailed Table Walkthrough}{\Needspace{22\baselineskip}}{}%
+        \ifstrequal{#1}{Detailed Grouping Walkthrough}{\Needspace{22\baselineskip}}{}%
+        \standardbooksubsection{#1}}}}}
 
 % -------------------------------------------------
 % Hyperlink Setup
@@ -152,10 +161,10 @@
     linkcolor=navy,
     urlcolor=teal,
     citecolor=teal,
-    pdftitle={Cracking the LeetCode Interview: 75 Programming Questions and Solutions},
+    pdftitle={Cracking The LeetCode Interview},
     pdfauthor={Om Tripathi},
-    pdfsubject={Visual C++ solutions for data structures and algorithms interview problems},
-    pdfkeywords={LeetCode, C++, algorithms, data structures, coding interviews}
+    pdfsubject={Visual C++ lessons for data structures, algorithms, and coding interviews},
+    pdfkeywords={C++, algorithms, data structures, coding interviews, problem solving}
 }
 
 % -------------------------------------------------
@@ -174,8 +183,8 @@
     showstringspaces=false,
     breaklines=true,
     breakindent=1.4em,
-    prebreak=\mbox{\textcolor{orange}{\tiny$\hookleftarrow$}},
-    postbreak=\mbox{\textcolor{orange}{\tiny$\hookrightarrow$}\space},
+    prebreak=\mbox{\textcolor{orange}{\scriptsize$\hookleftarrow$}},
+    postbreak=\mbox{\textcolor{orange}{\scriptsize$\hookrightarrow$}\space},
     frame=leftline,
     framerule=1.1pt,
     rulecolor=\color{teal},
@@ -219,12 +228,12 @@
     belowskip=0.5em
 }
 
-% A few complete classes are much longer than the usual LeetCode method.
+% A few complete classes are much longer than the usual judge method.
 % They use this smaller style so the whole class can stay on one page.
 \lstdefinestyle{longcode}{
     basicstyle=\ttfamily\footnotesize,
     numbers=left,
-    numberstyle=\tiny\color{ink!55},
+    numberstyle=\scriptsize\color{ink!55},
     numbersep=5pt,
     xleftmargin=0.9em,
     framexleftmargin=0.45em,
@@ -237,9 +246,6 @@
 % -------------------------------------------------
 \newcommand{\Oof}[1]{O(#1)}
 \newcommand{\inlinecode}[1]{\texttt{#1}}
-% Add the final paperback ISBN here after it has been assigned. Until then,
-% the copyright page omits the ISBN line instead of printing a placeholder.
-\providecommand{\bookisbn}{}
 % The judge workflow is explained once in the introduction. Keeping this
 % compatibility command empty avoids repeating the same note after every
 % solution.
@@ -290,8 +296,8 @@
 \BeforeBeginEnvironment{conceptbox}{\par\Needspace{6\baselineskip}}
 \BeforeBeginEnvironment{invariantbox}{\par\Needspace{6\baselineskip}}
 \BeforeBeginEnvironment{revisionbox}{\par\Needspace{6\baselineskip}}
-% Short pseudocode blocks should stay with their heading without forcing a
-% large blank area. Complete solutions are floats, so they remain unbroken.
+% Short pseudocode blocks should stay with their heading. Complete solutions
+% may split cleanly at a page boundary instead of forcing large blank areas.
 \BeforeBeginEnvironment{lstlisting}{\par\Needspace{8\baselineskip}}
 
 \newtcolorbox{problemcard}[1]{
@@ -309,31 +315,33 @@
     #1
 }
 
-\newcommand{\problemprofile}[4]{%
+\newcommand{\problemprofile}[3]{%
 \begin{problemcard}{}
-\begin{tabularx}{\linewidth}{@{}X X@{}}
-\textcolor{teal}{\textbf{LeetCode problem}} &
-\textcolor{teal}{\textbf{Difficulty}}\\[-1mm]
-\textbf{#1} & \textbf{#2}\\[2mm]
+\begin{tabularx}{\linewidth}{@{}X X X@{}}
+\textcolor{teal}{\textbf{Difficulty}} &
 \textcolor{teal}{\textbf{Approach}} &
 \textcolor{teal}{\textbf{Main tool}}\\[-1mm]
-#3 & #4
+\textbf{#1} & #2 & #3
 \end{tabularx}
 \end{problemcard}}
 
 \newcounter{lesson}
+\newcommand{\currentpattern}{Interview Foundations}
 \newcommand{\problemstart}[5]{%
 \FloatBarrier
-\clearpage
+\par\Needspace{22\baselineskip}
 \refstepcounter{lesson}%
 \phantomsection
+{\plexsans\small\bfseries\color{teal}\MakeUppercase{\currentpattern}\par}
+\vspace{0.3em}
 \section*{Lesson \thelesson: #1}
 \label{lesson:\thelesson}
-\addcontentsline{toc}{section}{Lesson \thelesson: #1\space (LC #2)}
+\addcontentsline{toc}{section}{Lesson \thelesson: #1}
 \markboth{#1}{#4}
-\problemprofile{#2}{#3}{#4}{#5}}
+\problemprofile{#3}{#4}{#5}}
 
 \newcommand{\patternintoc}[1]{%
+  \gdef\currentpattern{#1}%
   \phantomsection
   \addtocontents{toc}{\protect\Needspace{4\baselineskip}}%
   \addcontentsline{toc}{part}{#1}}
@@ -357,7 +365,7 @@
 \begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
   \foreach \v [count=\i from 0] in {-2,1,-3,4,-1,2,1}{
     \node[arraycell] (a\i) at (.95*\i,0) {\v};
-    \node[below=1mm of a\i,font=\tiny,text=ink!60]{\i};}
+    \node[below=1mm of a\i,font=\scriptsize,text=ink!60]{\i};}
   \node[draw=teal,very thick,fit=(a1),inner sep=1mm]{};
   \node[draw=orange,very thick,fit=(a5),inner sep=1mm]{};
   \draw[flowarrow,teal] ([yshift=7mm]a1.north)--(a1.north);
@@ -517,7 +525,7 @@
   \draw[->,navy] (0,0)--(8,0);
   \draw[line width=5pt,teal] (1,1.1)--(5,1.1);
   \draw[line width=5pt,orange] (4,.35)--(7,.35);
-  \foreach \x in {0,...,7}\node[below] at (\x,0){\tiny\x};
+  \foreach \x in {0,...,7}\node[below] at (\x,0){\scriptsize\x};
   \draw[flowarrow,orange] (4,.1)--(4,.35);
   \node[below=8mm] at (4,0){overlap starts before the current interval ends};
 \end{tikzpicture}\end{visualbox}}
@@ -537,7 +545,7 @@
 \begin{tikzpicture}[font=\scriptsize,>={Stealth[length=2.2mm,width=1.55mm]}]
   \foreach \v [count=\i from 0] in {0,1,1,2,3,5,8}{
     \node[arraycell] (d\i) at (.95*\i,0){\v};
-    \node[below=1mm of d\i,font=\tiny]{\i};}
+    \node[below=1mm of d\i,font=\scriptsize]{\i};}
   \draw[flowarrow,teal] (d4.north) to[bend left=28] (d6.north);
   \draw[flowarrow,orange] (d5.north) to[bend left=18] (d6.north);
   \node[above=9mm of d5]{two earlier answers make the next answer};
@@ -563,21 +571,12 @@
 \or\arraydryvisual\or\dpdryvisual\or\dpdryvisual\or\treedryvisual\or\griddryvisual
 \fi}
 
-\newcommand{\chaptercheckpoint}[4]{%
-\ifnum\value{lesson}<26\lessonstructurevisual\fi
-\begin{tcolorbox}[
-  enhanced,breakable,colback=softteal,colframe=teal,boxrule=0.65pt,
-  arc=1.5mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
-  before skip=0.55em,after skip=0.55em]
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X
-  >{\raggedright\arraybackslash}X@{}}
-\textcolor{teal}{\textbf{When to use it:}} #1 &
-\textcolor{teal}{\textbf{Keep track of:}} #2 \\[0.8mm]
-\textcolor{orange}{\textbf{Common mistake:}} #3 &
-\textcolor{navy}{\textbf{Complexity:}} #4
-\end{tabularx}
-\end{tcolorbox}}
+% Earlier drafts ended every lesson with another generic summary and, for the
+% first lessons, a generic data-structure picture. Those blocks duplicated the
+% lesson-specific revision boxes and sometimes created a nearly empty page or
+% an arrow unrelated to the actual example. Keep the calls in chapter files as
+% editorial metadata, but do not print the redundant template.
+\newcommand{\chaptercheckpoint}[4]{}
 
 % A shared layout for the later lessons. The text passed to this command is
 % different for every problem; the headings simply keep the book consistent.
@@ -601,16 +600,10 @@
 \ifcsname sourcewalkthrough@\thelesson\endcsname
   \subsection{A Closer Look}
   \csname sourcewalkthrough@\thelesson\endcsname
-\fi
-\ifcsname sourceexcerpt@\thelesson\endcsname
-  \subsection{Step-by-Step Explanation}
-  {\small\csname sourceexcerpt@\thelesson\endcsname}
 \fi}
 
 \input{chapters/source-restoration-part2}
 \input{chapters/source-restoration-part3}
-\input{chapters/source-excerpts-part2}
-\input{chapters/source-excerpts-part3}
 
 \tikzset{
     every picture/.style={line cap=round,line join=round},
@@ -638,83 +631,91 @@
 \begin{document}
 
 \hypersetup{pageanchor=false}
-\ifdefined\KDPINTERIOR
-\else
 \begin{titlepage}
 \thispagestyle{empty}
 \begin{tikzpicture}[remember picture,overlay]
-  % Deep full-page background and architectural accents.
-  \fill[navy] (current page.south west) rectangle (current page.north east);
-  \fill[teal!70!navy,opacity=0.55]
-    ([xshift=-7.0cm]current page.north east) rectangle (current page.south east);
-  \fill[orange]
-    ([xshift=1.25cm]current page.north west) rectangle
-    ([xshift=1.43cm]current page.south west);
-  \draw[white,opacity=0.22,line width=0.8pt,rounded corners=2mm]
-    ([xshift=1.05cm,yshift=-1.05cm]current page.north west) rectangle
-    ([xshift=-1.05cm,yshift=1.05cm]current page.south east);
+  % One continuous composition: typography first, algorithmic trace second.
+  \shade[left color=navy,right color=teal!58!navy]
+    (current page.south west) rectangle (current page.north east);
 
-  % Subtle algorithmic network on the right.
-  \coordinate (g1) at ([xshift=-4.7cm,yshift=-3.2cm]current page.north east);
-  \coordinate (g2) at ([xshift=-2.2cm,yshift=-5.0cm]current page.north east);
-  \coordinate (g3) at ([xshift=-5.8cm,yshift=-7.1cm]current page.north east);
-  \coordinate (g4) at ([xshift=-2.8cm,yshift=-9.0cm]current page.north east);
-  \coordinate (g5) at ([xshift=-5.0cm,yshift=-11.3cm]current page.north east);
-  \foreach \a/\b in {g1/g2,g1/g3,g2/g3,g2/g4,g3/g4,g3/g5,g4/g5}{
-    \draw[white,opacity=0.15,line width=1.2pt] (\a)--(\b);
+  % Quiet construction grid gives the page depth without dividing it.
+  \begin{scope}[shift={(current page.south west)}]
+    \foreach \x in {1.4,2.8,...,21.0}
+      \draw[white,opacity=0.035,line width=.35pt] (\x,0)--(\x,27.95);
+    \foreach \y in {1.4,2.8,...,27.0}
+      \draw[white,opacity=0.035,line width=.35pt] (0,\y)--(21.6,\y);
+  \end{scope}
+
+  % Oversized punctuation turns C++ into a recognizable cover symbol.
+  \node[anchor=north east,text=white,opacity=.055,font=\sffamily\bfseries]
+    at ([xshift=-.75cm,yshift=-.15cm]current page.north east)
+    {\fontsize{138}{138}\selectfont ++};
+
+  \node[anchor=north west,text=teal!22!white,font=\sffamily\bfseries]
+    at ([xshift=1.55cm,yshift=-1.45cm]current page.north west)
+    {75 VISUAL C++ LESSONS \quad / \quad SOURCE AVAILABLE};
+  \draw[orange,line width=2.1pt]
+    ([xshift=1.55cm,yshift=-2.25cm]current page.north west)--++(2.35cm,0);
+
+  \node[anchor=north west,text=white,font=\sffamily\bfseries,
+        align=left,text width=15.7cm]
+    at ([xshift=1.5cm,yshift=-4.05cm]current page.north west)
+    {\fontsize{28}{34}\selectfont CRACKING THE\\[-1mm]
+     \fontsize{47}{52}\selectfont \textcolor{teal!18!white}{LEETCODE}\\[2mm]
+     \fontsize{39}{45}\selectfont \textcolor{orange}{INTERVIEW}};
+
+  \node[anchor=north west,text=teal!18!white,font=\sffamily,
+        align=left,text width=10.7cm]
+    at ([xshift=1.65cm,yshift=-10.95cm]current page.north west)
+    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
+     \fontsize{16}{22}\selectfont
+     Data structures, algorithms, and the reusable ideas behind them.};
+
+  % A single trace crosses the cover like an algorithm being discovered.
+  \coordinate (p1) at ([xshift=3.0cm,yshift=7.4cm]current page.south west);
+  \coordinate (p2) at ([xshift=6.1cm,yshift=8.7cm]current page.south west);
+  \coordinate (p3) at ([xshift=8.4cm,yshift=6.7cm]current page.south west);
+  \coordinate (p4) at ([xshift=11.2cm,yshift=9.7cm]current page.south west);
+  \coordinate (p5) at ([xshift=14.2cm,yshift=7.8cm]current page.south west);
+  \coordinate (p6) at ([xshift=16.7cm,yshift=10.6cm]current page.south west);
+  \coordinate (p7) at ([xshift=19.0cm,yshift=8.9cm]current page.south west);
+  \draw[teal!28!white,opacity=.58,line width=1.25pt]
+    (p1)--(p2)--(p3)--(p4)--(p5)--(p6)--(p7);
+  \foreach \p/\n in {p1/1,p2/2,p3/3,p4/4,p5/5,p6/6,p7/7}{
+    \fill[navy] (\p) circle (5.3mm);
+    \draw[teal!28!white,line width=1pt] (\p) circle (5.3mm);
+    \node[text=white,font=\sffamily\bfseries\small] at (\p) {\n};
   }
-  \foreach \p/\r in {g1/5mm,g2/7mm,g3/6mm,g4/5mm,g5/7mm}{
-    \fill[softteal,opacity=0.12] (\p) circle (\r);
-    \draw[white,opacity=0.34,line width=1pt] (\p) circle (\r);
-  }
-  \fill[orange,opacity=0.9] (g2) circle (2.2mm);
-  \fill[teal!30!white,opacity=0.9] (g5) circle (2.2mm);
+  \fill[orange] (p4) circle (2.25mm);
+  \node[anchor=center,text=teal!22!white,font=\sffamily\small]
+    at ([xshift=10.8cm,yshift=5.15cm]current page.south west)
+    {TRACE THE STATE, THEN WRITE THE CODE};
 
-  % Decorative code blocks.
-  \foreach \y/\w in {-15.2/4.4,-15.75/3.2,-16.3/5.1,-16.85/2.7}{
-    \draw[white,opacity=0.13,line width=3pt,rounded corners=2pt]
-      ([xshift=-6.1cm,yshift=\y cm]current page.north east) --
-      ++(\w cm,0);
-  }
-  \node[anchor=north,text=teal!22!white,font=\sffamily\bfseries\large]
-    at ([yshift=-2.15cm]current page.north)
-    {DATA STRUCTURES \& ALGORITHMS};
-
-  % The complete title is the visual center of the cover.
-  \node[anchor=center,text=white,font=\sffamily\bfseries,align=center,
-        text width=16.2cm]
-    at ([yshift=1.0cm]current page.center)
-    {\fontsize{37}{43}\selectfont
-     CRACKING\hspace{0.48em}THE\\[2mm]
-     LEETCODE\hspace{0.48em}INTERVIEW};
-  \draw[orange,line width=2.4pt]
-    ([xshift=-5.9cm,yshift=-2.25cm]current page.center) --
-    ([xshift=5.9cm,yshift=-2.25cm]current page.center);
-  \node[anchor=north,text=teal!18!white,font=\sffamily\bfseries,align=center]
-    at ([yshift=-2.85cm]current page.center)
-    {\fontsize{18}{23}\selectfont 75 Programming Questions and Solutions};
-
-  \draw[white,opacity=0.25,line width=0.8pt]
-    ([xshift=2.15cm,yshift=3.65cm]current page.south west) --
-    ([xshift=-2.15cm,yshift=3.65cm]current page.south east);
-  \node[anchor=west,text=teal!25!white,font=\sffamily\large]
-    at ([xshift=2.15cm,yshift=2.85cm]current page.south west)
-    {AUTHOR};
+  \draw[white,opacity=.25,line width=.7pt]
+    ([xshift=1.55cm,yshift=3.45cm]current page.south west)--
+    ([xshift=-1.55cm,yshift=3.45cm]current page.south east);
   \node[anchor=west,text=white,font=\sffamily\bfseries]
-    at ([xshift=2.15cm,yshift=1.75cm]current page.south west)
-    {\fontsize{23}{28}\selectfont Om Tripathi};
+    at ([xshift=1.55cm,yshift=2.25cm]current page.south west)
+    {\fontsize{22}{27}\selectfont Om Tripathi};
+  \node[anchor=east,text=teal!22!white,font=\sffamily\small,align=right]
+    at ([xshift=-1.55cm,yshift=2.30cm]current page.south east)
+    {ARRAYS \; TREES \; GRAPHS \; HEAPS\\GREEDY \; SEARCH \; DYNAMIC PROGRAMMING};
 \end{tikzpicture}
 \null
 \end{titlepage}
-\fi
+
+% cover.tex defines COVERONLY to generate the same artwork as a standalone
+% one-page PDF for the repository landing page.
+\ifdefined\COVERONLY
+\else
 
 \clearpage
 \thispagestyle{empty}
 \vspace*{0.16\textheight}
 \begin{center}
-{\Large\bfseries\color{navy}Cracking the LeetCode Interview}\par
+{\Large\bfseries\color{navy}\booktitle}\par
 \smallskip
-{\large 75 Programming Questions and Solutions}\par
+{\large 75 Visual Lessons for Technical Interviews}\par
 \vspace{1.1cm}
 {\large\bfseries Om Tripathi}
 \end{center}
@@ -729,17 +730,16 @@ a retrieval system, or transmitted, in any form or by any means (electronic,
 mechanical, photocopying, recording or otherwise), without the prior written
 permission of the author.
 
-This book is an independent educational publication. LeetCode is a trademark
-of LeetCode, LLC. This publication is not affiliated with, sponsored by, or
-endorsed by LeetCode, LLC. Product names and trademarks mentioned in the book
-remain the property of their respective owners.
+All explanations, diagrams, examples, and source code in this edition were
+prepared for this book. Problem titles are used only to identify widely known
+algorithmic exercises. Product names and trademarks remain the property of
+their respective owners.
 
 The material is provided for educational purposes. Although the algorithms
 and code have been reviewed and tested, readers should independently validate
 solutions for their own environments and requirements.
 
-\textbf{First edition}\par
-\ifdefempty{\bookisbn}{}{\textbf{ISBN:} \bookisbn}
+\textbf{First digital edition}\par
 \end{minipage}
 \vspace*{0.08\textheight}
 
@@ -763,7 +763,7 @@ solutions for their own environments and requirements.
 \printcontentsonly
 \endgroup
 \clearpage
-\fancyhead[RO]{\small\textcolor{navy}{Cracking the LeetCode Interview}}
+\fancyhead[RO]{\small\textcolor{navy}{\booktitle}}
 \pagenumbering{arabic}
 
 
@@ -800,7 +800,7 @@ This keeps the reasoning separate from language details and makes the final
 code easier to understand.
 
 \begin{conceptbox}{How the C++ code is used}
-LeetCode creates the input, calls the required method, and checks the returned
+The online judge creates the input, calls the required method, and checks the returned
 answer. That is why these solution classes usually do not print anything.
 The code uses ordinary modern C++. Tree, graph, and linked-list node types are
 the standard types supplied by the judge.
@@ -829,14 +829,9 @@ appear in the final C++ reference section.
 
 \subsection{The Problem}
 
-Given an array of integers \texttt{nums} and an integer
-\texttt{target}, return the indices of the two numbers such that
-they add up to \texttt{target}.
-
-You may assume that each input has exactly one solution, and you
-may not use the same element twice.
-
-The answer may be returned in any order.
+You receive a sequence of integers and a required total. Find two different
+positions whose values combine to that total, then return those positions.
+Assume the input has one valid pair.
 
 \subsection{Examples and Rules}
 
@@ -850,15 +845,16 @@ zero-based indexing, and the same position cannot be used twice.
 \toprule
 Input & Matching values & Output \\
 \midrule
-\texttt{[2,7,11,15]}, target \texttt{9} & $2+7=9$ & \texttt{[0,1]} \\
-\texttt{[3,2,4]}, target \texttt{6} & $2+4=6$ & \texttt{[1,2]} \\
-\texttt{[3,3]}, target \texttt{6} & $3+3=6$ & \texttt{[0,1]} \\
+\texttt{[4,10,-2,7]}, target \texttt{8} & $10+(-2)=8$ & \texttt{[1,2]} \\
+\texttt{[5,1,9]}, target \texttt{14} & $5+9=14$ & \texttt{[0,2]} \\
+\texttt{[6,6]}, target \texttt{12} & $6+6=12$ & \texttt{[0,1]} \\
 \bottomrule
 \end{tabular}
 \end{center}
 \end{conceptbox}
 
-For the first example, the indexed array is
+For a compact dry run, use \texttt{[2,7,11,15]} with target 9. Its indexed
+array is
 \[
 \begin{array}{c|cccc}
 \text{Index} & 0 & 1 & 2 & 3 \\ \hline
@@ -938,7 +934,8 @@ of the array.
 \begin{visualbox}{Two Sum: save a number, then find the one needed}
 \centering
 \begin{tikzpicture}[>={Stealth[length=2.2mm,width=1.55mm]},font=\small]
-  \node[anchor=east,text=navy,font=\bfseries] at (-0.35,1.8) {Step 1};
+  % Keep the step labels in their own left margin, clear of the first cell.
+  \node[anchor=east,text=navy,font=\bfseries] at (-0.78,1.8) {Step 1};
   \foreach \x/\value in {0/2,1/7,2/11,3/15} {
     \node[arraycell] (a\x) at (1.05*\x,1.8) {\value};
     \node[below=1mm of a\x,font=\scriptsize,text=navy] {\x};
@@ -951,7 +948,7 @@ of the array.
     inner xsep=3mm,inner ysep=1.2mm] (store) {save 2 at index 0};
   \draw[flowarrow,orange] (store.east) -- (empty.west);
 
-  \node[anchor=east,text=navy,font=\bfseries] at (-0.35,-1.8) {Step 2};
+  \node[anchor=east,text=navy,font=\bfseries] at (-0.78,-1.8) {Step 2};
   \foreach \x/\value in {0/2,1/7,2/11,3/15} {
     \node[arraycell] (b\x) at (1.05*\x,-1.8) {\value};
     \node[below=1mm of b\x,font=\scriptsize,text=navy] {\x};
@@ -992,28 +989,28 @@ found without scanning the earlier part of the array again.
 The overall pseudocode is:
 
 \begin{enumerate}
-    \item Start an empty hash table to store the complement
-    values and their indices.
-    
+    \item Start an empty hash table to store previously seen values and their
+    indices.
+
     \item Loop over every element in the array.
-    
+
     \item For the current element, calculate its complement:
     \(\text{complement} = \texttt{target} - \text{current element}\)
-    
+
     \item Check whether the complement exists in the hash table.
-    
+
     \item If the complement exists:
     \begin{itemize}
         \item Return the index of the complement from the hash table.
         \item Return the index of the current element.
     \end{itemize}
-    
+
     \item If the complement does not exist:
     \begin{itemize}
         \item Insert the current element and its index into the
         hash table.
     \end{itemize}
-    
+
     \item If no pair is found, return an empty array as an edge case.
 \end{enumerate}
 
@@ -1027,7 +1024,7 @@ The overall pseudocode is:
 The hash table can be implemented using
 \texttt{unordered\_map} in C++.
 
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Two Sum}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Two Sum}]
 #include <unordered_map>
 #include <vector>
 
@@ -1177,27 +1174,6 @@ So, the space complexity is: \(\boxed{\Oof{n}}\)
 So, the overall complexity is: \(\boxed{\text{Time} = O(n)}\) \(\boxed{\text{Space} = O(n)}\)
 
 
-% =================================================
-% SUMMARY
-% =================================================
-
-\subsection{Two Sum: Summary}
-
-The key idea behind the Two Sum solution is to use a hash table
-to remember elements that we have already visited.
-
-For every current element \(x\), we calculate: \(\boxed{\text{complement} = \texttt{target} - x}\)
-
-We then check whether this complement has already been seen.
-
-\begin{itemize}
-    \item If yes, return the two indices.
-    \item If no, store the current element and its index.
-\end{itemize}
-
-This reduces the solution from a brute-force \(O(n^2)\) approach
-to an average-case \(O(n)\) time solution.
-
 \chaptercheckpoint
   {A current value needs a previously seen complement.}
   {A value-to-index hash map for the processed prefix.}
@@ -1212,12 +1188,9 @@ to an average-case \(O(n)\) time solution.
 
 \subsection{The Problem}
 
-Given an integer array \texttt{nums}, return all the triplets \([\texttt{nums[i]},\texttt{nums[j]},\texttt{nums[k]}]\)
-such that: \(i \neq j,\qquad i \neq k,\qquad j \neq k\)
-
-and \(\texttt{nums[i]}+\texttt{nums[j]}+\texttt{nums[k]}=0\)
-
-The solution set must not contain duplicate triplets.
+Find every distinct group of three values whose sum is zero. Each group must
+use three different array positions, and the returned collection must not
+repeat the same value triplet.
 
 \subsection{Example}
 
@@ -1304,19 +1277,20 @@ We add it to the result and move both pointers.
     \foreach \x/\value in {0/-4,1/-1,2/-1,3/0,4/1,5/2}
       \node[arraycell] (\row\x) at (1.0*\x,\yy) {\value};
   }
-  \node[anchor=east,font=\bfseries,text=navy] at (-0.35,1.8) {Check 1};
+  % Reserve a clear label column instead of letting labels touch the arrays.
+  \node[anchor=east,font=\bfseries,text=navy] at (-0.78,1.8) {Check 1};
   \node[draw=navy,very thick,fit=(A0),inner sep=.7mm] {};
   \node[draw=teal,very thick,fit=(A1),inner sep=.7mm] {};
   \node[draw=orange,very thick,fit=(A5),inner sep=.7mm] {};
   \node[right=5mm of A5,align=left] {$-4-1+2=-3$\\too small: move left};
 
-  \node[anchor=east,font=\bfseries,text=navy] at (-0.35,0) {Check 2};
+  \node[anchor=east,font=\bfseries,text=navy] at (-0.78,0) {Check 2};
   \node[draw=navy,very thick,fit=(B1),inner sep=.7mm] {};
   \node[draw=teal,very thick,fit=(B2),inner sep=.7mm] {};
   \node[draw=orange,very thick,fit=(B5),inner sep=.7mm] {};
   \node[right=5mm of B5,align=left,text=teal] {$-1-1+2=0$\\save $[-1,-1,2]$};
 
-  \node[anchor=east,font=\bfseries,text=navy] at (-0.35,-1.8) {Check 3};
+  \node[anchor=east,font=\bfseries,text=navy] at (-0.78,-1.8) {Check 3};
   \node[draw=navy,very thick,fit=(C1),inner sep=.7mm] {};
   \node[draw=teal,very thick,fit=(C3),inner sep=.7mm] {};
   \node[draw=orange,very thick,fit=(C4),inner sep=.7mm] {};
@@ -1346,26 +1320,26 @@ The overall process is:
 
 \begin{enumerate}
     \item Start an empty result vector.
-    
+
     \item If the size of \texttt{nums} is less than \(3\), return
     the empty result.
-    
+
     \item Sort the input array.
-    
+
     \item Traverse the array using index \texttt{i}.
-    
+
     \item Skip duplicate values for \texttt{i}.
-    
+
     \item Set:
     \(\texttt{j}=i+1\)
     and
     \(\texttt{k}=n-1\)
-    
+
     \item While:
     \(\texttt{j}<\texttt{k}\)
     calculate:
     \(\texttt{sum} = \texttt{nums[i]}+ \texttt{nums[j]}+ \texttt{nums[k]}\)
-    
+
     \item If the sum is zero:
     \begin{itemize}
         \item Add the triplet to the result.
@@ -1374,19 +1348,19 @@ The overall process is:
         \item Increment \texttt{j}.
         \item Decrement \texttt{k}.
     \end{itemize}
-    
+
     \item Else if the sum is less than zero:
     \(\texttt{j++}\)
-    
+
     \item Otherwise:
     \(\texttt{k--}\)
-    
+
     \item Return the result.
 \end{enumerate}
 
 \subsection{C++ Implementation}
 
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: 3Sum}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: 3Sum}]
 #include <algorithm>
 #include <vector>
 
@@ -1696,7 +1670,13 @@ searches the earlier days again to find the cheapest possible purchase.
 
 For a fixed selling day, the best buying day is always the cheapest earlier
 day. So, while scanning from left to right, we only need to remember
-the minimum price seen so far. \(\boxed{ \text{minimum previous price} \longrightarrow \text{current selling price} \longrightarrow \text{best profit} }\)
+the minimum price seen so far.
+\[
+\boxed{\begin{gathered}
+\text{minimum previous price}\longrightarrow\text{current selling price}\\
+\longrightarrow\text{best profit}
+\end{gathered}}
+\]
 
 \begin{visualbox}{For each selling day, keep the cheapest earlier price}
 \centering
@@ -1801,7 +1781,7 @@ maxProfit(prices):
 
 \subsection{C++ Implementation}
 
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ solution: Best Time to Buy and Sell Stock}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Best Time to Buy and Sell Stock}]
 #include <algorithm>
 #include <limits>
 #include <vector>
@@ -1826,7 +1806,7 @@ public:
 \end{lstlisting}
 
 \begin{conceptbox}{Output and local testing}
-This class does not print output by itself. LeetCode creates the input, calls
+This class does not print output by itself. The online judge creates the input, calls
 \texttt{maxProfit}, and checks the returned integer. A separate local test
 harness was used to compile and validate the method.
 \end{conceptbox}
@@ -2382,7 +2362,7 @@ bool dfs(string word, int index, TrieNode* node) {
 
 Here is the complete version:
 
-\begin{lstlisting}[style=longcode,float=htbp,caption={Complete C++ data structure: Word Dictionary}]
+\begin{lstlisting}[style=longcode,caption={Complete C++ data structure: Word Dictionary}]
 #include <string>
 
 using namespace std;
@@ -2492,7 +2472,7 @@ Step & Operation & What happens \\
 
 \subsection{The Problem}
 
-Design a Trie data structure that supports the following operations:
+Build a prefix-tree class with four operations:
 
 \begin{enumerate}
     \item \texttt{Trie()} -- Create an empty Trie.
@@ -2906,7 +2886,7 @@ bool startsWith(string prefix) {
 
 \subsection{Complete Implementation}
 
-\begin{lstlisting}[style=compactcode,float=htbp,caption={Complete C++ data structure: Trie}]
+\begin{lstlisting}[style=compactcode,caption={Complete C++ data structure: Trie}]
 #include <string>
 
 using namespace std;
@@ -3121,19 +3101,10 @@ Step & Operation & What happens \\
 
 \subsection{The Problem}
 
-There is a new alien language that uses the English alphabet.
-However, the order of the letters in this language is unknown.
-
-You are given a list of words from the alien language's dictionary.
-The words are already sorted dictionaryly according to the rules
-of the alien language.
-
-The goal is to determine the ordering of the unique characters in
-the alien language.
-
-If there is no valid ordering, return an empty string.
-
-If multiple valid orderings exist, any one of them may be returned.
+A list of words has already been sorted using an unknown alphabet order.
+Recover one character order consistent with that list. Return an empty string
+if the comparisons imply a contradiction; when several orders are possible,
+any valid one is acceptable.
 
 \subsection{Input and Output}
 
@@ -3724,31 +3695,31 @@ larger alphabet.
 \begin{itemize}
     \item The words are already sorted according to an unknown
     alphabet.
-    
+
     \item Compare adjacent words to discover character ordering
     relationships.
-    
+
     \item The first different characters determine an ordering:
     \(a\rightarrow b\)
     means \(a\) comes before \(b\).
-    
+
     \item Represent the relationships using a directed graph.
-    
+
     \item Use indegree to determine which characters can be placed
     next.
-    
+
     \item Kahn's algorithm performs the required topological sort.
-    
+
     \item An invalid prefix such as:
     \(\texttt{"abc"},\texttt{"ab"}\)
     makes the ordering impossible.
-    
+
     \item If the result does not contain every unique character, a
     cycle exists and the answer is invalid.
-    
+
     \item Time complexity:
     \(O(C+U+E)=O(C)\)
-    
+
     \item Space complexity:
     \(O(U+E)\)
     where \(U\) is the number of unique characters and \(E\) is the number of
@@ -3786,14 +3757,17 @@ larger alphabet.
 \markboth{About the Author}{About the Author}
 
 \begin{conceptbox}{Om Tripathi}
-Om Tripathi wrote \textit{Cracking the LeetCode Interview} to explain data
-structures and algorithms in a clear, visual way. The examples show what each
-variable means, how it changes, and how the same idea becomes working C++ code.
+Om Tripathi wrote \textit{\booktitle} to make data structures and algorithms
+easier to see, trace, and rebuild. Each lesson connects an interview pattern
+to a concrete example, a visual state change, and a complete C++ solution.
 \end{conceptbox}
 
 The 75 problems are grouped by ideas that appear again and again. Once you can
 see what the algorithm keeps track of, the code becomes much easier to write
 again during an interview.
+
+\ifdefempty{\bookrepository}{}{The source files, corrections, and future
+edition notes are available at \url{\bookrepository}.}
 
 \begin{revisionbox}{Author's note}
 Do not only read the diagrams. Cover the answer, draw the example yourself,
@@ -3801,94 +3775,78 @@ and then write the code without looking. The aim is to understand the idea,
 not to memorize 75 separate programs.
 \end{revisionbox}
 
-\ifdefined\KDPINTERIOR
-\clearpage
-\thispagestyle{empty}
-\null
-\clearpage
-\thispagestyle{empty}
-\null
-\clearpage
-\thispagestyle{empty}
-\null
-\clearpage
-\thispagestyle{empty}
-\null
-\clearpage
-\thispagestyle{empty}
-\null
-\clearpage
-\thispagestyle{empty}
-\null
-\else
+% Matching closing cover for the digital edition.
 \clearpage
 \thispagestyle{empty}
 \begin{tikzpicture}[remember picture,overlay]
-  \fill[navy] (current page.south west) rectangle (current page.north east);
-  \fill[teal!70!navy,opacity=0.48]
-    (current page.south west) rectangle
-    ([xshift=6.2cm]current page.north west);
-  \fill[orange]
-    ([xshift=-1.43cm]current page.north east) rectangle
-    ([xshift=-1.25cm]current page.south east);
-  \draw[white,opacity=0.22,line width=0.8pt,rounded corners=2mm]
-    ([xshift=1.05cm,yshift=-1.05cm]current page.north west) rectangle
-    ([xshift=-1.05cm,yshift=1.05cm]current page.south east);
+  \shade[left color=navy,right color=teal!58!navy]
+    (current page.south west) rectangle (current page.north east);
+  \begin{scope}[shift={(current page.south west)}]
+    \foreach \x in {1.4,2.8,...,21.0}
+      \draw[white,opacity=0.035,line width=.35pt] (\x,0)--(\x,27.95);
+    \foreach \y in {1.4,2.8,...,27.0}
+      \draw[white,opacity=0.035,line width=.35pt] (0,\y)--(21.6,\y);
+  \end{scope}
 
-  % A restrained network echoes the front cover in the open lower field.
-  \coordinate (b1) at ([xshift=-5.4cm,yshift=-15.6cm]current page.north east);
-  \coordinate (b2) at ([xshift=-3.1cm,yshift=-17.0cm]current page.north east);
-  \coordinate (b3) at ([xshift=-5.8cm,yshift=-19.2cm]current page.north east);
-  \coordinate (b4) at ([xshift=-3.5cm,yshift=-20.7cm]current page.north east);
-  \foreach \a/\b in {b1/b2,b1/b3,b2/b3,b2/b4,b3/b4}{
-    \draw[white,opacity=0.15,line width=1.1pt] (\a)--(\b);
-  }
-  \foreach \p in {b1,b2,b3,b4}{
-    \draw[white,opacity=0.32,line width=1pt] (\p) circle (4mm);
-  }
-  \fill[orange] (b2) circle (1.8mm);
+  \node[anchor=north west,text=teal!22!white,font=\sffamily\bfseries]
+    at ([xshift=1.55cm,yshift=-1.45cm]current page.north west)
+    {CRACKING THE LEETCODE INTERVIEW};
+  \draw[orange,line width=2.1pt]
+    ([xshift=1.55cm,yshift=-2.25cm]current page.north west)--++(2.35cm,0);
 
   \node[anchor=north west,text=white,font=\sffamily\bfseries,
-        text width=13.2cm,align=left]
-    at ([xshift=2.0cm,yshift=-2.1cm]current page.north west)
-    {\fontsize{23}{29}\selectfont Stop memorizing solutions.\\
-     Start recognizing patterns.};
+        align=left,text width=15.8cm]
+    at ([xshift=1.5cm,yshift=-4.0cm]current page.north west)
+    {\fontsize{31}{38}\selectfont
+     See the state.\\
+     Follow the change.\\
+     \textcolor{orange}{Rebuild the solution.}};
 
-  \node[anchor=north west,text=teal!15!white,font=\sffamily\large,
-        text width=12.8cm,align=left]
-    at ([xshift=2.0cm,yshift=-5.25cm]current page.north west)
+  \node[anchor=north west,text=teal!18!white,font=\sffamily,
+        align=left,text width=13.8cm]
+    at ([xshift=1.6cm,yshift=-8.8cm]current page.north west)
     {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
-     \setlength{\baselineskip}{17pt}
-     \textit{Cracking the LeetCode Interview} turns 75 essential \mbox{programming}
-     questions into connected lessons on arrays, strings, linked lists,
-     trees, tries, graphs, heaps, greedy \mbox{algorithms}, binary search, bit
-     manipulation, and dynamic programming.};
+     \fontsize{15}{21}\selectfont
+     This book organizes 75 interview problems around the\\
+     small set of ideas that appear repeatedly: what to keep,\\
+     how it changes, and why each move is safe. Every lesson\\
+     connects a visual dry run to complete C++ code, complexity\\
+     analysis, common mistakes, and a practice checkpoint.};
 
-  \node[anchor=north west,text=white,font=\sffamily\bfseries\large]
-    at ([xshift=2.0cm,yshift=-10.1cm]current page.north west)
-    {INSIDE THIS BOOK};
+  % Minimal four-step trace, matching the line motif on the front.
+  \coordinate (q1) at ([xshift=3.0cm,yshift=-14.4cm]current page.north west);
+  \coordinate (q2) at ([xshift=7.6cm,yshift=-14.4cm]current page.north west);
+  \coordinate (q3) at ([xshift=12.2cm,yshift=-14.4cm]current page.north west);
+  \coordinate (q4) at ([xshift=16.8cm,yshift=-14.4cm]current page.north west);
+  \draw[teal!28!white,line width=1.2pt] (q1)--(q2)--(q3)--(q4);
+  \foreach \p/\n/\word in {q1/1/RECOGNIZE,q2/2/TRACE,q3/3/EXPLAIN,q4/4/CODE}{
+    \fill[navy] (\p) circle (6.2mm);
+    \draw[teal!28!white,line width=1pt] (\p) circle (6.2mm);
+    \node[text=white,font=\sffamily\bfseries] at (\p) {\n};
+    \node[anchor=north,text=teal!22!white,font=\sffamily\bfseries\small]
+      at ([yshift=-8.5mm]\p) {\word};
+  }
+  \fill[orange] (q3) circle (2.4mm);
 
-  \node[anchor=north west,text=teal!12!white,font=\sffamily\normalsize,
-        text width=12.6cm,align=left]
-    at ([xshift=2.0cm,yshift=-11.0cm]current page.north west)
-    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
-     \setlength{\baselineskip}{18pt}
-     \textcolor{orange}{\textbullet}\quad Clear pictures and step-by-step dry runs\\
-     \textcolor{orange}{\textbullet}\quad The simple idea explained before the code\\
-     \textcolor{orange}{\textbullet}\quad Complete C++ solutions with code walkthroughs\\
-     \textcolor{orange}{\textbullet}\quad Tests, common mistakes, time, and space\\
-     \textcolor{orange}{\textbullet}\quad 75 lessons grouped by topic};
+  \node[anchor=north west,text=white,font=\sffamily\bfseries,
+        align=left,text width=16cm]
+    at ([xshift=1.55cm,yshift=-17.2cm]current page.north west)
+    {\fontsize{17}{23}\selectfont
+     ARRAYS \quad HASHING \quad TWO POINTERS \quad WINDOWS\\[1mm]
+     STACKS \quad TREES \quad HEAPS \quad GRAPHS\\[1mm]
+     GREEDY \quad BINARY SEARCH \quad DYNAMIC PROGRAMMING};
 
+  \draw[white,opacity=.25,line width=.7pt]
+    ([xshift=1.55cm,yshift=3.45cm]current page.south west)--
+    ([xshift=-1.55cm,yshift=3.45cm]current page.south east);
   \node[anchor=west,text=white,font=\sffamily\bfseries]
-    at ([xshift=2.0cm,yshift=4.25cm]current page.south west)
-    {\fontsize{19}{24}\selectfont OM TRIPATHI};
-  \node[anchor=west,text=teal!20!white,font=\sffamily]
-    at ([xshift=2.0cm,yshift=3.45cm]current page.south west)
-    {Author};
-
-  % Keep the lower-right area visually clear so KDP can place its barcode.
+    at ([xshift=1.55cm,yshift=2.25cm]current page.south west)
+    {\fontsize{21}{26}\selectfont Om Tripathi};
+  \node[anchor=east,text=teal!22!white,font=\sffamily\small,align=right]
+    at ([xshift=-1.55cm,yshift=2.30cm]current page.south east)
+    {GITHUB EDITION\\READ \; TRACE \; PRACTICE \; IMPROVE};
 \end{tikzpicture}
 \null
-\fi
 
+\fi
 \end{document}
