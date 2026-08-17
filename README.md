@@ -16,8 +16,6 @@
   &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="#the-reading-experience"><strong>Explore the method</strong></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
-  <a href="https://drive.google.com/file/d/1LOKxrBklmLI1Z2son9oYDQmqo_Jq55cs/view?usp=sharing"><strong>View the cover</strong></a>
-  &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="#support-the-next-volume"><strong>Support the project</strong></a>
 
 </div>
