@@ -1036,10 +1036,10 @@ be parsed completely. Total work is linear in the encoded data size, although
 repeated string growth may allocate; reserving capacity is a practical
 optimization when total size is known.
 
-\begin{revisionbox}{Practice checkpoint}
+\medskip
+\noindent\textcolor{teal}{\textbf{Practice checkpoint.}}
 Decode \texttt{5\#hello0\#3\#a\#b} by hand. At each step record the separator
 position, parsed length, payload interval, and next frame index.
-\end{revisionbox}
 \chaptercheckpoint
   {Arbitrary strings must be combined and separated without ambiguity.}
   {Length-prefixed frames and a decoder cursor.}

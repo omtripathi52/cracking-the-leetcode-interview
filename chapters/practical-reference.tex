@@ -15,11 +15,12 @@ provides a small set of exercises for turning the completed lessons into
 active interview practice.
 
 \begin{conceptbox}{Implementation validation}
-All 75 complete solutions are checked independently with a C++
-compiler. The audit includes judge-provided tree, list, and graph types, so a
-solution cannot pass merely because another chapter supplied a missing type or
-header. Representative examples and boundary cases are also exercised for
-each algorithm family.
+All 75 complete solutions were independently syntax-checked under C++11 and
+C++17. Each listing was compiled in isolation with representative
+judge-provided tree, list, and graph types, so it could not rely on a header or
+declaration from another chapter. This verifies completeness and language
+compatibility; it is not a substitute for a full automated behavioral test
+suite.
 \end{conceptbox}
 
 \subsection{Judge-provided pointer structures}
@@ -121,9 +122,8 @@ Check the following properties directly in the code.
 For each exercise, first draw the changing state, then write the key rule and
 only afterward modify the implementation.
 
-\begin{revisionbox}{Practice prompts}
-\small
-\renewcommand{\arraystretch}{1.08}
+\begin{revisionbox}{Practice prompts: foundations}
+\renewcommand{\arraystretch}{1.12}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{2.45cm}
   >{\raggedright\arraybackslash}X
   >{\raggedright\arraybackslash}X@{}}
@@ -139,6 +139,19 @@ Trie recursion & Count every word matching a wildcard pattern. & Sum successful
 branches instead of returning after the first match. \\
 Tree queues & Produce zigzag level order. & Keep the BFS queue unchanged and
 alter only the destination index inside each row. \\
+\bottomrule
+\end{tabularx}
+\end{revisionbox}
+
+\Needspace{18\baselineskip}
+\begin{revisionbox}{Practice prompts: advanced patterns}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{2.45cm}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X@{}}
+\toprule
+Area & Exercise & Hint after drawing \\
+\midrule
 Graphs & Return one valid course order. & Record vertices when they leave a
 zero-indegree queue; a short result still detects a cycle. \\
 Dynamic programming & Reconstruct a minimum coin selection. & Store the final
@@ -150,3 +163,21 @@ length, not a delimiter search, controls how many payload characters to read. \\
 \bottomrule
 \end{tabularx}
 \end{revisionbox}
+
+\subsection{A four-pass practice loop}
+
+Use the prompts above as small extensions rather than as new problems to
+memorize.
+
+\begin{enumerate}[itemsep=0.3em]
+  \item Draw one example and name the state that changes.
+  \item Modify the existing solution without looking at its final code.
+  \item Test the smallest input, a typical input, and one adversarial case.
+  \item Explain the invariant and complexity aloud in under two minutes.
+\end{enumerate}
+
+\begin{conceptbox}{When to revisit a lesson}
+Return to the original lesson when you can reproduce its code but cannot
+explain why an update is safe. The goal of revision is not faster recall of
+syntax; it is faster recognition of the state and invariant.
+\end{conceptbox}

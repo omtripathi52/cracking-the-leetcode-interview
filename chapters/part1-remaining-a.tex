@@ -372,6 +372,12 @@ each node I also test the complete path that joins the best non-negative left
 and right gains. Every path has exactly one highest turning node, so one of
 these local choices represents the global optimum.
 \end{revisionbox}
+
+\begin{revisionbox}{Rebuild challenge}
+Trace an all-negative tree such as root \(-3\) with children \(-2\) and
+\(-5\). Explain why child gains may be clamped to zero while the global answer
+must still contain at least one real node.
+\end{revisionbox}
 \chaptercheckpoint
   {A path may begin and end anywhere, and a parent needs child results.}
   {One-sided postorder gains plus a global complete-path maximum.}

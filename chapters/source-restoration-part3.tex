@@ -62,13 +62,13 @@ including leading zeros. On each iteration, shift the result left to make room
 for one new bit. Copy the lowest bit of the input with \texttt{n \& 1}, then
 shift the input right.
 
+\enlargethispage{2\baselineskip}
 This reads the input from right to left while building the answer from left to
 right. For a small pattern such as \texttt{00000101}, the read bits are
 1, 0, 1, followed by zeros, and they appear at the opposite end of the result.
 Use an unsigned 32-bit type so the right shift inserts zeros instead of
-extending a sign bit. A loop that stops when \(n\) becomes zero would fail to
-place the remaining leading zeros in their correct reversed positions unless
-the result position were tracked separately.}
+extending a sign bit. Because the width is fixed, stopping when \(n\) becomes
+zero would lose the positions of the remaining leading zeros.}
 
 \expandafter\def\csname sourcewalkthrough@55\endcsname{%
 A square matrix can be rotated without another matrix by separating the
@@ -201,13 +201,14 @@ times. With lowercase English letters, a fixed array of 26 counts is simpler
 than sorting. First reject different lengths, because no count adjustment can
 repair that mismatch.
 
+\enlargethispage{2\baselineskip}
 For each position, increase the count for the character in the first string
 and decrease the count for the character in the second. At the end, every
 entry must be zero. Combining the two updates in one loop is safe because the
 strings have equal length. For \texttt{anagram} and \texttt{nagaram}, the same
 letters cancel even though their positions differ. Sorting would take
-\(O(n\log n)\); counting takes \(O(n)\) time and constant alphabet space. A
-larger or Unicode alphabet would use a hash map instead of a 26-cell array.}
+\(O(n\log n)\); counting takes \(O(n)\) time and constant lowercase-alphabet
+space. Use a hash map for a larger or Unicode alphabet.}
 
 \expandafter\def\csname sourcewalkthrough@65\endcsname{%
 Move one pointer from each end. Skip any character that is not a letter or
@@ -336,13 +337,13 @@ Inverting a tree is a local operation repeated at every node. Swap the left
 and right child pointers, then recursively invert the two child subtrees. A
 null pointer is the base case.
 
+\enlargethispage{2\baselineskip}
 The order can be swap-then-recurse or recurse-then-swap as long as the calls
 follow the pointers consistently. For a root 4 with children 2 and 7, the
 first swap places 7 on the left and 2 on the right; recursion then mirrors the
 children below them. No new nodes are required because only links change.
-Every node is visited once, so time is \(O(n)\). Recursive stack space is
-\(O(h)\); a queue can perform the same transformation breadth first. A
-one-node tree and a completely skewed tree are useful tests.}
+Each node is visited once: \(O(n)\) time and \(O(h)\) recursion space. An
+iterative version can use a queue; one-node and skewed trees are useful tests.}
 
 \expandafter\def\csname sourcewalkthrough@75\endcsname{%
 Water normally flows from a cell to an equal or lower neighbor. Starting from

@@ -1,20 +1,24 @@
 <div align="center">
 
-  <a href="pdf/Cracking-The-LeetCode-Interview.pdf">
-    <img src="assets/book-cover.png" alt="Cover of Cracking The LeetCode Interview" width="400" />
+  <a href="pdf/Cracking-the-LeetCode-Interview.pdf">
+    <img src="assets/book-cover.png" alt="Cover of Cracking the LeetCode Interview" width="400" />
   </a>
 
-  # Cracking The LeetCode Interview
+  # Cracking the LeetCode Interview
 
   ### Blind 75, taught through visual reasoning—not memorized solutions.
 
   <img src="https://img.shields.io/badge/75-Interview--critical%20problems-ff8a3d?style=flat-square" alt="75 interview-critical problems" />
   <img src="https://img.shields.io/badge/C%2B%2B-Complete%20solutions-00599C?style=flat-square&logo=cplusplus&logoColor=white" alt="Complete C++ solutions" />
-  <img src="https://img.shields.io/badge/LaTeX-Source%20available-008080?style=flat-square&logo=latex&logoColor=white" alt="LaTeX source available" />
+  <img src="https://img.shields.io/badge/LaTeX-Open%20source%20book-008080?style=flat-square&logo=latex&logoColor=white" alt="Open source LaTeX book" />
+  <img src="https://img.shields.io/badge/Content-CC%20BY%204.0-2A7AE2?style=flat-square" alt="Content licensed CC BY 4.0" />
+  <img src="https://img.shields.io/badge/Code-MIT-F4C430?style=flat-square" alt="Code licensed MIT" />
 
-  <a href="pdf/Cracking%20The%20Leetcode%20Interview.pdf"><strong>Read the book</strong></a>
+  <a href="pdf/Cracking-the-LeetCode-Interview.pdf"><strong>Read the book</strong></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="#the-reading-experience"><strong>Explore the method</strong></a>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <a href="assets/book-cover.png"><strong>View the cover</strong></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
   <a href="#support-the-next-volume"><strong>Support the project</strong></a>
 
@@ -68,7 +72,7 @@ Problems are grouped by the data structure or algorithmic pattern they teach, cr
 
 <div align="center">
 
-### [Open the complete PDF](pdf/Cracking%20The%20Leetcode%20Interview.pdf)
+### [Open the complete PDF](pdf/Cracking-the-LeetCode-Interview.pdf)
 
 The complete typeset edition is included in this repository.
 
@@ -77,7 +81,8 @@ The complete typeset edition is included in this repository.
 The main LaTeX source lives in [`main.tex`](main.tex), with supporting lessons in [`chapters/`](chapters/). Build the complete book with a LaTeX distribution that includes TikZ and `tcolorbox`:
 
 ```bash
-latexmk -pdf -jobname=book main.tex
+mkdir -p pdf
+latexmk -pdf -outdir=pdf -jobname=Cracking-the-LeetCode-Interview main.tex
 ```
 
 Build the standalone cover with:
@@ -142,11 +147,16 @@ Want to collaborate, discuss an opportunity, report a problem, or share feedback
 
 Found a typo, confusing explanation, incorrect result, or visual that could be clearer? Open an issue or submit a pull request. Contributions that improve clarity, visual intuition, accessibility, and correctness are especially welcome.
 
-## Rights, acknowledgements, and disclaimer
+## License, acknowledgements, and disclaimer
 
 This is an independent educational project and is not affiliated with or endorsed by LeetCode. **LeetCode** and associated problem titles are trademarks of their respective owners. They are referenced only to identify the exercises discussed.
 
-Copyright © 2026 Om Tripathi. The source is publicly viewable, but no reuse, redistribution, or resale rights are granted unless a separate license explicitly provides them.
+Copyright © 2026 Om Tripathi.
+
+- The prose, diagrams, and book design are licensed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**. See [`LICENSE.md`](LICENSE.md).
+- The C++ listings and supporting build source are licensed under the **MIT License**. See [`LICENSE-CODE.md`](LICENSE-CODE.md).
+
+You may share and adapt the book with appropriate attribution. Contributions and corrections are welcome through issues and pull requests.
 
 ---
 

@@ -36,10 +36,12 @@
 % -------------------------------------------------
 % Book Metadata
 % -------------------------------------------------
-\newcommand{\booktitle}{Cracking The LeetCode Interview}
+\newcommand{\booktitle}{Cracking the LeetCode Interview}
 \newcommand{\bookauthor}{Om Tripathi}
-% Add the public repository URL after the GitHub repository is created.
-\providecommand{\bookrepository}{}
+\newcommand{\bookrepository}{https://github.com/omtripathi52/cracking-the-leetcode-interview}
+\newcommand{\authoremail}{omt4464@gmail.com}
+\newcommand{\authorxhandle}{@omtripathi52}
+\newcommand{\authorxurl}{https://x.com/omtripathi52}
 
 % -------------------------------------------------
 % Page Setup
@@ -90,7 +92,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\textcolor{navy}{\nouppercase{\rightmark}}}
+\fancyhead[L]{\small\textcolor{navy}{\nouppercase{\leftmark}}}
 \fancyhead[R]{\small\textcolor{navy}{\booktitle}}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
@@ -151,6 +153,7 @@
         \ifstrequal{#1}{Common judge definitions}{\Needspace{30\baselineskip}}{}%
         \ifstrequal{#1}{Detailed Table Walkthrough}{\Needspace{22\baselineskip}}{}%
         \ifstrequal{#1}{Detailed Grouping Walkthrough}{\Needspace{22\baselineskip}}{}%
+        \ifstrequal{#1}{Detailed Visual Dry Run}{\Needspace{20\baselineskip}}{}%
         \standardbooksubsection{#1}}}}}
 
 % -------------------------------------------------
@@ -161,7 +164,7 @@
     linkcolor=navy,
     urlcolor=teal,
     citecolor=teal,
-    pdftitle={Cracking The LeetCode Interview},
+    pdftitle={Cracking the LeetCode Interview},
     pdfauthor={Om Tripathi},
     pdfsubject={Visual C++ lessons for data structures, algorithms, and coding interviews},
     pdfkeywords={C++, algorithms, data structures, coding interviews, problem solving}
@@ -224,6 +227,7 @@
     basicstyle=\ttfamily\small,
     numbers=left,
     numberstyle=\scriptsize\color{ink!55},
+    float=htbp,
     aboveskip=0.5em,
     belowskip=0.5em
 }
@@ -231,9 +235,10 @@
 % A few complete classes are much longer than the usual judge method.
 % They use this smaller style so the whole class can stay on one page.
 \lstdefinestyle{longcode}{
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\fontsize{8.6}{9.6}\selectfont,
     numbers=left,
-    numberstyle=\scriptsize\color{ink!55},
+    numberstyle=\tiny\color{ink!55},
+    float=htbp,
     numbersep=5pt,
     xleftmargin=0.9em,
     framexleftmargin=0.45em,
@@ -315,13 +320,15 @@
     #1
 }
 
-\newcommand{\problemprofile}[3]{%
+\newcommand{\problemprofile}[4]{%
 \begin{problemcard}{}
-\begin{tabularx}{\linewidth}{@{}X X X@{}}
-\textcolor{teal}{\textbf{Difficulty}} &
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\textcolor{teal}{\textbf{Problem}} &
+\textcolor{teal}{\textbf{Difficulty}}\\[-1mm]
+\textbf{LC #1} & \textbf{#2}\\[2mm]
 \textcolor{teal}{\textbf{Approach}} &
 \textcolor{teal}{\textbf{Main tool}}\\[-1mm]
-\textbf{#1} & #2 & #3
+#3 & #4
 \end{tabularx}
 \end{problemcard}}
 
@@ -329,22 +336,50 @@
 \newcommand{\currentpattern}{Interview Foundations}
 \newcommand{\problemstart}[5]{%
 \FloatBarrier
-\par\Needspace{22\baselineskip}
+\clearpage
 \refstepcounter{lesson}%
 \phantomsection
-{\plexsans\small\bfseries\color{teal}\MakeUppercase{\currentpattern}\par}
+{\plexsans\small\bfseries\color{teal}\MakeUppercase{\currentpattern}%
+ \ifnum\value{lesson}<7\hfill\textcolor{orange}{GUIDED DEEP DIVE}\fi\par}
 \vspace{0.3em}
 \section*{Lesson \thelesson: #1}
 \label{lesson:\thelesson}
-\addcontentsline{toc}{section}{Lesson \thelesson: #1}
+\addcontentsline{toc}{section}{Lesson \thelesson: #1\space (LC #2)}
 \markboth{#1}{#4}
-\problemprofile{#3}{#4}{#5}}
+\problemprofile{#2}{#3}{#4}{#5}}
 
 \newcommand{\patternintoc}[1]{%
   \gdef\currentpattern{#1}%
   \phantomsection
   \addtocontents{toc}{\protect\Needspace{4\baselineskip}}%
   \addcontentsline{toc}{part}{#1}}
+
+% Two deliberate learning phases make the change in lesson depth visible.
+% Each phase receives a quiet divider page; individual lessons still begin on
+% their own pages through \problemstart.
+\newcommand{\learningphase}[4]{%
+  \clearpage
+  \phantomsection
+  \addtocontents{toc}{\protect\Needspace{5\baselineskip}}%
+  \addcontentsline{toc}{part}{#1}%
+  \markboth{#1}{#1}%
+  \thispagestyle{empty}%
+  \vspace*{0.16\textheight}%
+  {\plexsans\small\bfseries\color{teal}\MakeUppercase{#2}\par}%
+  \vspace{0.65em}%
+  {\plexsans\fontsize{31}{37}\selectfont\bfseries\color{navy}#1\par}%
+  \vspace{0.55em}%
+  {\color{orange}\rule{3.0cm}{2pt}\par}%
+  \vspace{1.8em}%
+  \begin{tcolorbox}[
+    enhanced,colback=softblue,colframe=navy,boxrule=0.8pt,arc=2mm,
+    left=5mm,right=5mm,top=4mm,bottom=4mm]
+  {\large #3}
+  \end{tcolorbox}
+  \vfill
+  {\plexsans\small\bfseries\color{teal}#4\par}%
+  \vspace*{0.10\textheight}%
+}
 
 \newtcolorbox{revisionbox}[1]{
   enhanced,breakable,colback=softteal,colframe=teal,boxrule=0.8pt,
@@ -717,7 +752,11 @@
 \smallskip
 {\large 75 Visual Lessons for Technical Interviews}\par
 \vspace{1.1cm}
-{\large\bfseries Om Tripathi}
+{\large\bfseries Om Tripathi}\par
+\smallskip
+{\small\href{mailto:\authoremail}{\authoremail}\quad
+\textcolor{teal}{\textbullet}\quad
+\href{\authorxurl}{\authorxhandle}}
 \end{center}
 
 \vfill
@@ -725,19 +764,21 @@
 \small
 \textbf{Cover Design: Om Tripathi}\par
 \textcopyright\ 2026 Om Tripathi\par
-All rights reserved. No part of this publication may be reproduced, stored in
-a retrieval system, or transmitted, in any form or by any means (electronic,
-mechanical, photocopying, recording or otherwise), without the prior written
-permission of the author.
+Except where otherwise noted, the prose, diagrams, and book design are
+licensed under the Creative Commons Attribution 4.0 International license
+(CC BY 4.0). The C++ listings and supporting build source are available under
+the MIT License. Attribution details and complete license notices are included
+with the repository source.
 
-All explanations, diagrams, examples, and source code in this edition were
-prepared for this book. Problem titles are used only to identify widely known
-algorithmic exercises. Product names and trademarks remain the property of
-their respective owners.
+This is an independent educational publication. It is not affiliated with,
+sponsored by, or endorsed by LeetCode. LeetCode and associated problem titles
+are trademarks of their respective owners. Problem titles and identifiers are
+used only to identify the algorithmic exercises discussed.
 
-The material is provided for educational purposes. Although the algorithms
-and code have been reviewed and tested, readers should independently validate
-solutions for their own environments and requirements.
+The explanations, diagrams, and implementations are presented for educational
+purposes. The complete listings were independently syntax-checked under C++11
+and C++17 with representative judge-provided types. Readers should still test
+behavior and edge cases in the environment where they intend to use the code.
 
 \textbf{First digital edition}\par
 \end{minipage}
@@ -780,6 +821,14 @@ This book explains 75 common coding interview problems in plain C++. The goal
 is not to memorize 75 answers. The goal is to see why each solution works and
 to learn how to rebuild it on your own.
 
+\begin{conceptbox}{How the pacing changes}
+Part I contains six guided lessons. They demonstrate the complete
+reasoning process slowly: interpreting the prompt, drawing the state, tracing
+updates, writing pseudocode, and explaining the final implementation. Part II
+turns the same method into pattern practice: repeated ideas receive less
+repetition while new patterns receive the attention.
+\end{conceptbox}
+
 We will work with arrays, strings, linked lists, trees, tries, graphs, heaps,
 greedy methods, binary search, bits, and dynamic programming. Each lesson
 starts with the simple idea, follows the changing values through an example,
@@ -818,6 +867,17 @@ appear in the final C++ reference section.
 \input{chapters/stl-guide}
 
 \input{chapters/data-structure-visual-guide}
+
+
+\learningphase
+  {Part I: Guided Lessons}
+  {Learn the complete reasoning process}
+  {The first six lessons slow down every decision. Read the prompt, identify
+   the changing state, trace a small example, justify the update, and only
+   then translate the idea into C++.}
+  {SEE THE STATE \quad\textcolor{orange}{\textbullet}\quad TRACE THE CHANGE
+   \quad\textcolor{orange}{\textbullet}\quad EXPLAIN THE MOVE
+   \quad\textcolor{orange}{\textbullet}\quad WRITE THE CODE}
 
 
 % =================================================
@@ -1173,6 +1233,11 @@ So, the space complexity is: \(\boxed{\Oof{n}}\)
 
 So, the overall complexity is: \(\boxed{\text{Time} = O(n)}\) \(\boxed{\text{Space} = O(n)}\)
 
+\begin{revisionbox}{Rebuild challenge}
+Modify the method to return every unique value pair that reaches the target.
+Decide what must change when duplicate values appear, then explain whether a
+hash set or a sorted two-pointer scan gives the cleaner result.
+\end{revisionbox}
 
 \chaptercheckpoint
   {A current value needs a previously seen complement.}
@@ -1600,14 +1665,12 @@ the output vector and implementation-dependent sorting stack space.
 
 The key idea is:
 
-\begin{enumerate}
-    \item Sort the array.
-    \item Fix one element.
-    \item Use two pointers to find the remaining two elements.
-    \item If the sum is too small, move the left pointer right.
-    \item If the sum is too large, move the right pointer left.
-    \item If the sum is zero, record the triplet.
-    \item Skip duplicates to ensure unique triplets.
+\begin{enumerate}[itemsep=0.1em,topsep=0.2em]
+    \item Sort the array, then fix one element.
+    \item Use two pointers to search for the remaining pair.
+    \item Move the left pointer for a small sum and the right pointer for a
+    large sum.
+    \item Record zero-sum triplets and skip duplicates before continuing.
 \end{enumerate}
 
 So, the two-pointer technique reduces the problem to an
@@ -1701,7 +1764,7 @@ No other earlier buying price can produce a larger profit that day.
 
 \subsection{The Two Variables}
 
-\begin{conceptbox}{State keeped during the scan}
+\begin{conceptbox}{State kept during the scan}
 \begin{tabularx}{\linewidth}{@{}>{\bfseries}p{3cm}X@{}}
 \texttt{minPrice} & Smallest price seen up to the current day. Start at positive infinity.\\[2mm]
 \texttt{maxProfit} & Greatest legal profit found so far. Start at zero so a loss is never returned.
@@ -2458,6 +2521,12 @@ Step & Operation & What happens \\
 \end{center}
 \end{dryrunbox}
 
+\begin{revisionbox}{Rebuild challenge}
+Add \texttt{countMatches(pattern)} so a wildcard query returns the number of
+matching words instead of stopping after the first match. Decide how the DFS
+must combine successful branches without counting prefixes as complete words.
+\end{revisionbox}
+
 \chaptercheckpoint
   {Stored words share prefixes and a wildcard may match several children.}
   {Trie nodes, end markers, and a DFS position/node pair.}
@@ -3086,6 +3155,12 @@ Step & Operation & What happens \\
 \end{center}
 \end{dryrunbox}
 
+\begin{revisionbox}{Rebuild challenge}
+Add \texttt{countPrefix(prefix)} so the Trie reports how many inserted words
+share a prefix. Decide what extra value each node must store and update it
+during insertion without changing the \(O(L)\) operation time.
+\end{revisionbox}
+
 \chaptercheckpoint
   {Many operations repeatedly query complete words and shared prefixes.}
   {Character-child links and an end-of-word Boolean at each Trie node.}
@@ -3521,7 +3596,7 @@ alienOrder(words):
 
 \subsection{C++ Implementation}
 
-\begin{lstlisting}[style=compactcode,caption={Complete C++ solution: Alien Dictionary}]
+\begin{lstlisting}[style=longcode,caption={Complete C++ solution: Alien Dictionary}]
 #include <algorithm>
 #include <queue>
 #include <string>
@@ -3660,11 +3735,8 @@ problem becomes a standard topological sorting problem.
 
 \subsection{Time and Space}
 
-Let: \(C\)
-
-be the total number of characters across all words.
-
-That is: \(C= \sum_{i=0}^{n-1} |\texttt{words[i]}|\)
+Let \(C=\sum_{i=0}^{n-1}|\texttt{words[i]}|\) be the total number of
+characters across all words.
 
 Building the graph scans the words, and the topological sort processes every
 stored vertex and edge once. So, the full time complexity is: \(\boxed{O(C+U+E)}\)
@@ -3673,14 +3745,10 @@ Because the distinct edges arise from adjacent-word comparisons, this is
 commonly simplified to \(O(C)\) for this problem.
 
 The graph contains the unique characters and the precedence edges discovered
-between them.
-
-Let: \(U=\text{number of unique characters}\)
-
-and let \(E\) be the number of distinct directed edges. Then the additional
-space is: \(\boxed{O(U+E)}\)
-
-Since the language uses only the lowercase English alphabet: \(U\leq26\)
+between them. If \(U\) is the number of unique characters and \(E\) is the
+number of distinct directed edges, the additional space is
+\(\boxed{O(U+E)}\). Since the language uses only lowercase English letters,
+\(U\leq26\).
 
 So, in this particular problem, \(U\) is bounded by a constant, but
 writing \(O(U+E)\) describes the graph storage exactly and generalizes to a
@@ -3736,6 +3804,16 @@ larger alphabet.
 % ADDITIONAL VOLUME 1 LESSONS
 % =================================================
 
+\learningphase
+  {Part II: Pattern Practice}
+  {Recognize, adapt, and rebuild}
+  {The remaining lessons keep the same reasoning structure but move faster.
+   Focus on the reusable invariant, compare it with patterns you have already
+   seen, and practise rebuilding the implementation without looking.}
+  {RECOGNIZE THE PATTERN \quad\textcolor{orange}{\textbullet}\quad ADAPT THE STATE
+   \quad\textcolor{orange}{\textbullet}\quad TEST THE EDGES
+   \quad\textcolor{orange}{\textbullet}\quad RE-CODE FROM MEMORY}
+
 \input{chapters/part1-remaining-a}
 \input{chapters/part1-remaining-b}
 \input{chapters/part1-remaining-c}
@@ -3757,20 +3835,45 @@ larger alphabet.
 \markboth{About the Author}{About the Author}
 
 \begin{conceptbox}{Om Tripathi}
-Om Tripathi wrote \textit{\booktitle} to make data structures and algorithms
+Om Tripathi created \textit{\booktitle} to make data structures and algorithms
 easier to see, trace, and rebuild. Each lesson connects an interview pattern
-to a concrete example, a visual state change, and a complete C++ solution.
+to a concrete example, a visible state change, and a complete C++ solution.
 \end{conceptbox}
 
-The 75 problems are grouped by ideas that appear again and again. Once you can
-see what the algorithm keeps track of, the code becomes much easier to write
-again during an interview.
+\subsection{Why This Book Exists}
 
-\ifdefempty{\bookrepository}{}{The source files, corrections, and future
-edition notes are available at \url{\bookrepository}.}
+Interview preparation often turns into memorizing isolated answers. This book
+takes the opposite approach: identify the small piece of state an algorithm
+maintains, watch that state change on a concrete example, and then rebuild the
+implementation from the reasoning. The 75 lessons are grouped so that the same
+ideas reappear in increasingly demanding settings.
+
+\begin{revisionbox}{The method behind every lesson}
+\begin{enumerate}
+  \item Restate the problem in plain language and identify the useful pattern.
+  \item Draw a small example and track only the state that can affect the next move.
+  \item Explain why each update is safe before translating it into C++.
+  \item Re-code the solution without looking, then test edge cases and complexity.
+\end{enumerate}
+\end{revisionbox}
+
+\subsection{Continue the Project}
+
+This is an open-source digital edition designed to improve over time.
+Readers can report mistakes, suggest clearer examples, or contribute focused
+corrections through the GitHub repository listed below.
+
+\begin{revisionbox}{Contact and project links}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}p{2.4cm}X@{}}
+Email & \href{mailto:\authoremail}{\authoremail}\\[1mm]
+X & \href{\authorxurl}{\authorxhandle}\\[1mm]
+\ifdefempty{\bookrepository}{}{GitHub & \url{\bookrepository}\\[1mm]}
+Licensing & CC BY 4.0 for the book; MIT for code and build source
+\end{tabularx}
+\end{revisionbox}
 
 \begin{revisionbox}{Author's note}
-Do not only read the diagrams. Cover the answer, draw the example yourself,
+Do not just read the diagrams. Cover the answer, draw the example yourself,
 and then write the code without looking. The aim is to understand the idea,
 not to memorize 75 separate programs.
 \end{revisionbox}
